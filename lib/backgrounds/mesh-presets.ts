@@ -1,0 +1,55 @@
+/**
+ * Mesh-gradient presets as plain data. Add new ones (e.g. sampled from gradient
+ * screenshots) by appending an entry: 2-8 stops, positions/radii as fractions of
+ * the screen, drift as fraction of the screen, speed as a multiplier.
+ */
+import { hueShift } from './color-math';
+import type { MeshStop } from './settings';
+
+export type MeshPreset = { id: string; name: string; colorBack: string; blur: number; stops: MeshStop[] };
+
+/** Reference looks (faithful to the brief / screenshot). Use MESH_PRESETS (nudged defaults) in the app. */
+export const MESH_PRESET_REFERENCES: MeshPreset[] = [
+  {
+    id: 'indigoAurora', name: 'Indigo Aurora', colorBack: '#0b0a2a', blur: 60,
+    stops: [
+      { color: '#6d5cff', x: 0.2, y: 0.2, radius: 0.6, driftX: 0.12, driftY: 0.08, speed: 0.6 },
+      { color: '#2a1d6b', x: 0.8, y: 0.3, radius: 0.7, driftX: 0.1, driftY: 0.12, speed: 0.4 },
+      { color: '#a78bfa', x: 0.5, y: 0.85, radius: 0.55, driftX: 0.14, driftY: 0.06, speed: 0.5 },
+      { color: '#0b0a2a', x: 0.1, y: 0.75, radius: 0.6, driftX: 0.08, driftY: 0.1, speed: 0.3 },
+    ],
+  },
+  {
+    id: 'deepOcean', name: 'Deep Ocean', colorBack: '#040d20', blur: 70,
+    stops: [
+      { color: '#1f5fd1', x: 0.25, y: 0.3, radius: 0.65, driftX: 0.1, driftY: 0.1, speed: 0.5 },
+      { color: '#0e7c74', x: 0.75, y: 0.65, radius: 0.6, driftX: 0.12, driftY: 0.08, speed: 0.4 },
+      { color: '#3b2a8f', x: 0.6, y: 0.15, radius: 0.5, driftX: 0.08, driftY: 0.12, speed: 0.6 },
+    ],
+  },
+  {
+    // Soft Mesh: teal -> bright blue -> purple, slow drift.
+    id: 'softMesh', name: 'Soft Mesh', colorBack: '#071226', blur: 80,
+    stops: [
+      { color: '#14b8a6', x: 0.15, y: 0.25, radius: 0.7, driftX: 0.08, driftY: 0.06, speed: 0.25 },
+      { color: '#3b82f6', x: 0.55, y: 0.5, radius: 0.7, driftX: 0.1, driftY: 0.08, speed: 0.2 },
+      { color: '#8b5cf6', x: 0.9, y: 0.8, radius: 0.7, driftX: 0.08, driftY: 0.1, speed: 0.22 },
+    ],
+  },
+];
+
+/** Reference -> default: hue +14 deg, stops offset +-0.05 in x, drift x1.15, blur +6. */
+export const MESH_PRESET_NUDGE = { hue: 14, offset: 0.05, drift: 1.15, blur: 6 } as const;
+
+export const MESH_PRESETS: MeshPreset[] = MESH_PRESET_REFERENCES.map((m) => ({
+  ...m,
+  colorBack: hueShift(m.colorBack, MESH_PRESET_NUDGE.hue),
+  blur: m.blur + MESH_PRESET_NUDGE.blur,
+  stops: m.stops.map((x, i) => ({
+    ...x,
+    color: hueShift(x.color, MESH_PRESET_NUDGE.hue),
+    x: x.x + (i % 2 ? MESH_PRESET_NUDGE.offset : -MESH_PRESET_NUDGE.offset),
+    driftX: Math.round(x.driftX * MESH_PRESET_NUDGE.drift * 1000) / 1000,
+    driftY: Math.round(x.driftY * MESH_PRESET_NUDGE.drift * 1000) / 1000,
+  })),
+}));

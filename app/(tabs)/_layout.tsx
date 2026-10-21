@@ -6,7 +6,7 @@ import { Platform, StyleSheet, Text, View, type ColorValue } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Icon } from '@/components/ui/icon';
 import { UpdateBanner } from '@/components/ui/update-notice';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -56,7 +56,7 @@ export default function TabLayout() {
         options={{
           title: 'OpenCode Mobile',
           tabBarLabel: label('/', t('common:tabs.chat')),
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="message.fill" color={iconColor('/', color)} />,
+          tabBarIcon: ({ color }) => <Icon size={28} name="chat" color={iconColor('/', color)} />,
           tabBarButton: (props) => <HapticTab {...props} route="/" />,
         }}
       />
@@ -65,7 +65,7 @@ export default function TabLayout() {
         options={{
           title: t('common:tabs.terminal'),
           tabBarLabel: label('/terminal', t('common:tabs.terminal')),
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="terminal.fill" color={iconColor('/terminal', color)} />,
+          tabBarIcon: ({ color }) => <Icon size={28} name="terminal" color={iconColor('/terminal', color)} />,
           tabBarButton: (props) => <HapticTab {...props} route="/terminal" />,
         }}
       />
@@ -74,7 +74,7 @@ export default function TabLayout() {
         options={{
           title: t('common:tabs.projects'),
           tabBarLabel: label('/projects', t('common:tabs.projects')),
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="folder.fill" color={iconColor('/projects', color)} />,
+          tabBarIcon: ({ color }) => <Icon size={28} name="folder" color={iconColor('/projects', color)} />,
           tabBarButton: (props) => <HapticTab {...props} route="/project" />,
         }}
       />
@@ -83,7 +83,7 @@ export default function TabLayout() {
         options={{
           title: t('common:tabs.settings'),
           tabBarLabel: label('/settings', t('common:tabs.settings')),
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={iconColor('/settings', color)} />,
+          tabBarIcon: ({ color }) => <Icon size={28} name="settings" color={iconColor('/settings', color)} />,
           tabBarButton: (props) => <HapticTab {...props} route="/settings" />,
         }}
       />

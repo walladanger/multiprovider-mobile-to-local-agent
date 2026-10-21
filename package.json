@@ -30,6 +30,11 @@
     "preview:workspaces": "EXPO_PUBLIC_E2E_MODE=1 EXPO_APP_VARIANT=development npm run build:web:ci && node ./tests/fake-opencode/preview-workspaces.mjs"
   },
   "dependencies": {
+    "@expo-google-fonts/ibm-plex-sans": "^0.4.1",
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
+    "@expo-google-fonts/manrope": "^0.4.2",
+    "@expo-google-fonts/space-grotesk": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@opencode-ai/sdk": "^1.18.3",
     "@opencode/client": "^2.0.16",
@@ -38,6 +43,8 @@
     "@rn-primitives/portal": "^1.5.3",
     "@rn-primitives/slot": "^1.5.2",
     "@shopify/flash-list": "2.0.2",
+    "@shopify/react-native-skia": "2.6.2",
+    "@tabler/icons-react-native": "^3.49.0",
     "@xterm/addon-fit": "0.11.0",
     "@xterm/xterm": "6.0.0",
     "base-64": "^1.0.0",
@@ -80,7 +87,9 @@
     "expo-video": "~57.0.5",
     "expo-web-browser": "~57.0.3",
     "i18next": "^26.4.2",
+    "lucide-react-native": "^1.60.0",
     "nativewind": "^4.2.7",
+    "phosphor-react-native": "^3.0.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-i18next": "^17.0.15",
@@ -93,6 +102,7 @@
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.10.1",
     "tailwind-merge": "^3.7.0"
