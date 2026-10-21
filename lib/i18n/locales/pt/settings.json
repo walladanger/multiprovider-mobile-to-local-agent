@@ -406,7 +406,12 @@
       "liquid": "Brilho líquido",
       "swirl": "Redemoinho de pixels",
       "cyber": "Cyber particles",
-      "mesh": "Mesh gradient"
+      "mesh": "Mesh gradient",
+      "prism": "Prismatic lattice",
+      "aurora": "Aurora flow",
+      "halftone": "Halftone clouds",
+      "papermesh": "Paper mesh",
+      "hive": "Hive"
     },
     "descriptions": {
       "gradient": "A static indigo gradient. Lightest on battery.",
@@ -415,7 +420,12 @@
       "liquid": "Soft glowing liquid blobs in blue and violet.",
       "swirl": "A dithered pixel swirl, cyan on dark plum.",
       "cyber": "A flowing field of tiny particles driven by Perlin noise.",
-      "mesh": "Slowly drifting, blurred color blobs."
+      "mesh": "Slowly drifting, blurred color blobs.",
+      "prism": "A kaleidoscopic lattice of rounded, slowly morphing cells with iridescent edges.",
+      "aurora": "A flat color field with one soft drifting glow.",
+      "halftone": "Flowing noise clouds drawn as a monochrome pixel halftone.",
+      "papermesh": "Mesh gradient from Paper Shaders with blended color blobs and grain.",
+      "hive": "A dark field with a glowing shape and rainbow edges."
     },
     "controls": {
       "colorA": "Cor principal",
@@ -433,7 +443,10 @@
       "positionBoth": "Both sides",
       "positionRight": "Right",
       "positionLeft": "Left",
-      "stop": "Color {{value}}"
+      "stop": "Color {{value}}",
+      "scale": "Scale",
+      "distortion": "Distortion",
+      "swirl": "Swirl"
     },
     "presets": {
       "title": "Predefinições salvas",
@@ -483,6 +496,7 @@
         "phosphor": "Phosphor",
         "tabler": "Tabler"
       }
-    }
+    },
+    "builtin": "Presets"
   }
 }

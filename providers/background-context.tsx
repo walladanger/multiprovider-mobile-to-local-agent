@@ -25,6 +25,8 @@ type BackgroundContextValue = {
   presets: BackgroundPreset[];
   fontsLoaded: boolean;
   update: (patch: Partial<BackgroundSettings>) => void;
+  /** Replace the whole background (built-in presets). */
+  applySettings: (next: BackgroundSettings) => void;
   selectKind: (kind: BackgroundKind) => void;
   /** Applies a color theme live and suggests matching background colors. */
   selectTheme: (id: ColorThemeId) => void;
@@ -85,6 +87,7 @@ export function BackgroundProvider({ children }: { children: React.ReactNode }) 
       presets,
       fontsLoaded,
       update: (patch) => setActive(normalizeSettings({ ...settings, ...patch })),
+      applySettings: (next) => setActive(normalizeSettings(next)),
       selectKind: (kind) => setActive(normalizeSettings({ ...BACKGROUND_DEFAULTS[kind], ...suggestBackgroundColors(COLOR_THEMES[appearance.themeId], kind) })),
       selectTheme: (id) => {
         setLook({ ...appearance, themeId: id });

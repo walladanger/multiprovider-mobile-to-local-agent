@@ -13,6 +13,7 @@ import { View, useWindowDimensions } from 'react-native';
 import { useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
 
 import { kokonutPath, stepParticles } from '@/lib/backgrounds/background-math';
+import { SHADER_KINDS, SHADER_SOURCES, shaderUniforms, type ShaderKind } from '@/lib/backgrounds/shader-sources';
 import type { BackgroundSettings, MeshStop } from '@/lib/backgrounds/settings';
 
 export type SkiaBackgroundProps = { settings: BackgroundSettings; width?: number; height?: number };
@@ -247,4 +248,20 @@ export function SwirlBackground({ settings, width, height }: SkiaBackgroundProps
   return <HalfResShaderCanvas effect={effect} uniforms={uniforms} w={w} h={h} settings={settings} />;
 }
 
-export const SKIA_BACKGROUNDS = { paths: PathsBackground, liquid: LiquidBackground, swirl: SwirlBackground, cyber: CyberBackground, mesh: MeshGradientBackground } as const;
+// ---------- Code-only shader presets (lib/backgrounds/shader-sources.ts) ----------
+function makeShaderBackground(kind: ShaderKind) {
+  return function ShaderBackground({ settings, width, height }: SkiaBackgroundProps) {
+    const { w, h } = useSize(width, height);
+    const effect = React.useMemo(() => Skia.RuntimeEffect.Make(SHADER_SOURCES[kind]), []);
+    const clock = useClock();
+    const hw = Math.ceil(w / 2);
+    const hh = Math.ceil(h / 2);
+    const base = React.useMemo(() => shaderUniforms(kind, settings, hw, hh), [settings, hw, hh]);
+    const speed = settings.speed;
+    const uniforms = useDerivedValue<Uniforms>(() => ({ ...base, time: (clock.value / 1000) * speed }));
+    return <HalfResShaderCanvas effect={effect} uniforms={uniforms} w={w} h={h} settings={settings} />;
+  };
+}
+
+export const SKIA_BACKGROUNDS = {
+  ...Object.fromEntries(SHADER_KINDS.map((k) => [k, makeShaderBackground(k)])) as Record<ShaderKind, ReturnType<typeof makeShaderBackground>>, paths: PathsBackground, liquid: LiquidBackground, swirl: SwirlBackground, cyber: CyberBackground, mesh: MeshGradientBackground } as const;

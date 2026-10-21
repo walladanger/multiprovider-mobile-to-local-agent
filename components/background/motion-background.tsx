@@ -4,7 +4,7 @@ import * as React from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { SKIA_BACKGROUNDS } from '@/components/background/skia-backgrounds';
+import { SKIA_BACKGROUNDS, type SkiaKind } from '@/components/background/skia-backgrounds';
 import { MOTION_BACKGROUND_SOURCE } from '@/constants/motion-background';
 import { BACKGROUND_DEFAULTS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
 import { useBackground } from '@/providers/background-context';
@@ -43,9 +43,14 @@ export const BACKGROUND_REGISTRY: Record<BackgroundKind, (props: LayerProps) => 
   swirl: (props) => renderSkia('swirl', props),
   cyber: (props) => renderSkia('cyber', props),
   mesh: (props) => renderSkia('mesh', props),
+  prism: (props) => renderSkia('prism', props),
+  aurora: (props) => renderSkia('aurora', props),
+  halftone: (props) => renderSkia('halftone', props),
+  papermesh: (props) => renderSkia('papermesh', props),
+  hive: (props) => renderSkia('hive', props),
 };
 
-function renderSkia(kind: 'paths' | 'liquid' | 'swirl' | 'cyber' | 'mesh', { settings, width, height, paused }: LayerProps) {
+function renderSkia(kind: SkiaKind, { settings, width, height, paused }: LayerProps) {
   const Component = SKIA_BACKGROUNDS[kind];
   // Unmounting the canvas while paused stops its frame clock entirely.
   if (!Component || paused) return null;

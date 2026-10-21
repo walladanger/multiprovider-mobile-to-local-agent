@@ -45,3 +45,20 @@ Text, Dialog, GlassPanel) rather than from a kit package. To swap kits:
    `resolver.resolveRequest` alias selected by an env var such as `EXPO_PUBLIC_UI_KIT`, the same way
    `metro.config.js` already stubs FOSS-only modules).
 3. Map the kit's theme to `theme/tokens.ts` (and `global.css` if the kit uses CSS variables).
+
+## Background sources and licenses
+
+| Background | Origin | License |
+| --- | --- | --- |
+| Flowing paths | Port of Kokonut UI `FloatingPathsBackground` (source supplied by Warwick) | MIT (Kokonut UI) |
+| Cyber particles | Port of `FluidParticlesBackground` / CyberBackground (source supplied by Warwick; Ken Perlin's reference noise) | confirm with the source's author |
+| Swirl | Original SkSL after Ali Imam's 21st.dev Swirl look (Bayer dither) | original |
+| Liquid glow | Original approximation | original |
+| Prismatic lattice, Halftone clouds | Original | original |
+| Aurora flow | Original, inspired by Ruixen UI (no code copied) | original |
+| Hive | Original, inspired by Xor's Hive shader (no code copied; license not clear) | original |
+| Paper mesh | Port of `MeshGradient` from `@paper-design/shaders` 0.0.81 | Apache-2.0, Copyright 2026 Paper (see `NOTICE`) |
+| Mesh gradient / Soft Mesh | Original, presets are data in `lib/backgrounds/mesh-presets.ts` | original |
+
+All shader backgrounds render at half resolution, unmount while the app is backgrounded and fall back to the
+static gradient when reduce motion is on (`components/background/motion-background.tsx`).

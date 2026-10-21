@@ -25,4 +25,13 @@ export const MESH_PRESETS: MeshPreset[] = [
       { color: '#3b2a8f', x: 0.6, y: 0.15, radius: 0.5, driftX: 0.08, driftY: 0.12, speed: 0.6 },
     ],
   },
+  {
+    // Soft Mesh: teal -> bright blue -> purple, slow drift.
+    id: 'softMesh', name: 'Soft Mesh', colorBack: '#071226', blur: 80,
+    stops: [
+      { color: '#14b8a6', x: 0.15, y: 0.25, radius: 0.7, driftX: 0.08, driftY: 0.06, speed: 0.25 },
+      { color: '#3b82f6', x: 0.55, y: 0.5, radius: 0.7, driftX: 0.1, driftY: 0.08, speed: 0.2 },
+      { color: '#8b5cf6', x: 0.9, y: 0.8, radius: 0.7, driftX: 0.08, driftY: 0.1, speed: 0.22 },
+    ],
+  },
 ];

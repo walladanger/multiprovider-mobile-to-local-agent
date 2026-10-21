@@ -4,5 +4,6 @@
 import type { ComponentType } from 'react';
 import type { BackgroundSettings } from '@/lib/backgrounds/settings';
 
+export type SkiaKind = 'paths' | 'liquid' | 'swirl' | 'cyber' | 'mesh' | 'prism' | 'aurora' | 'halftone' | 'papermesh' | 'hive';
 export type SkiaBackgroundProps = { settings: BackgroundSettings; width?: number; height?: number };
-export const SKIA_BACKGROUNDS: Partial<Record<'paths' | 'liquid' | 'swirl' | 'cyber' | 'mesh', ComponentType<SkiaBackgroundProps>>> = {};
+export const SKIA_BACKGROUNDS: Partial<Record<SkiaKind, ComponentType<SkiaBackgroundProps>>> = {};

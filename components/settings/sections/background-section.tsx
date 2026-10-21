@@ -10,6 +10,7 @@ import { ICON_PACKS } from '@/lib/backgrounds/appearance';
 import { COLOR_THEME_IDS, COLOR_THEMES } from '@/lib/backgrounds/color-themes';
 import { CODE_FONT_IDS, FONT_FAMILIES, TEXT_SCALE_MAX, TEXT_SCALE_MIN, UI_FONT_IDS } from '@/lib/backgrounds/fonts';
 import { SKIN_IDS } from '@/lib/backgrounds/skins';
+import { BUILTIN_PRESETS, presetThumbnail } from '@/lib/backgrounds/builtin-presets';
 import { MESH_PRESETS } from '@/lib/backgrounds/mesh-presets';
 import { BACKGROUND_KINDS, PARTICLE_COUNT_MAX, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
 import { useBackground } from '@/providers/background-context';
@@ -19,7 +20,7 @@ const SWATCHES = ['#6d5cff', '#8b5cf6', '#3b82f6', '#00ffff', '#c9c2ff', '#f0abf
 
 type ColorKey = 'colorA' | 'colorB' | 'colorBack';
 // Which controls make sense for each background.
-type SliderKey = 'speed' | 'density' | 'intensity' | 'blur' | 'opacity' | 'particleCount' | 'noiseIntensity' | 'particleSizeMin' | 'particleSizeMax';
+type SliderKey = 'speed' | 'density' | 'intensity' | 'blur' | 'opacity' | 'scale' | 'distortion' | 'swirl' | 'particleCount' | 'noiseIntensity' | 'particleSizeMin' | 'particleSizeMax';
 const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: SliderKey[] }> = {
   gradient: { colors: ['colorA', 'colorB', 'colorBack'], sliders: [] },
   video: { colors: [], sliders: ['intensity'] },
@@ -28,8 +29,13 @@ const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: SliderKey[
   swirl: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
   cyber: { colors: ['colorA', 'colorBack'], sliders: ['particleCount', 'noiseIntensity', 'particleSizeMin', 'particleSizeMax', 'speed', 'intensity', 'blur', 'opacity'] },
   mesh: { colors: ['colorBack'], sliders: ['speed', 'blur', 'opacity'] },
+  prism: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
+  aurora: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
+  halftone: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'density', 'opacity'] },
+  papermesh: { colors: ['colorBack'], sliders: ['speed', 'distortion', 'swirl', 'density', 'scale', 'intensity', 'opacity'] },
+  hive: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
 };
-const RANGES: Record<SliderKey, readonly [number, number, number]> = { speed: [0, 2, 0.05], density: [0, 1, 0.05], intensity: [0, 1, 0.05], blur: [0, 20, 1], opacity: [0, 1, 0.05], particleCount: [50, PARTICLE_COUNT_MAX, 50], noiseIntensity: [0.0005, 0.01, 0.0005], particleSizeMin: [0.2, 4, 0.1], particleSizeMax: [0.5, 6, 0.1] };
+const RANGES: Record<SliderKey, readonly [number, number, number]> = { speed: [0, 2, 0.05], density: [0, 1, 0.05], intensity: [0, 1, 0.05], blur: [0, 20, 1], opacity: [0, 1, 0.05], scale: [0, 1, 0.05], distortion: [0, 1, 0.05], swirl: [0, 1, 0.05], particleCount: [50, PARTICLE_COUNT_MAX, 50], noiseIntensity: [0.0005, 0.01, 0.0005], particleSizeMin: [0.2, 4, 0.1], particleSizeMax: [0.5, 6, 0.1] };
 const valueText = (key: SliderKey, v: number) => key === 'blur' ? `${v}px` : key === 'particleCount' ? String(v) : key === 'noiseIntensity' ? v.toFixed(4) : v.toFixed(2);
 
 export function BackgroundSection({ palette }: { palette: Palette }) {
@@ -81,6 +87,16 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
         {(['chat', 'terminal', 'folder', 'settings', 'palette', 'bell'] as const).map((n) => <Icon key={n} name={n} size={22} color={palette.tint} />)}
       </View>
 
+      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.builtin')}</Text>
+      <View style={styles.chips}>
+        {BUILTIN_PRESETS.map((p) => (
+          <Pressable key={p.id} accessibilityRole="button" testID={`builtin-preset-${p.id}`} onPress={() => bg.applySettings(p.settings)}
+            style={[styles.chip, styles.thumbChip, { borderColor: palette.border, backgroundColor: palette.surface }]}>
+            <View style={styles.thumb}>{presetThumbnail(p).map((c, i) => <View key={i} style={{ backgroundColor: c, flex: 1 }} />)}</View>
+            <Text style={{ color: palette.text }}>{p.name}</Text>
+          </Pressable>
+        ))}
+      </View>
       <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.style')}</Text>
       <View style={styles.chips}>
         {BACKGROUND_KINDS.map((kind) => (
@@ -96,10 +112,10 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
         <ChipRow palette={palette} options={[{ id: '0', label: t('settings:backgrounds.controls.positionBoth') }, { id: '1', label: t('settings:backgrounds.controls.positionRight') }, { id: '-1', label: t('settings:backgrounds.controls.positionLeft') }]}
           value={String(settings.position) as '0' | '1' | '-1'} onChange={(id) => bg.update({ position: Number(id) })} />
       ) : null}
-      {settings.kind === 'mesh' ? (
+      {settings.kind === 'mesh' || settings.kind === 'papermesh' ? (
         <>
-          <ChipRow palette={palette} options={MESH_PRESETS.map((m) => ({ id: m.id, label: m.name }))} value={MESH_PRESETS.find((m) => JSON.stringify(m.stops) === JSON.stringify(settings.stops))?.id ?? ''}
-            onChange={(id) => { const m = MESH_PRESETS.find((x) => x.id === id); if (m) bg.update({ stops: m.stops, colorBack: m.colorBack, blur: m.blur }); }} />
+          {settings.kind === 'mesh' ? <ChipRow palette={palette} options={MESH_PRESETS.map((m) => ({ id: m.id, label: m.name }))} value={MESH_PRESETS.find((m) => JSON.stringify(m.stops) === JSON.stringify(settings.stops))?.id ?? ''}
+            onChange={(id) => { const m = MESH_PRESETS.find((x) => x.id === id); if (m) bg.update({ stops: m.stops, colorBack: m.colorBack, blur: m.blur }); }} /> : null}
           {settings.stops.map((stop, index) => (
             <View key={index} style={styles.colorRow}>
               <Text variant="bodyMedium" style={{ color: palette.text }}>{t('settings:backgrounds.controls.stop', { value: index + 1 })}</Text>
@@ -183,6 +199,8 @@ const styles = StyleSheet.create({
   chip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
   colorRow: { gap: 6 },
   themeChip: { alignItems: 'center', borderRadius: 999, borderWidth: 1, flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 8 },
+  thumbChip: { alignItems: 'center', flexDirection: 'row', gap: 8 },
+  thumb: { borderRadius: 6, flexDirection: 'row', height: 18, overflow: 'hidden', width: 28 },
   themeDot: { borderRadius: 6, height: 12, width: 12 },
   swatch: { borderRadius: 14, height: 28, width: 28 },
   saveRow: { alignItems: 'center', flexDirection: 'row', gap: 8 },

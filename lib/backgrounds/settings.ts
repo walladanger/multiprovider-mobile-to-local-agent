@@ -1,7 +1,7 @@
 /** Pure model for animated background settings and named presets (no React/RN imports). */
 import { normalizeAppearance, type AppearanceSettings } from './appearance';
 
-export const BACKGROUND_KINDS = ['gradient', 'video', 'paths', 'liquid', 'swirl', 'cyber', 'mesh'] as const;
+export const BACKGROUND_KINDS = ['gradient', 'video', 'paths', 'liquid', 'swirl', 'cyber', 'mesh', 'prism', 'aurora', 'halftone', 'papermesh', 'hive'] as const;
 export type BackgroundKind = (typeof BACKGROUND_KINDS)[number];
 
 export type BackgroundSettings = {
@@ -31,7 +31,12 @@ export type BackgroundSettings = {
   /** Cyber particles: radius range in px (original `particleSize` {min,max}). */
   particleSizeMin: number;
   particleSizeMax: number;
-  /** Mesh gradient color stops (see mesh-presets.ts). */
+  /** Shader backgrounds: pattern / glow size, 0..1. */
+  scale: number;
+  /** Paper Mesh: distortion and swirl, 0..1 (original defaults 0.8 / 0.1). */
+  distortion: number;
+  swirl: number;
+  /** Mesh gradient color stops (see mesh-presets.ts); Paper Mesh uses the first 6 colors. */
   stops: MeshStop[];
 };
 
@@ -50,7 +55,7 @@ const DEFAULT_MESH_STOPS: MeshStop[] = [
 /** A user preset: background settings plus (optionally) the full appearance: theme, skin, fonts, icons. */
 export type BackgroundPreset = { id: string; name: string; settings: BackgroundSettings; appearance?: AppearanceSettings };
 
-const EXTRAS = { position: 0, particleCount: 600, noiseIntensity: 0.003, particleSizeMin: 0.5, particleSizeMax: 2, stops: DEFAULT_MESH_STOPS };
+const EXTRAS = { scale: 0.5, distortion: 0.8, swirl: 0.1, position: 0, particleCount: 600, noiseIntensity: 0.003, particleSizeMin: 0.5, particleSizeMax: 2, stops: DEFAULT_MESH_STOPS };
 
 export const BACKGROUND_DEFAULTS: Record<BackgroundKind, BackgroundSettings> = {
   gradient: { kind: 'gradient', colorA: '#6d5cff', colorB: '#1a1446', colorBack: '#0b0a2a', speed: 1, density: 0.5, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
@@ -64,6 +69,18 @@ export const BACKGROUND_DEFAULTS: Record<BackgroundKind, BackgroundSettings> = {
   cyber: { kind: 'cyber', colorA: '#ffffff', colorB: '#ffffff', colorBack: '#000000', speed: 1, density: 0.5, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
   // Animated mesh gradient: slow drifting color blobs.
   mesh: { kind: 'mesh', colorA: '#6d5cff', colorB: '#a78bfa', colorBack: '#0b0a2a', speed: 0.5, density: 0.5, intensity: 0.5, blur: 60, opacity: 1, ...EXTRAS },
+  prism: { kind: 'prism', colorA: '#8f82ff', colorB: '#5fe3d2', colorBack: '#07061c', speed: 0.6, density: 0.5, intensity: 0.6, blur: 0, opacity: 1, ...EXTRAS },
+  aurora: { kind: 'aurora', colorA: '#14b8a6', colorB: '#a7f3d0', colorBack: '#03201c', speed: 0.6, density: 0.5, intensity: 0.6, blur: 0, opacity: 1, ...EXTRAS },
+  halftone: { kind: 'halftone', colorA: '#c9c2ff', colorB: '#c9c2ff', colorBack: '#0b0a2a', speed: 0.6, density: 0.4, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
+  papermesh: { kind: 'papermesh', colorA: '#6d5cff', colorB: '#a78bfa', colorBack: '#070b24', speed: 0.5, density: 0.35, intensity: 1, blur: 0, opacity: 1, ...EXTRAS,
+    stops: [
+      { color: '#3b2fbf', x: 0, y: 0, radius: 0.5, driftX: 0, driftY: 0, speed: 1 },
+      { color: '#8b5cf6', x: 0, y: 0, radius: 0.5, driftX: 0, driftY: 0, speed: 1 },
+      { color: '#ec4899', x: 0, y: 0, radius: 0.5, driftX: 0, driftY: 0, speed: 1 },
+      { color: '#f5b83d', x: 0, y: 0, radius: 0.5, driftX: 0, driftY: 0, speed: 1 },
+      { color: '#0b1033', x: 0, y: 0, radius: 0.5, driftX: 0, driftY: 0, speed: 1 },
+    ] },
+  hive: { kind: 'hive', colorA: '#6d5cff', colorB: '#ec4899', colorBack: '#05040f', speed: 0.6, density: 0.5, intensity: 0.6, blur: 0, opacity: 1, ...EXTRAS },
   swirl: { kind: 'swirl', colorA: '#00ffff', colorB: '#00ffff', colorBack: '#220011', speed: 0.9, density: 0.4, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
 };
 
@@ -95,6 +112,9 @@ export function normalizeSettings(input: unknown): BackgroundSettings {
     intensity: clamp(raw.intensity, 0, 1, d.intensity),
     blur: clamp(raw.blur, 0, kind === 'mesh' ? 120 : 20, d.blur),
     opacity: clamp(raw.opacity, 0, 1, d.opacity),
+    scale: clamp(raw.scale, 0, 1, d.scale),
+    distortion: clamp(raw.distortion, 0, 1, d.distortion),
+    swirl: clamp(raw.swirl, 0, 1, d.swirl),
     position: raw.position === 1 || raw.position === -1 ? raw.position : 0,
     particleCount: Math.round(clamp(raw.particleCount, 50, PARTICLE_COUNT_MAX, d.particleCount)),
     noiseIntensity: clamp(raw.noiseIntensity, 0.0005, 0.02, d.noiseIntensity),
