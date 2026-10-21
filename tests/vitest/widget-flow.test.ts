@@ -22,7 +22,6 @@ vi.mock('@/lib/opencode/client', () => ({ buildClient: (...args: any[]) => h.cli
 vi.mock('@/lib/opencode/client/interactions', () => ({ listPendingPermissions: (...args: any[]) => h.permissions(...args), listPendingQuestions: (...args: any[]) => h.questions(...args) }));
 vi.mock('@/providers/services/session-service', () => ({ listActiveSessions: (...args: any[]) => h.list(...args), getSessionMessages: (...args: any[]) => h.messages(...args) }));
 vi.mock('react-native', () => ({ Platform: { OS: 'android' } }));
-vi.mock('@/lib/connect', () => ({ parseConnectMetadata: () => undefined }));
 
 const session = (id: string, updated = 1, parentID?: string, directory = '/repo') => ({ id, title: id, directory, parentID, time: { created: 1, updated } }) as any;
 const assistant = (text: string, created = 1, parts?: any[]) => ({ info: { id: `m${created}`, role: 'assistant', time: { created } }, parts: parts ?? [{ type: 'text', text }] }) as any;

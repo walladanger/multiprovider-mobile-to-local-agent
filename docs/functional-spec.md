@@ -347,48 +347,13 @@ Behavior:
 
 - each connection is a collapsible row; expanding shows its server URL and username, and reveals Connect, Edit, and Delete for that connection
 - the active row shows an `Active` (or `Connecting`) badge; the active connection always has a row, titled `Current connection` while it has not been saved as a profile yet
-- `Add connection` offers three choices in order: Scan QR code (local network, native only), Manual, and Cloud Link. Scan QR code and Manual open the shared scrollable full-screen form for name, server URL, username, and password; its keyboard-safe primary action, `Save & connect`, stores the profile (password in SecureStore, metadata in AsyncStorage) and switches to it. Cloud Link opens the guided assistant
+- `Add connection` offers two choices in order: Scan QR code (local network, native only) and Manual. Scan QR code and Manual open the shared scrollable full-screen form for name, server URL, username, and password; its keyboard-safe primary action, `Save & connect`, stores the profile (password in SecureStore, metadata in AsyncStorage) and switches to it. Cloud Link opens the guided assistant
 - `Edit` opens the same form for that connection: for a saved connection it updates the stored profile (and the live settings when it is active), for the current unsaved connection it updates the live settings only
 - editing the active connection never reconnects on its own; the row's Reconnect action does that, so an in-flight session is not dropped
 - the active connection cannot be deleted; other connections offer Delete with a confirmation
 - selecting Connect on another connection switches through `switchConnection()`, which persists the outgoing profile's model selection, restores the target profile's selection, clears all server-derived state, and reconnects with the target credentials
 - values are persisted locally; passwords stay in SecureStore while name, URL, and username live in AsyncStorage
 - Settings shows short category summaries in one compact group; tapping Connection opens a content-sized overlay with the server message, last checked timestamp, and saved connection rows
-
-### Cloud Link Section
-
-Purpose:
-
-- show verified Cloud Link access and manage the store subscription, owned machines, and connector-exposed services
-
-Behavior exposed today:
-
-- the row sits directly below AI & Providers and only appears for installs that came from the App Store or Google Play; directly installed APKs, F-Droid/FOSS builds, production web, and non-store iOS builds never show it (the development web E2E harness keeps it through `connectPilot.testing`)
-- inside the section the order is: access status summary, Exposed Services, the subscription group (Manage subscription, Restore purchases, and native offers/Subscribe while inactive), then Machines last, with a Learn more footer row
-- the section opens without requesting camera access, pairing a machine, purchasing, or restoring
-- progress, error, notice, and Retry feedback stays attached to the subscription actions
-- an existing Cloud Link connection profile and its deep links keep working even when the store-install check hides the section
-
-### Exposed Services Section
-
-Purpose:
-
-- let a paired Cloud Link device add, replace and remove the connector's exposed service paths remotely over the existing tunnel
-
-Behavior:
-
-- the subsection is always rendered inside the consolidated Cloud Link Settings section. Services belong to one Cloud Link machine: the provider targets the active connection when it is a Cloud Link machine, and otherwise resolves a saved Cloud Link profile (explicit selection, then last-used, then the only/first saved machine), because the connector's management API authenticates the device on the machine's own origin. Manual connections therefore still manage their Cloud Link machine's services
-- a Machine selector appears when more than one Cloud Link machine is saved; rows, addresses, and Copy link use the target machine's `serverUrl`, never the active connection's
-- a notice names the target machine when it is not the active connection, with a Switch to this machine action that reconnects it
-- with no saved Cloud Link machine the subsection explains that a machine must be connected instead of hiding; expired or rejected credentials surface an explicit state with Reconnect
-- opening (or re-opening) the Cloud Link section re-fetches `GET /_cloudlink/services` and `GET /_cloudlink/version` for the resolved target, because the connector's tray or CLI can change the list out from under the app
-- Add/Edit opens a full-screen route (`app/service.tsx`), not an inline overlay form; Save returns to Settings with the Cloud Link section reopened. The form covers id (create only), optional name, path, target, enabled, access (`private`/`public`) and strip-prefix; the id is fixed when editing
-- on management revision 2 the form also picks a `port` from the connector's `service_ports`; the path is optional (empty serves the port root, and the strip-prefix toggle only applies to path services), the picker marks ports already in use and disables them for the mode being edited (a root service needs a fully free port; a path service may share a root-free port)
-- revision 1 and unknown older connectors stay on the legacy path-only form on `:8443` with a non-blocking "update your desktop connector" hint; root services and the port picker require revision 2
-- the app mirrors the connector's validation before sending, and shows the connector's own message when the server rejects a request (for example `400` invalid service)
-- a successful save renders the stored canonical values the connector returns, not the request values
-- each row shows name, the full `https://<server host>:<port>/` or `https://<server host>:<port><path>/` link, the address (`:2053` or `:8443/app`) → target, access and enabled state, with Edit, Copy link, and Remove
-- changes apply to the running proxy immediately and are persisted; no connector restart is required
 
 ### AI Defaults Section
 

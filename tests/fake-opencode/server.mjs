@@ -116,25 +116,6 @@ let connectionPassword = process.env.FAKE_OPENCODE_PASSWORD || '';
 let pairingCode;
 let pairingToken;
 let pairingSequence = 0;
-// Device-authenticated connector management surface. `deviceCredentials` mirrors
-// the connector's paired-device Basic credentials; `managedServices` is the
-// exposed-service list the `/_cloudlink/services` API reads and mutates.
-// `connectorApi` mirrors the management API revision: `2` serves dedicated
-// service ports and root services, `1` is the legacy path-only surface.
-const deviceCredentials = new Map();
-let managedServices = [];
-let connectorApi = 2;
-const CONNECTOR_VERSION = '0.1.14';
-const SERVICE_PORTS = [8443, 2053, 2083, 2087, 2096];
-const MANAGEMENT_PREFIX = '/_cloudlink';
-
-function connectorHeaders() {
-  return { 'x-cloudlink-connector-version': CONNECTOR_VERSION };
-}
-
-function storedServicePort(service) {
-  return service.port ?? SERVICE_PORTS[0];
-}
 
 function sendText(res, statusCode, body, extraHeaders = {}) {
   res.writeHead(statusCode, { 'Content-Type': 'text/plain; charset=utf-8', 'Access-Control-Allow-Origin': '*', ...extraHeaders });
@@ -213,9 +194,6 @@ const server = http.createServer(async (req, res) => {
       connectionPassword = body?.password ?? process.env.FAKE_OPENCODE_PASSWORD ?? '';
       pairingCode = undefined;
       pairingToken = undefined;
-      deviceCredentials.clear();
-      managedServices = [];
-      connectorApi = 2;
       sendJson(res, 200, { data: { scenario: state.scenario } });
       return;
     }
@@ -232,18 +210,6 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, { code: pairingCode.value, expires_in: 300 });
       return;
     }
-    if (req.method === 'POST' && pathname === '/__control/device') {
-      const body = await readJson(req);
-      if (body?.device_id) deviceCredentials.set(body.device_id, body.device_secret ?? '');
-      sendJson(res, 200, { data: { devices: [...deviceCredentials.keys()] } });
-      return;
-    }
-    if (req.method === 'POST' && pathname === '/__control/connector-api') {
-      const body = await readJson(req);
-      connectorApi = Number.isInteger(body?.api) ? body.api : 2;
-      sendJson(res, 200, { data: { api: connectorApi } });
-      return;
-    }
     if (req.method === 'GET' && pathname.startsWith('/auth/connect/')) {
       if (!pairingCode || pairingCode.expiresAt <= Date.now() || pathname !== `/auth/connect/${pairingCode.value}`) {
         sendJson(res, 401, { _tag: 'UnauthorizedError', message: 'Pairing link expired or already used' });
@@ -254,99 +220,6 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, { token: pairingToken });
       return;
     }
-    // Device-authenticated connector management. Served on the OpenCode origin
-    // (never a service port) and reachable only with a paired device credential,
-    // so it is handled before the OpenCode password gate. Every authenticated
-    // reply carries the connector version header, and `api` 2 enforces dedicated
-    // service ports with the connector's root/path sharing rules.
-    if (pathname === '/_cloudlink' || pathname.startsWith('/_cloudlink/')) {
-      const rawAuth = req.headers.authorization || '';
-      const basic = rawAuth.startsWith('Basic ') ? Buffer.from(rawAuth.slice(6), 'base64').toString('utf8') : '';
-      const separator = basic.indexOf(':');
-      const user = separator >= 0 ? basic.slice(0, separator) : '';
-      const secret = separator >= 0 ? basic.slice(separator + 1) : '';
-      const deviceOk = Boolean(user) && deviceCredentials.get(user) === secret;
-      const operatorOk = Boolean(connectionPassword) && basic === `opencode:${connectionPassword}`;
-      if (!deviceOk && !operatorOk) return sendText(res, 401, 'device credential required');
-      const headers = connectorHeaders();
-      if (req.method === 'GET' && pathname === '/_cloudlink/version') {
-        return sendJson(res, 200, connectorApi >= 2
-          ? { version: CONNECTOR_VERSION, api: connectorApi, service_ports: SERVICE_PORTS }
-          : { version: CONNECTOR_VERSION, api: connectorApi }, headers);
-      }
-      if (pathname === '/_cloudlink/services' || pathname.startsWith('/_cloudlink/services/')) {
-        const id = pathname === '/_cloudlink/services' ? undefined : decodeURIComponent(pathname.slice('/_cloudlink/services/'.length));
-        if (req.method === 'GET' && id === undefined) return sendJson(res, 200, { services: managedServices }, headers);
-        if (req.method === 'PUT' && id) {
-          const body = await readJson(req) || {};
-          const wantsPort = connectorApi >= 2;
-          let servicePort = SERVICE_PORTS[0];
-          if (wantsPort) {
-            if (!Number.isInteger(body.port)) return sendText(res, 400, 'invalid service: missing field `port`', headers);
-            if (!SERVICE_PORTS.includes(body.port)) return sendText(res, 400, `invalid service: service port must be one of ${SERVICE_PORTS.join(', ')}`, headers);
-            servicePort = body.port;
-          }
-          let canonicalPath = null;
-          if (typeof body.path === 'string' && body.path.trim() !== '') {
-            canonicalPath = body.path.replace(/\/+$/, '');
-            const segments = canonicalPath.split('/').slice(1);
-            if (!canonicalPath.startsWith('/') || canonicalPath.includes('%') || canonicalPath.includes('?') || canonicalPath.includes('#')) {
-              return sendText(res, 400, 'invalid service: path must be an absolute path', headers);
-            }
-            if (segments.some((segment) => !segment || segment === '.' || segment === '..' || !/^[A-Za-z0-9._~-]+$/.test(segment))) {
-              return sendText(res, 400, 'invalid service: path contains unsupported characters', headers);
-            }
-            if (canonicalPath === MANAGEMENT_PREFIX || canonicalPath.startsWith(`${MANAGEMENT_PREFIX}/`)) {
-              return sendText(res, 400, 'invalid service: path is reserved for connector management', headers);
-            }
-          } else if (body.path !== undefined && body.path !== null) {
-            return sendText(res, 400, 'invalid service: path must be a string or null', headers);
-          } else if (!wantsPort) {
-            return sendText(res, 400, 'invalid service: path must be an absolute path', headers);
-          }
-          const target = typeof body.target === 'string' ? body.target : '';
-          if (!/^(?:127\.0\.0\.1|\[::1\]):(\d+)$/.test(target)) return sendText(res, 400, 'invalid service: target must be loopback', headers);
-          const targetPort = Number(target.slice(target.lastIndexOf(':') + 1));
-          if (targetPort < 1024 || targetPort > 65_535) return sendText(res, 400, 'invalid service: target port must be 1024-65535', headers);
-          if (SERVICE_PORTS.includes(targetPort)) return sendText(res, 400, 'invalid service: target cannot use a service port', headers);
-          const created = !managedServices.some((service) => service.id === id);
-          if (created && managedServices.length >= 16) return sendText(res, 400, 'invalid service: at most 16 services are allowed', headers);
-          const others = managedServices.filter((service) => service.id !== id);
-          if (canonicalPath === null) {
-            if (others.some((service) => storedServicePort(service) === servicePort)) return sendText(res, 400, `invalid service: port ${servicePort} is already used by another service`, headers);
-          } else {
-            if (others.some((service) => storedServicePort(service) === servicePort && service.path === null)) {
-              return sendText(res, 400, 'invalid service: a service port cannot serve both a root service and path services', headers);
-            }
-            if (others.some((service) => storedServicePort(service) === servicePort && service.path === canonicalPath)) {
-              return sendText(res, 400, `invalid service: duplicate service path on port ${servicePort}`, headers);
-            }
-          }
-          const service = {
-            id,
-            name: typeof body.name === 'string' && body.name.trim() ? body.name.trim() : id,
-            ...(wantsPort ? { port: servicePort } : {}),
-            path: canonicalPath,
-            target,
-            enabled: body.enabled === true,
-            access: body.access === 'public' ? 'public' : 'private',
-            strip_prefix: body.strip_prefix !== false,
-          };
-          managedServices = managedServices.filter((entry) => entry.id !== id).concat(service);
-          return sendJson(res, created ? 201 : 200, { service }, headers);
-        }
-        if (req.method === 'DELETE' && id) {
-          if (!managedServices.some((service) => service.id === id)) return sendText(res, 404, 'unknown service', headers);
-          managedServices = managedServices.filter((service) => service.id !== id);
-          res.writeHead(204, { 'Access-Control-Allow-Origin': '*', ...headers });
-          res.end();
-          return;
-        }
-      }
-      if (req.method === 'GET') return sendText(res, 404, 'not found', headers);
-      return sendText(res, 405, 'method not allowed', headers);
-    }
-
     if (connectionPassword) {
       const valid = [connectionPassword, pairingToken].filter(Boolean).some((secret) => req.headers.authorization === `Basic ${Buffer.from(`opencode:${secret}`).toString('base64')}`);
       if (!valid) { sendJson(res, 401, { _tag: 'UnauthorizedError', message: 'Authentication required' }); return; }

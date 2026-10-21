@@ -21,7 +21,7 @@ abort/resubmit races in the actual prompt hook. `read-deadline.test.ts` exercise
 both installed SDKs through the shared transport: stalled headers and bodies,
 coalescing recovery, caller signals, late-result rejection, stream/mutation
 exclusions, exact UTF-8 authentication and advertised-byte diagnostics.
-Profile tests exercise interleaved manual, Cloud Link and preference writes.
+Profile tests exercise interleaved profile and preference writes.
 Hydration tests preserve unread metadata and prevent credentials from being
 applied to an unknown/default server. Prompt ownership also covers stale client
 callbacks, overlapping aborts and notification records moved during renewal.
@@ -179,12 +179,6 @@ Share/Widget extensions remain deferred.
 
 ## Current Strategy
 
-Cloud Link Subscription Settings coverage is described in [connect.md](connect.md).
-Validate the selected grouped-action layout in dark/light themes, narrow widths,
-larger text, sheet dismissal and screen-reader navigation. Check real App Store
-and Google Play handoff separately from the mocked E2E driver. E2E additions
-require explicit human validation under AGENTS.md.
-
 This repository validates behavior primarily through end-to-end flow tests and static checks, not broad unit-test coverage.
 
 That choice matches the app's risk profile:
@@ -200,11 +194,6 @@ prevents the anchor's default browser navigation before calling the router's
 tab handler. E2E coverage checks that switching tabs sends no document request
 and preserves an unsent chat draft; a full reload can otherwise race input or
 project selection on slower CI runners.
-The Cloud Link renewal fixture waits for the initial last-session bootstrap write
-before seeding next-launch data, and waits for the rotated scope to persist
-before asserting preservation. Navigation completion alone does not signal
-that provider persistence has finished.
-
 The OpenCode 2 project regression flow opens the picker, checks a server
 project that was never opened on this connection is not listed, adds a
 directory, and checks the serve's `/api/project` response now includes it. It
@@ -667,25 +656,14 @@ This strategy gives confidence in:
 
 ## Coverage Gaps
 
-Cloud Link activation checks cover 3/6/12/15-second backoff, request time within
-the shared 120-second budget, mixed transient failures, explicit saved-credential
-retry, permanent failures, general/manual reconnect exclusion, stale results,
-background suspension and teardown cleanup. Provider-hook coverage verifies
-foreground recovery does not overlap or restart activation and rescan retains
-the saved profile. Protocol checks preserve HTML 1033 before SDK parsing and
-keep 401/403 and TLS/certificate failures immediately actionable.
-
 Recovery classification is pinned by `tests/vitest/connection-classification.test.ts`
-(tunnel-startup, offline, timeout, auth, entitlement, server-incompatible,
+(tunnel-startup, offline, timeout, auth, server-incompatible,
 unknown, and the retry/auth policies). `tests/vitest/provider-runtime.test.ts` covers
 the liveness watchdog (one re-subscription per staleness window, foreground
 cycle, no traffic while healthy), the queued full reconcile behind an in-flight
 safety poll, auth-failure stream stop with a single provider notification, and
 the terminal reconnect on a rotated credential client.
-`tests/vitest/connect-recovery.test.ts` covers single-flight concurrent connects
-(one project discovery), same-machine rotation using the soft reset (project
-preserved), and data-plane revocation (state cleared once, Cloud Link recovery
-reused). `tests/vitest/terminal.test.ts` covers jittered bounded reconnect
+`tests/vitest/terminal.test.ts` covers jittered bounded reconnect
 delays and cursor-preserving reconnect with rotated credentials.
 `tests/e2e/realtime.spec.mjs` adds a silently stalled SSE flow (watchdog
 re-subscribes and the released stall reconciles a missed blocker, both
@@ -694,16 +672,7 @@ without re-submitting the prompt.
 
 These fake-server and E2E changes require explicit human validation under
 AGENTS.md. Device acceptance still needs Wi-Fi/cellular transitions, sleep/wake
-resume, real revocation, and Cloud Link renewal with a live terminal and editor
-draft.
-
-The web Cloud Link flows use controlled time and mocked tunnel responses to
-check waiting beyond 15 seconds without recovery controls, automatic connection,
-neutral timeout without automatic restart, explicit Retry without replaying
-claim/access, and regenerated-QR recovery. E2E changes require explicit human
-validation under AGENTS.md. Real-device acceptance remains outstanding: delayed
-desktop approval, approval followed by slow DNS/tunnel startup, denial/TTL expiry
-followed by a regenerated QR, and background/resume during the wait.
+resume and real revocation with a live terminal and editor draft.
 
 Local validation on 2026-10-12 passed `test:ci:static` (including 199 Vitest cases),
 both fake-server self-tests and all 119 web E2E flows against the final export.
@@ -711,56 +680,9 @@ Android development prebuild completed; Gradle compilation stopped with
 `SDK location not found`. Explicit human validation of these E2E changes and
 the physical-device flows remains pending.
 
-Cloud Link subscription checks are described in [connect.md](connect.md). Provider
-checks cover rejected/false native initialization and billing failures
-during product and existing-purchase queries on both stores. Retry reconnects and
-replays initialization while checkout stays disabled; purchase checkpoints retain
-their existing recovery path. The V2 inbox E2E resets the shared boot backend
-before opening chat so the preceding attachment flow cannot leak its conversation.
-Billing recovery validation (2026-10-13): static CI (291 Vitest checks plus script
-suites), both fake-server self-tests, all 134 web flows and the Android development
-build pass. An earlier full rerun had intermittent V2 terminal, file-diff and
-polling failures; all three passed separately and in the final full run without
-changes to those flows. On 2026-10-13 the user explicitly validated the one-line
-inbox E2E reset in this chat. Real Google Play checkout remains unverified.
-No release version changed.
-
-Static checks validate claim/secure-write ordering, StoreKit finalization on iOS, and
-the backend-owned Google acknowledgement (Android never calls
-`finishTransaction`). Mocked E2E validates explicit Purchase/Restore, silent
-unfinished-purchase recovery, pending/cancellation, exact QR continuation,
-transient/save retries, existing-machine access, identity mismatch, rotation and
-expiry. These do not prove native store acceptance. Native
-camera, secure relaunch/locked-device access, real tunnel upgrades, and
-revocation still require explicit physical-device validation.
-
-`test:connect` covers the same contract as `tests/vitest/connect-recovery.test.ts`,
-exercising the actual
-provider hooks with deterministic app-state, time, native store and storage
-boundaries. It covers healthy reopen, background expiry and retry cancellation,
-cold-launch store readiness, shared credential access, stale recovery success
-and failure after switching connections, and renewal with Settings mounted.
-Profile checks distinguish machines/environments while preserving manual scope
-matching. The live-renewal E2E checks one active saved row, fresh username, panel
-close/reopen and remembered-session continuity without a document reload.
-On 2026-10-11, the user explicitly confirmed the live-renewal flow and all Android
-background/resume and full-relaunch checks on a build containing this fix,
-satisfying the human validation requirement for these E2E changes under AGENTS.md.
-Static CI, both fake-server self-tests and all 116 web E2E flows passed. Android
-development prebuild passed; local Gradle compilation remains unverified because
-no Android SDK is configured.
-
-The service-domain cutover checks reject both legacy control planes before any
-request or store proof is sent, preserve isolated legacy secure records, and
-discard legacy environment preferences in favor of `api.opencodecloud.link`.
-Cloud Link E2E exercises both old preferences through purchase and pairing on the
-new production endpoint, plus the existing production/staging recovery flows.
-These E2E edits require explicit human validation under `AGENTS.md`; mocked
-requests do not verify deployment or real store acceptance on the new domain.
-
 The camera-gate component check covers permission request-on-entry, grant,
 requestable denial, blocked denial, and web bypass. Native validation still
-needs to confirm the OS prompt and Subscribe/Restore continuation on device.
+needs to confirm the OS prompt and scan continuation on device.
 
 The following important behaviors are present in code but are not obviously covered by the current documented E2E suite:
 
@@ -883,25 +805,6 @@ The Android development command completed Expo prebuild but
 Gradle stopped with `SDK location not found`; no Android SDK is installed or
 configured on this host. Real-device checks and explicit human validation of the
 E2E/fake-server changes remain outstanding.
-
-Connection creation now enters through a shared Cloud Link/Manual chooser in
-Settings and onboarding. The web flows cover manual form retry and duplicate
-submission guards, subscription dismissal back to the chooser, subscriber
-auto-pairing without a subscription-sheet flash, invalid/untrusted QR replacement,
-automatic test/production purchase routing and environment isolation, and separate restored-machine
-management. The camera-active status chip was replaced by the appbar options
-action (`connect-options`), so entitlement assertions now check that the
-subscription sheet is absent instead. The pairing-link alternative and machine
-management now live in that options sheet. Existing purchase verification,
-secure-save/finalization ordering, exact QR continuation, expiry and
-credential-rotation flows remain covered.
-
-Native acceptance still requires camera permission requested before the pairing
-surface with allow/deny-cancel behaviour, deep-link gate bypass, focus/background
-suspension, iOS/Android safe areas, larger text, screen-reader focus,
-keyboard/back behavior and real native Subscribe/Restore. Updated E2E
-files require explicit human validation under AGENTS.md. Build/static/mocked
-flow results do not replace these acceptance checks.
 
 ## Changes chip validation
 
@@ -1049,91 +952,7 @@ Before marking this change complete, a human must review and validate the change
 - Complete automatic and code MCP OAuth, cancel/restart, and switch connections while authorization is pending.
 - Verify terminal streaming and cursor resume after reconnect; retain v1 sharing/archive/config/diagnostic features.
 
-No dependency version, persisted schema or release version was changed. Existing Cloud Link work is retained.
-
-## Cloud Link illustrated onboarding
-
-`connect-onboarding.test.ts` checks four-step navigation, explicit scan before
-camera permission, denial returning to Pair, pending/canceled purchases,
-finalization-error recovery, subscriber entry, access loss and direct-link
-continuation. The existing Cloud Link web suite now enters Subscribe through
-Learn and Computer setup for ordinary entry, retaining deep-link purchase,
-Restore, renewal, activation and error coverage. New flows assert native pricing,
-copy feedback, removed Share setup, Restore above Subscribe, aligned illustration/
-heading/subheading/primary-action positions, explicit checkout and no pairing
-until scanning or opening a link. Pending and canceled guided purchases stay on
-Subscribe. The fake backend and subscription protocol are unchanged.
-
-Run all three CI gates and the Android development build. Native acceptance must
-cover real App Store/Google Play purchase/Restore, camera allow/deny and fallback,
-desktop approval, Back/keyboard, foreground suspension, safe areas, light/dark,
-larger text and VoiceOver/TalkBack. Modified `tests/e2e/connect.spec.mjs` requires
-explicit human validation under AGENTS.md after automated checks pass.
-
-Human validation: on 2026-10-13 the user explicitly validated the revised Cloud
-Link E2E contract in this chat. Real store/camera/device acceptance remains
-outstanding and is separate from approval of the deterministic test contract.
-
-Implementation validation (2026-10-13): static CI passes (290 Vitest checks), both
-fake-server self-tests pass, and the full web suite passes 134 flows. After the
-short-screen illustration adjustment, all 44 Cloud Link flows pass again with
-fresh dark and narrow-light captures. Browser comparison is recorded in
-`design-qa.md`. Android development prebuild passes; Gradle remains blocked by
-`SDK location not found`. No dependency, release version or protocol changed.
-
-Pair illustration refinement (2026-10-13): the thick scanner icon is replaced
-by a transparent, theme-tinted corner overlay positioned outside the display.
-The original computer drawing is still shared with Download. Lint, typecheck and
-both focused dark/narrow-light flows pass on isolated preview/backend ports; the
-full suite and native build were not repeated for this visual-only change. The
-user explicitly validated the screenshot-helper adjustment in this chat.
-
-Pre-merge validation (2026-10-13): the Cloud Link commit was rebased onto `main`
-without the unrelated Android-sharing commits from its original base. All three
-required gates pass on that result: static CI (289 Vitest checks), both fake-server
-self-tests, and all 134 web E2E flows, including the final scan-frame refinement.
-Native builds and real store/camera/device acceptance were not repeated.
-
-## Connector service management validation
-
-A paired device adds, replaces and removes the connector's exposed services
-through `/_cloudlink/services` and reads the connector's management revision and
-service port pool from `/_cloudlink/version`. Coverage is split by layer:
-
-- `lib/opencode/client/management.ts` is unit-tested in
-  `tests/vitest/services-management.test.ts`: the path/target/id validation
-  mirror, the root/port rules and port-picker computation, both stored shapes
-  (`path` string and `path` null) and both version responses (`api` 1 without a
-  pool and `api` 2 with `service_ports`, plus `404` without a version header),
-  the api 2 PUT body (root and path) and the legacy api 1 body without `port`,
-  link building for root, path and legacy services, the device Basic credential
-  and request shape, canonical-value parsing, and error/status propagation
-  (including the no-connection and expired-credential guards).
-- `tests/vitest/services-target.test.ts` covers the pure target resolution in
-  `providers/services-target.ts`: the active Cloud Link connection, explicit
-  selection of another saved machine, last-used fallback for a manual active
-  connection, subscription-environment filtering, no-candidate handling, and the
-  machine list's active marking.
-- The V2 fake server implements `GET/PUT/DELETE /_cloudlink/services` and
-  `GET /_cloudlink/version` behind a device-credential check provisioned through
-  `POST /__control/device`, with `POST /__control/connector-api` switching the
-  reported management revision. `tests/fake-opencode/self-test.mjs` asserts 401
-  without a device credential, the api 2 version shape and header, 201 create /
-  200 replace, canonical path/target responses, missing `port` and out-of-pool
-  port rejection, duplicate port/path rejection, root-service port ownership and
-  mixing rejection, shared path ports, 404 on unknown delete, list consistency,
-  and the api 1 legacy version/body shapes.
-- `tests/e2e/connect.spec.mjs` drives a real Cloud Link pairing, opens Settings →
-  Services, and adds, edits and removes path and root services through the fake
-  connector, including picking a port and seeing an occupied port marked. Add and
-  Edit now enter the full-screen `app/service.tsx` route and return to the
-  reopened Cloud Link section. A second flow switches to a manual connection and
-  proves the saved machine's services stay listed with the not-active notice.
-
-The connector contract is frozen and unchanged; this change is app-side target
-resolution plus the reworked flows, so the E2E additions require explicit human
-validation under AGENTS.md. CI gates: `test:ci:static`, `test:fake-server:self`,
-`test:e2e:web`.
+No dependency version, persisted schema or release version was changed.
 
 ## Extended onboarding acceptance
 
@@ -1142,7 +961,7 @@ configured/enabled model filtering. Web flows cover embedded provider auth/model
 toggles, remembered-model selection and Chat continuity, preference persistence,
 immediate language changes, interrupted setup, V1 delivery hiding, empty model
 catalogs, provider removal/reconciliation, back navigation and Settings review.
-Fresh-install Cloud Link pairing must continue to AI before Project. No fake
+Fresh-install `opencode pair` scanning must continue to AI before Project. No fake
 server contract is changed. Run the static, fake-server and full web CI gates.
 Changed E2E contracts require explicit human validation under AGENTS.md; accepting
 the design mocks does not validate those test changes. Native acceptance must

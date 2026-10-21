@@ -10,7 +10,7 @@ import { loadTs } from '../helpers/runtime.mjs';
 async function loadPasswordModule(platform: 'android' | 'ios' | 'web' = 'android') {
   const secure = new Map<string, string>();
   const storage = new Map<string, string>();
-  const connectSecrets = new Map<string, string>();
+  const testSecrets = new Map<string, string>();
 
   const url = await loadTs('lib/opencode/client/url.ts', {
     './types': { defaultConnectionSettings: { serverUrl: 'http://localhost' } },
@@ -25,9 +25,9 @@ async function loadPasswordModule(platform: 'android' | 'ios' | 'web' = 'android
       deleteItemAsync: async (key: string) => { secure.delete(key); },
     },
     'react-native': { Platform: { OS: platform } },
-    '@/lib/connect': {
-      getConnectTestSecret: (key: string) => connectSecrets.get(key) ?? '',
-      setConnectTestSecret: (key: string, value: string) => { connectSecrets.set(key, value); },
+    '@/lib/test-secrets': {
+      getTestSecret: (key: string) => testSecrets.get(key) ?? '',
+      setTestSecret: (key: string, value: string) => { testSecrets.set(key, value); },
     },
     '@react-native-async-storage/async-storage': {
       __esModule: true,
@@ -40,7 +40,7 @@ async function loadPasswordModule(platform: 'android' | 'ios' | 'web' = 'android
     '@/lib/opencode/client/url': url,
   });
 
-  return { module, secure, storage, connectSecrets, settingsKey: storageKeys.SETTINGS_STORAGE_KEY };
+  return { module, secure, storage, testSecrets, settingsKey: storageKeys.SETTINGS_STORAGE_KEY };
 }
 
 const PASSWORD_KEY = 'opencode-mobile.connection-password';
@@ -101,10 +101,10 @@ describe('connection password storage', () => {
     expect(secure.has(PASSWORD_KEY)).toBe(false);
   });
 
-  it('uses the connect test secret on web instead of SecureStore', async () => {
-    const { module, secure, connectSecrets } = await loadPasswordModule('web');
+  it('uses the test secret on web instead of SecureStore', async () => {
+    const { module, secure, testSecrets } = await loadPasswordModule('web');
     await module.saveConnectionPassword('web-secret');
-    expect(connectSecrets.get(PASSWORD_KEY)).toBe('web-secret');
+    expect(testSecrets.get(PASSWORD_KEY)).toBe('web-secret');
     expect(secure.has(PASSWORD_KEY)).toBe(false);
     expect(await module.getConnectionPassword()).toBe('web-secret');
   });

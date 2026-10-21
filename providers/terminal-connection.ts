@@ -4,7 +4,7 @@ import { createTerminalConnectToken, getTerminalWebSocketUrl, openTerminalWebSoc
 import type { TerminalInstance, TerminalRenderer } from './terminal-types';
 
 // The context accessor reads the current provider client/credentials on every
-// use, so a retained PTY reconnects with rotated Cloud Link credentials instead
+// use, so a retained PTY reconnects with current credentials instead
 // of disposing its renderer and cursor.
 export type TerminalConnectionContext = {
   client: ScopedOpencodeClient;

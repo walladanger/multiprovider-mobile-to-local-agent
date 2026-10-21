@@ -12,7 +12,9 @@ export function parseWorkspaces(raw: string): StoredWorkspaces {
   const value: unknown = JSON.parse(raw);
   if (!object(value) || value.version !== 1 || !Array.isArray(value.connections) || value.connections.length > 50) throw new Error('Invalid workspace registry.');
   const seen = new Set<string>();
-  const connections = value.connections.map((item): StoredConnection => {
+  // Connections paired through the removed Cloud Link service are dropped.
+  const legacy = new Set(value.connections.filter((item) => object(item) && object(item.settings) && 'connect' in item.settings).map((item) => (item as Record<string, unknown>).id));
+  const connections = value.connections.filter((item) => !(object(item) && legacy.has(item.id))).map((item): StoredConnection => {
     if (!object(item) || typeof item.id !== 'string' || typeof item.name !== 'string' || typeof item.enabled !== 'boolean'
       || !object(item.settings) || 'password' in item.settings || !object(item.preferences) || !Array.isArray(item.projects)
       || !item.projects.length || item.projects.length > 100 || !item.projects.every((path) => typeof path === 'string')) throw new Error('Invalid saved connection.');
@@ -24,7 +26,7 @@ export function parseWorkspaces(raw: string): StoredWorkspaces {
       preferences: parseChatPreferences(JSON.stringify(item.preferences)), projects: [...new Set(item.projects as string[])] };
   });
   let focus: WorkspaceTarget | undefined;
-  if (value.focus !== undefined) {
+  if (value.focus !== undefined && !(object(value.focus) && legacy.has(value.focus.connectionId))) {
     if (!object(value.focus) || typeof value.focus.connectionId !== 'string' || typeof value.focus.projectPath !== 'string' || !seen.has(value.focus.connectionId)) throw new Error('Invalid workspace selection.');
     const selection = { connectionId: value.focus.connectionId, projectPath: value.focus.projectPath };
     if (!connections.find((entry) => entry.id === selection.connectionId)?.projects.includes(selection.projectPath)) throw new Error('Invalid workspace project.');

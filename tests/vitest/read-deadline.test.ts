@@ -9,7 +9,6 @@ import { deferred } from '../helpers/runtime.mjs';
 
 const counters = vi.hoisted(() => ({ recordBytes: vi.fn(), recordRequest: vi.fn() }));
 vi.mock('@/lib/opencode/data-usage', () => counters);
-vi.mock('@/lib/connect', () => ({ getConnectCredentialError: () => undefined }));
 vi.mock('@/lib/opencode/client/types', () => ({ defaultConnectionSettings: { serverUrl: 'http://localhost' } }));
 vi.mock('expo/fetch', () => ({ fetch: (...args: any[]) => (globalThis.fetch as any)(...args) }));
 
