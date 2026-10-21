@@ -33,8 +33,7 @@ Meaning:
 - `currentProjectPath` is the server's notion of current project
 - `serverRootPath` is the root directory reported by the server
 - `eventStreamStatus` tracks real-time subscription health independently of connection state
-- the connection domain also exposes `services`, the Cloud Link connector's remote service-management state with its connector-reported management revision and port pool. The provider resolves the target machine from the active Cloud Link connection or a saved Cloud Link profile (so it works while another connection is active), exposes the target/machine list and unavailable reason, and keeps the list keyed by that target scope; see [api-contract.md](api-contract.md#connector-service-management-cloud-link)
-- failures carry a machine-readable `kind` (`timeout`, `offline`, `auth`, `entitlement`, `tunnel-startup`, `server-incompatible`, `unknown`) alongside the display message; `retryableStartup` remains for Cloud Link activation compatibility
+- failures carry a machine-readable `kind` (`timeout`, `offline`, `auth`, `tunnel-startup`, `server-incompatible`, `unknown`) alongside the display message
 
 ## Project And Session Identity State
 
@@ -196,10 +195,7 @@ tickets. Backgrounding suspends retries and closes transports; foregrounding
 reconnects. Authentication/removal failures and clean PTY exit stop automatic
 retry. Input requires a connected transport and matching scope/generation, and is
 never replayed after reconnect. Visible dimensions update the PTY immediately on
-first measurement and then with a deduplicated 100 ms debounce. A same-machine
-Cloud Link credential rotation also reconnects retained transports with the
-rotated credentials instead of disposing them, so the acknowledged cursor and
-the renderer surface survive (see the rotation note under connection state).
+first measurement and then with a deduplicated 100 ms debounce.
 
 Exit retains the final display with input disabled. Explicit termination removes
 local state only after the server accepts deletion; failure preserves it.
@@ -278,7 +274,6 @@ not re-derive connection keys anywhere else.
 Persisted values:
 
 - `opencode-mobile.settings` (connection URL and username; the password lives in secure storage)
-- `opencode-mobile.connect-control-plane` (last automatically resolved Cloud Link environment; defaults to production, accepts only production/staging, hydrated before pairing/Cloud Link startup)
 - `opencode-mobile.connection-profiles` (saved connections with name and optional per-profile model selection; passwords live in secure storage)
 - `opencode-mobile.chat-preferences` (chat preferences, including the global UI `language`; not connection-scoped)
 - `opencode-mobile.active-project`
@@ -325,7 +320,7 @@ list.
 
 Hydration rules:
 
-- persisted settings validate known string fields and Cloud Link identity before merging over defaults
+- persisted settings validate known string fields before merging over defaults
 - persisted chat preferences validate individual strings, booleans, arrays, maps, and enum values; numeric controls are clamped to their supported ranges before merging over defaults and current provider state
 - saved connection profiles are hydrated on demand and fully validated, including `modelPreferences`; entries with any malformed field are dropped and unknown fields are ignored
 - active project path is restored if present, and the connection's opened projects restore with it; on connect an unlisted active path falls back to the most recent opened project unless the server resolves it (a deep link or worktree)
@@ -337,58 +332,10 @@ Hydration rules:
 
 Credentials:
 
-- Cloud Link profiles and active settings carry non-secret metadata (control-plane
-  URL, machine ID/name, device ID, expiry). Secrets and environment/store-scoped subscription
-  sessions use SecureStore. Expired/missing Cloud Link credentials never fall back to
-  active passwords; expiry stops streams/sockets. Development web E2E substitutes
-  memory only. See [Cloud Link pilot](connect.md).
-- Cloud Link setup exposes initialization readiness separately from operation phase.
-  Provider-owned `pairLink` securely accepts scanned/deep-linked QR data and
-  automatically claims after initialization settles and entitlement is verified.
-  Subscription recovery and automatic pairing use the existing operation lock;
-  failed claims require explicit Retry or a replacement QR.
-- First post-claim activation adds `waitingForApproval` and `delayed` phases.
-  Its in-memory provider checkpoint retains the saved profile and a cancellable
-  wait, not the redeemed QR. `ConnectionState.retryableStartup` classifies raw
-  transport failures before display formatting. One 120-second budget includes
-  request time, pauses attempts in background and survives foreground return;
-  delayed retries are explicit. Valid credentials are reused without near-expiry
-  rotation during startup; actual credential expiry remains blocking. This wait
-  does not apply to normal reconnects. See [Cloud Link](connect.md).
-- `connectSetup.subscriptionExpiresAt` exposes only the verified session's
-  paid-through timestamp, not its bearer token or a renewal prediction.
-  `manageSubscription()` uses the existing operation lock and refuses to open
-  store management during initialization or a pending purchase. Platform store
-  handoff belongs to `lib/connect-store.ts`; Settings owns only presentation.
-- `connectSetup.storeInstall` resolves through `lib/connect-install.ts` before
-  Settings may offer the section: the iOS App Store release type, or a Play
-  Install Referrer response on Android. Directly installed APKs, F-Droid/FOSS
-  and non-store iOS builds resolve false. It is a visibility flag only;
-  existing Cloud Link profiles, pairing and deep links keep working on any
-  install.
-- Failed subscription operations return to an idle phase while retaining their
-  provider checkpoint. Purchase environment routing automatically switches scope
-  after the operation releases its lock, retaining the same native transaction
-  and a matching secure QR. Only production and staging are trusted. A verified
-  session awaiting secure save or store finalization blocks switching environments.
-  The provider exposes `canPurchase` so the UI cannot offer another subscription
-  while that checkpoint still needs recovery or store approval is pending.
-- Cloud Link uses a default phone name and backend-issued device credentials.
-  Native purchase/Restore verifies ownership, securely saves the issued session,
-  then finalizes the store transaction. Pending QR continuation is secure;
-  subscription expiry preserves profiles, and access refresh keeps machine/profile
-  identity while migrating credential-scoped remembered state.
-- Automatic Cloud Link recovery waits for store initialization and unfinished
-  subscription finalization, then rereads saved credentials. Requests for the
-  same environment/machine share one access/save operation; different machine
-  saves are ordered because they share the secure-save checkpoint. A late
-  recovery cannot replace a connection selected while it was in flight.
-- Foreground return schedules recovery even after credential expiry or loss.
-  Failed automatic recovery retries after 60 seconds while active; backgrounding
-  cancels retry timers. Same-machine renewal keeps the project selection.
-  Provider-owned profile state refreshes when the Cloud Link profile snapshot
-  changes, including renewal of inactive saved machines.
-
+- Development web E2E builds keep credentials in memory only; production web
+  has no credential persistence.
+- Profiles and workspace entries saved by the removed Cloud Link feature are
+  dropped during hydration.
 - the active connection password is stored in Keychain/Keystore-backed secure storage via `lib/connection-password.ts`; legacy plaintext `settings.password` is migrated to secure storage and stripped from AsyncStorage on hydration
 - credentials hydrate only when stored server metadata supplies a valid identity; unread metadata never lends an old password to the default server. Invalid background connection references do not resolve credentials
 - each saved profile's password is stored under its own SecureStore key in `lib/connection-profiles.ts`; profile metadata in AsyncStorage never contains it
@@ -758,10 +705,9 @@ not restart a healthy stream. A foreground return either retries immediately
 because a suspended JS runtime can miss envelopes while the stream still looks
 connected and would otherwise leave a stale or empty transcript until the next
 event. Envelope timestamps advance the window, so a healthy server never
-reconnects. Stream failures classified as invalid credentials or entitlement
-(`auth`/`entitlement`) stop the retry loop and notify the provider, which routes
-Cloud Link to its prepared credential recovery and manual connections to an
-actionable error state.
+reconnects. Stream failures classified as invalid credentials (`auth`) stop the retry loop
+and notify the provider, which moves the connection to an actionable error
+state.
 An event-derived `retry` status is preserved across session-list refreshes
 (`mergeSessionStatuses`), so an automatic retry stays busy and its safety poll
 continues instead of freezing on a missed event. Stable latest-action bridges
@@ -856,7 +802,7 @@ credentials or step progress are duplicated in the completion marker.
 
 ## Workspace registry and presentation state
 
-`opencode-mobile.workspaces` is a validated version 1 DTO. It records password-free connection metadata, enabled state, server preferences, remembered workspace paths and chat focus. `getConnectionUiScope` identifies runtime owners, including stable Cloud Link machine identities; the existing canonical connection scope identifies persisted favorites, caches and secure profile credentials. Passwords remain per-profile SecureStore data. An unreadable registry is preserved; fallback startup never overwrites that unread value.
+`opencode-mobile.workspaces` is a validated version 1 DTO. It records password-free connection metadata, enabled state, server preferences, remembered workspace paths and chat focus. `getConnectionUiScope` identifies runtime owners; the existing canonical connection scope identifies persisted favorites, caches and secure profile credentials. Passwords remain per-profile SecureStore data. An unreadable registry is preserved; fallback startup never overwrites that unread value.
 
 A legacy active connection is matched or saved as a profile and migrated into the connected set. Other saved profiles are not connected automatically. Explicit disconnect removes a server from automatic restoration, invalidates in-flight work and detaches its transports. It does not terminate remote prompts or PTYs. Last-good data and drafts remain in memory.
 

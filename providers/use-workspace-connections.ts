@@ -47,12 +47,12 @@ export function useWorkspaceConnections(shell: OpencodeProviderState, hydrated: 
 
   const saveProfile = useCallback(async (settings: OpencodeConnectionSettings) => mutateConnectionProfiles(async (profiles, save) => {
     const existing = findMatchingProfile(profiles, settings);
-    const profile = existing ?? { id: createProfileId(), name: getServerHostname(settings.serverUrl), serverUrl: settings.serverUrl, username: settings.username, connect: settings.connect };
+    const profile = existing ?? { id: createProfileId(), name: getServerHostname(settings.serverUrl), serverUrl: settings.serverUrl, username: settings.username };
     const previousPassword = existing ? await getProfilePassword(profile.id) : '';
-    await saveProfilePassword(profile.id, settings.password, Boolean(settings.connect));
+    await saveProfilePassword(profile.id, settings.password);
     try { if (!existing) await save([...profiles, profile]); }
     catch (error) {
-      if (existing) await saveProfilePassword(profile.id, previousPassword, Boolean(settings.connect)).catch(() => undefined);
+      if (existing) await saveProfilePassword(profile.id, previousPassword).catch(() => undefined);
       else await deleteProfilePassword(profile.id).catch(() => undefined);
       throw error;
     }
@@ -184,7 +184,7 @@ export function useWorkspaceConnections(shell: OpencodeProviderState, hydrated: 
     }
     select({ connectionId: target.connectionId, projectPath });
   }, [connectedWorkspace, pauseConversation, select]);
-  const switchConnection = useCallback(async (settings: Pick<OpencodeConnectionSettings, 'serverUrl' | 'username' | 'password' | 'connect'>, preferences?: Partial<ChatPreferences>, selectWorkspace = true) => {
+  const switchConnection = useCallback(async (settings: Pick<OpencodeConnectionSettings, 'serverUrl' | 'username' | 'password'>, preferences?: Partial<ChatPreferences>, selectWorkspace = true) => {
     const full = { ...settings, directory: '' };
     const profile = await saveProfile(full);
     const id = getConnectionUiScope(full);
@@ -210,12 +210,11 @@ export function useWorkspaceConnections(shell: OpencodeProviderState, hydrated: 
   const updateSettings = useCallback((id: string, value: OpencodeConnectionSettings, origin?: string) => {
     const previous = records.current.find((entry) => entry.id === id);
     if (!previous || JSON.stringify(previous.settings) === JSON.stringify(value)) return;
-    const manualChange = !value.connect;
-    if (manualChange) canPersist.current = true;
+    canPersist.current = true;
     for (const [key, runtime] of Object.entries(live.current)) if ((JSON.parse(key) as string[])[0] === id && key !== origin) runtime.suspend();
     const nextId = getConnectionUiScope(value);
-    change((current) => current.map((entry) => entry.id === id ? { ...entry, id: nextId, settings: value, events: createSharedEventStream(), ...(manualChange ? { enabled: false } : {}),
-      ...(nextId === id ? {} : { enabled: false, projects: [''], preferences: { autoApprove: false }, events: createSharedEventStream() }) } : entry));
+    change((current) => current.map((entry) => entry.id === id ? { ...entry, id: nextId, settings: value, events: createSharedEventStream(), enabled: false,
+      ...(nextId === id ? {} : { projects: [''], preferences: { autoApprove: false }, events: createSharedEventStream() }) } : entry));
     if (selected.current?.connectionId === id) { if (nextId !== id) select({ connectionId: nextId, projectPath: '' }); shellRef.current.setSettings(value); }
   }, [change, select]);
   const updatePreferences = useCallback((id: string, value: ChatPreferences) => {
