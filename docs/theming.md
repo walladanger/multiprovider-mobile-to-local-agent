@@ -56,7 +56,7 @@ Text, Dialog, GlassPanel) rather than from a kit package. To swap kits:
 | Liquid glow | Original approximation | original |
 | Prismatic lattice, Halftone clouds | Original | original |
 | Aurora flow | Original, inspired by Ruixen UI (no code copied) | original |
-| Hive | Original, inspired by Xor's Hive shader (no code copied; license not clear) | original |
+| Hive | Original, inspired by Xor's Hive shader (no code copied; no explicit license found, Shadertoy's default CC BY-NC-SA 3.0 is not compatible) | original |
 | Paper mesh | Port of `MeshGradient` from `@paper-design/shaders` 0.0.81 | Apache-2.0, Copyright 2026 Paper (see `NOTICE`) |
 | Mesh gradient / Soft Mesh | Original, presets are data in `lib/backgrounds/mesh-presets.ts` | original |
 
@@ -73,10 +73,13 @@ Every ported or reference-inspired background keeps its faithful look as a `REFE
 | Preset | Hue shift | Other deltas (default vs reference) |
 | --- | --- | --- |
 | See `BACKGROUND_NUDGES` | 10–25° per kind | speed / density / intensity / scale multipliers plus per-kind extras (counts, offsets) |
+| Liquid glow | +15° | reference matched to the 21st.dev "liquid Shader" screenshot (teal ring, pink-violet rim, black); default: speed ×1.15, density +0.1, intensity −0.05, black → `#05040f` |
 | Mesh presets (Indigo Aurora, Deep Ocean, Soft Mesh) | +14° | stop x ±0.05, drift ×1.15, blur +6 |
 | Aurora Flow (Deep Blue) | −14° | — |
 | Gradient, Video | none | our own (theme / user video), not references |
 
 The exact per-kind numbers sit in code next to each preset. In the UI, sliders show an offset from the
 default (−100..+100, 0 = our default); **Reset** returns to 0. Saved presets store absolute values plus
-`schema` (`PRESET_SCHEMA = 2`), so changing defaults later does not move saved presets.
+`schema` (`PRESET_SCHEMA = 2`), so changing defaults later does not move saved presets. Older presets (schema 1, no `schema` field) are
+upgraded on load by `migratePreset()` (legacy `colorFront` / `pxSize` mapped; new fields take defaults);
+see `tests/vitest/preset-migration.test.ts`.
