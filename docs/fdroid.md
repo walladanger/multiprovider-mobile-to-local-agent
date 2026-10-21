@@ -6,26 +6,22 @@ policy forbids.
 
 ## Why a variant exists
 
-The Play/iOS build uses three proprietary Android components:
+The Play/iOS build uses two proprietary Android components:
 
-- `expo-iap` → Google Play Billing (optional Cloud Link subscription)
-- `expo-camera` barcode scanning → Google ML Kit + `play-services-code-scanner` (Cloud Link QR pairing)
+- `expo-camera` barcode scanning → Google ML Kit + `play-services-code-scanner` (`opencode pair` QR scanning)
 - `expo-notifications` → `com.google.firebase:firebase-messaging` (pulled in even though the app only posts local notifications)
 
 F-Droid forbids Google Play Services and Firebase in all apps, and requires
 upstream to provide a build flavour without them. The FOSS variant:
 
-- excludes `expo-iap` and `expo-camera` from autolinking and plugins, and
-  redirects their JS imports to stubs in `lib/foss/` via `metro.config.js`
-- disables the Cloud Link paid-subscription and QR-pairing surfaces by returning
-  `false` from `isConnectEnabled()` when `extra.foss` is set; the Settings
-  section also requires the store-install check in `lib/connect-install.ts`,
-  which FOSS can never pass
+- excludes `expo-camera` from autolinking and plugins, and redirects its JS
+  import to a stub in `lib/foss/` via `metro.config.js`; connection setup offers
+  manual address entry only
 - keeps local task-completion notifications by compiling `expo-notifications`
   against F-Droid's free `firebase-stubs` classes instead of `firebase-messaging`
 
 The self-hosted OpenCode experience (connections, sessions, project, terminal,
-files, voice) is unchanged. Only the optional paid Cloud Link path is absent.
+files, voice) is unchanged. Only QR scanning is absent.
 
 ## Building locally
 
@@ -42,15 +38,13 @@ It then applies `scripts/foss-prepare.mjs` and builds with the FOSS variant:
 
 1. `scripts/foss-prepare.mjs` (shared with the fdroiddata recipe, so both builds
    get byte-identical dependency patches):
-   - injects `expo.autolinking.exclude: ["expo-iap", "expo-camera"]` into
+   - injects `expo.autolinking.exclude: ["expo-camera", "opencode-updates"]` into
      `package.json` for the duration of the build (the build script restores it)
    - swaps `expo-notifications`' `firebase-messaging` dependency for free stub
      sources supplied through `FIREBASE_STUB_SRC_DIR`; F-Droid supplies its
      pinned `firebase-stub` srclib at the same revision
    - removes `expo-application`'s proprietary `com.android.installreferrer`
-     dependency and stubs its `getInstallReferrerAsync` to resolve empty; FOSS
-     builds already fail Cloud Link's `extra.foss` gate, so the store-install
-     check is never consulted there
+     dependency and stubs its `getInstallReferrerAsync` to resolve empty
 2. `expo prebuild` and Gradle run with `EXPO_APP_VARIANT=foss`,
    `EXPO_PUBLIC_FOSS=1`, and app id `app.getopencode.fdroid`
 

@@ -5,8 +5,8 @@ import { Platform } from 'react-native';
 
 import { parseWorkspaces, WORKSPACES_STORAGE_KEY } from '@/providers/workspace-storage';
 import { getConnectionPassword } from '@/lib/connection-password';
-import { getConnectCredentialError, getConnectTestSecret, parseConnectMetadata, setConnectTestSecret, type ConnectMetadata } from '@/lib/connect';
 import { getConnectionScope, type ConnectionIdentity } from '@/lib/connection-scope';
+import { getTestSecret, setTestSecret } from '@/lib/test-secrets';
 import { CONNECTION_PROFILES_STORAGE_KEY, SETTINGS_STORAGE_KEY } from '@/lib/storage-keys';
 import type { ChatPreferences } from '@/providers/opencode-preferences';
 import { isValidServerUrl, stripServerUrlCredentials } from '@/lib/opencode/client/url';
@@ -23,7 +23,6 @@ export type ConnectionProfile = {
   name: string;
   serverUrl: string;
   username: string;
-  connect?: ConnectMetadata;
   // Partial because older writes may not carry every field; unknown fields are
   // ignored and each present field is validated before it is applied.
   modelPreferences?: Partial<ProfileModelPreferences>;
@@ -75,12 +74,12 @@ export function toConnectionProfile(value: unknown): ConnectionProfile | undefin
   if (!isRecord(value)) return undefined;
 
   const { id, name, serverUrl, username, modelPreferences, connect } = value;
+  // Profiles paired through the removed Cloud Link service cannot reconnect.
+  if (connect !== undefined) return undefined;
   if (typeof id !== 'string' || !id.trim()) return undefined;
   if (typeof name !== 'string' || !name.trim()) return undefined;
   if (typeof serverUrl !== 'string' || !serverUrl.trim()) return undefined;
   if (typeof username !== 'string') return undefined;
-  const parsedConnect = connect === undefined ? undefined : parseConnectMetadata(connect);
-  if (connect !== undefined && (!parsedConnect || parsedConnect.deviceId !== username.trim())) return undefined;
 
   let parsedPreferences: Partial<ProfileModelPreferences> | undefined;
   if (modelPreferences !== undefined && modelPreferences !== null) {
@@ -106,7 +105,6 @@ export function toConnectionProfile(value: unknown): ConnectionProfile | undefin
     name: name.trim(),
     serverUrl: stripServerUrlCredentials(serverUrl),
     username: username.trim(),
-    ...(parsedConnect ? { connect: parsedConnect } : {}),
     ...(parsedPreferences ? { modelPreferences: parsedPreferences } : {}),
   };
 }
@@ -115,11 +113,7 @@ export function findProfileByConnectionScope(profiles: ConnectionProfile[], conn
   return profiles.find((profile) => getConnectionScope(profile) === connectionScope);
 }
 
-export function findMatchingProfile(profiles: ConnectionProfile[], identity: ConnectionIdentity & { connect?: ConnectMetadata }) {
-  if (identity.connect) {
-    return profiles.find((profile) => profile.connect?.controlPlaneUrl === identity.connect!.controlPlaneUrl
-      && profile.connect.machineId === identity.connect!.machineId);
-  }
+export function findMatchingProfile(profiles: ConnectionProfile[], identity: ConnectionIdentity) {
   return findProfileByConnectionScope(profiles, getConnectionScope(identity));
 }
 
@@ -188,9 +182,6 @@ async function writeSanitizedProfiles(profiles: ConnectionProfile[]) {
 
 /**
  * Resolves credentials for a connection that may no longer be the active one.
- * Connect metadata travels with the password so background clients also guard
- * expiry on every fetch and reject credential-bearing redirects.
- *
  * Resolution order:
  * 1. the saved profile whose scope matches (password in SecureStore),
  * 2. the active connection when the record belongs to it, which also covers a
@@ -200,7 +191,7 @@ async function writeSanitizedProfiles(profiles: ConnectionProfile[]) {
  * pending record instead of dropping it or borrowing another connection's
  * password.
  */
-export async function resolveConnectionCredentials(identity: ConnectionIdentity): Promise<{ password: string; connect?: ConnectMetadata } | undefined> {
+export async function resolveConnectionCredentials(identity: ConnectionIdentity): Promise<{ password: string } | undefined> {
   if (!identity.serverUrl.trim() || !isValidServerUrl(identity.serverUrl)) return undefined;
   const connectionScope = getConnectionScope(identity);
   // Background notifications and widget actions honor explicit disconnects too.
@@ -213,9 +204,8 @@ export async function resolveConnectionCredentials(identity: ConnectionIdentity)
     const profiles = await loadConnectionProfiles();
     const profile = findProfileByConnectionScope(profiles, connectionScope);
     if (profile) {
-      if (getConnectCredentialError(profile.connect, 'present')) return undefined;
       const password = await getProfilePassword(profile.id);
-      return getConnectCredentialError(profile.connect, password) ? undefined : { password, ...(profile.connect ? { connect: profile.connect } : {}) };
+      return { password };
     }
   } catch {
     // Fall through to the active connection.
@@ -232,9 +222,7 @@ export async function resolveConnectionCredentials(identity: ConnectionIdentity)
     });
     if (activeScope !== connectionScope) return undefined;
     const password = (await getConnectionPassword()) || '';
-    const connect = parseConnectMetadata(settings.connect);
-    if (settings.connect !== undefined && (!connect || getConnectCredentialError(connect, password))) return undefined;
-    return { password, ...(connect ? { connect } : {}) };
+    return { password };
   } catch {
     return undefined;
   }
@@ -245,12 +233,12 @@ export async function resolveConnectionPassword(identity: ConnectionIdentity): P
 }
 
 export async function getProfilePassword(profileId: string) {
-  if (Platform.OS === 'web') return getConnectTestSecret(passwordKey(profileId));
+  if (Platform.OS === 'web') return getTestSecret(passwordKey(profileId));
   return (await SecureStore.getItemAsync(passwordKey(profileId))) ?? '';
 }
 
 export async function saveProfilePassword(profileId: string, password: string, background = false) {
-  if (Platform.OS === 'web') { setConnectTestSecret(passwordKey(profileId), password); return; }
+  if (Platform.OS === 'web') { setTestSecret(passwordKey(profileId), password); return; }
   if (password) {
     await SecureStore.setItemAsync(passwordKey(profileId), password, background ? { keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY } : undefined);
     return;
@@ -259,28 +247,6 @@ export async function saveProfilePassword(profileId: string, password: string, b
 }
 
 export async function deleteProfilePassword(profileId: string) {
-  if (Platform.OS === 'web') { setConnectTestSecret(passwordKey(profileId), ''); return; }
+  if (Platform.OS === 'web') { setTestSecret(passwordKey(profileId), ''); return; }
   await SecureStore.deleteItemAsync(passwordKey(profileId));
-}
-
-export async function saveConnectProfile(controlPlaneUrl: string, claim: import('@/lib/connect').ConnectClaim) {
-  return mutateConnectionProfiles(async (profiles, save) => {
-    const previous = profiles.filter((profile) => profile.connect?.controlPlaneUrl === controlPlaneUrl && profile.connect.machineId === claim.machine_id);
-    if (previous[0] && new URL(previous[0].serverUrl).hostname !== new URL(claim.server_url).hostname) throw new Error('machine_hostname_mismatch: Access returned a different hostname.');
-    const profile: ConnectionProfile = {
-      id: previous[0]?.id ?? createProfileId(), name: previous[0]?.name ?? claim.machine_name, serverUrl: claim.server_url, username: claim.device_id,
-      ...(previous[0]?.modelPreferences ? { modelPreferences: previous[0].modelPreferences } : {}),
-      connect: { controlPlaneUrl, machineId: claim.machine_id, machineName: claim.machine_name, deviceId: claim.device_id, expiresAt: claim.expires_at },
-    };
-    const oldPassword = previous[0] ? await getProfilePassword(profile.id) : '';
-    await saveProfilePassword(profile.id, claim.device_secret, true);
-    try {
-      await save([...profiles.filter((item) => !previous.includes(item)), profile]);
-    } catch (error) {
-      await saveProfilePassword(profile.id, oldPassword, true).catch(() => undefined);
-      throw error;
-    }
-    await Promise.all(previous.filter((item) => item.id !== profile.id).map((item) => deleteProfilePassword(item.id)));
-    return profile;
-  });
 }

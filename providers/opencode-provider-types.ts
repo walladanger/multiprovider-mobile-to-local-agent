@@ -23,7 +23,6 @@ import type {
 } from '@/lib/opencode/types';
 import type {
   ConnectionFailureKind,
-  ManagedService,
   OpencodeConnectionSettings,
   PendingPermission,
   PendingQuestion,
@@ -31,8 +30,6 @@ import type {
   PendingQuestionRequest,
   PendingPermissionRequest,
   SavedPermissionRule,
-  ServiceInput,
-  ServiceManagementVersion,
 } from '@/lib/opencode/client';
 import type { Diagnostics } from '@/providers/services/diagnostics-service';
 import type { SessionMessageRecord, TranscriptEntry } from '@/lib/opencode/format';
@@ -148,7 +145,6 @@ export type ConnectionState = {
   message: string;
   checkedAt?: number;
   projectDirectory?: string;
-  retryableStartup?: boolean;
   kind?: ConnectionFailureKind;
 };
 
@@ -182,67 +178,17 @@ export type OnboardingContextValue = {
   stopOnboardingReview: () => void;
 };
 
-// A saved Cloud Link machine the services surface can manage. Services belong
-// to one machine, so the selector only appears when more than one exists.
-export type ServiceManagementMachine = {
-  id: string;
-  name: string;
-  isActive: boolean;
-};
-
-// The machine the services surface currently targets. It can differ from the
-// active connection: management uses this machine's own origin and device
-// credentials, and links/addresses are built from its `serverUrl`.
-export type ServiceManagementTarget = {
-  serverUrl: string;
-  profileId?: string;
-  machineId?: string;
-  machineName?: string;
-  isActiveConnection: boolean;
-};
-
-// Why no usable services surface exists right now.
-export type ServiceManagementUnavailableReason = 'no-cloud-link-machine' | 'credentials-expired';
-
-// Remote connector service management. Folded into the connection domain so the
-// provider keeps a single context entry for it; consumers read `services` and
-// call the actions it exposes. `available` is false while resolving, when no
-// Cloud Link machine is saved, or when its credentials expired.
-export type ServiceManagementApi = {
-  services: ManagedService[];
-  // Connector-reported management revision and port pool; undefined until the
-  // first refresh answers. `api < 2` (or an unknown older connector) is legacy
-  // path-only mode with an update hint instead of the port picker.
-  version?: ServiceManagementVersion;
-  available: boolean;
-  target?: ServiceManagementTarget;
-  machines: ServiceManagementMachine[];
-  unavailableReason?: ServiceManagementUnavailableReason;
-  isRefreshing: boolean;
-  isSaving: boolean;
-  refresh: () => Promise<void>;
-  save: (id: string, input: ServiceInput) => Promise<ManagedService>;
-  remove: (id: string) => Promise<void>;
-  // Switch the services target machine (saved Cloud Link profiles).
-  selectMachine: (id: string) => void;
-  // Reconnect the target machine's Cloud Link access; also makes it the active
-  // connection because fresh device credentials come from machine access.
-  activateTarget: () => Promise<boolean>;
-};
-
 export type ConnectionContextValue = {
   connectionProfiles: import('@/providers/use-connection-profiles').ConnectionProfilesState;
-  connectSetup: import('@/providers/use-connect-state').ConnectSetup;
   settings: OpencodeConnectionSettings;
   updateSettings: (patch: Partial<OpencodeConnectionSettings>) => void;
   switchConnection: (
-    next: Pick<OpencodeConnectionSettings, 'serverUrl' | 'username' | 'password' | 'connect'>,
+    next: Pick<OpencodeConnectionSettings, 'serverUrl' | 'username' | 'password'>,
     modelPreferences?: Partial<ChatPreferences>,
   ) => Promise<ConnectionState>;
   connection: ConnectionState;
   serverCapabilities: ServerCapabilities;
   connect: () => Promise<ConnectionState>;
-  services: ServiceManagementApi;
 };
 
 export type DiagnosticsContextValue = {

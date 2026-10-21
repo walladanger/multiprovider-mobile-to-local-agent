@@ -35,10 +35,10 @@ function connectionHost(serverUrl: string) {
   }
 }
 
-export function ConnectionProfiles({ palette, onManageConnect, onPair }: { palette: Palette; onManageConnect?: () => void; onPair?: () => void }) {
+export function ConnectionProfiles({ palette }: { palette: Palette }) {
   const { t } = useTranslation();
   const registry = useWorkspaces();
-  const { settings, connection, connect, updateSettings, connectSetup, connectionProfiles } = useConnection();
+  const { settings, connection, connect, updateSettings, connectionProfiles } = useConnection();
   const { profiles, refresh, connect: connectProfile, passwordForEditing, save, remove } = connectionProfiles;
   const [error, setError] = useState<string>();
   const [expandedKey, setExpandedKey] = useState<string>();
@@ -54,11 +54,6 @@ export function ConnectionProfiles({ palette, onManageConnect, onPair }: { palet
 
   const activeProfile = findMatchingProfile(profiles, settings);
   const isReconnecting = connection.status === 'connecting';
-  function manageConnect(profile: ConnectionProfile) {
-    connectSetup.selectControlPlane(profile.connect!.controlPlaneUrl);
-    onManageConnect?.();
-  }
-
   async function handleConnect(profile: ConnectionProfile) {
     if (switchingProfileId) {
       return;
@@ -250,9 +245,9 @@ export function ConnectionProfiles({ palette, onManageConnect, onPair }: { palet
             {t('common:actions.reconnect')}
           </Button>
           <Button testID={`connection-disconnect-${profile.id}`} onPress={() => void registry.disconnect(id).catch((reason) => setError(String(reason)))}>{t('common:actions.disconnect')}</Button>
-          {profile.connect ? onManageConnect ? <Button mode="outlined" onPress={() => manageConnect(profile)}>{t('settings:connect.manage')}</Button> : null : <Button testID={`connection-edit-${profile.id}`} mode="outlined" onPress={() => void handleEditProfile(profile).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}>
+          <Button testID={`connection-edit-${profile.id}`} mode="outlined" onPress={() => void handleEditProfile(profile).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}>
             {t('common:actions.edit')}
-          </Button>}
+          </Button>
         </>
       ) : (
         <>
@@ -264,9 +259,9 @@ export function ConnectionProfiles({ palette, onManageConnect, onPair }: { palet
             onPress={() => void handleConnect(profile)}>
             {t('common:actions.connect')}
           </Button>
-          {profile.connect ? onManageConnect ? <Button mode="outlined" onPress={() => manageConnect(profile)}>{t('settings:connect.manage')}</Button> : null : <Button testID={`connection-edit-${profile.id}`} mode="outlined" onPress={() => void handleEditProfile(profile).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}>
+          <Button testID={`connection-edit-${profile.id}`} mode="outlined" onPress={() => void handleEditProfile(profile).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}>
             {t('common:actions.edit')}
-          </Button>}
+          </Button>
           <Button testID={`connection-delete-${profile.id}`} mode="text" textColor={palette.danger} onPress={() => handleDelete(profile)}>
             {t('common:actions.delete')}
           </Button>
@@ -294,7 +289,7 @@ export function ConnectionProfiles({ palette, onManageConnect, onPair }: { palet
         </Text>
       ) : null}
       <OverlaySheet visible={choosing} title={t('settings:connection.addConnection')} onClose={() => setChoosing(false)} fitContent testID="connection-method-sheet">
-        <ConnectionMethodChooser onScan={() => { setChoosing(false); setScanning(true); }} onManual={() => { setChoosing(false); setDialog({ mode: 'add' }); }} onPair={() => { setChoosing(false); onPair?.(); }} />
+        <ConnectionMethodChooser onScan={() => { setChoosing(false); setScanning(true); }} onManual={() => { setChoosing(false); setDialog({ mode: 'add' }); }} />
       </OverlaySheet>
       {scanning ? (
         <ConnectionScanFlow

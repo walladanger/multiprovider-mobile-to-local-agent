@@ -395,9 +395,6 @@ This is important to parity because the chat layout is intentionally dense and h
 ### Presentation
 
 - shows compact settings rows in one group and opens one category at a time
-- places Cloud Link immediately below AI & Providers, and only when the provider
-  resolved `connectSetup.storeInstall` (App Store or Google Play installs); its
-  summary reflects initialization or verified access status
 - opens the full-screen service editor route for Add/Edit and reopens the Cloud
   Link section when the route returns, without leaving a portal sheet over the
   pushed screen
@@ -446,45 +443,15 @@ reply/request excerpts and step text while preserving titles, counts and status.
 
 ## Settings Components
 
-`connection-method-chooser.tsx` renders the shared Scan QR code (local network),
-Manual, and Cloud Link choices in that order, plus a learn-more link.
+`connection-method-chooser.tsx` renders the shared Scan QR code (local network)
+and Manual choices in that order.
 `connection-setup-form.tsx` composes the chooser with two independent flows for
-onboarding and returning from pairing: the scan choice opens the camera-only
+onboarding and Settings: the scan choice opens the camera-only
 `connection-scan-flow`, and Manual opens the manual profile form.
-`connect-onboarding.tsx` presents the four-step Cloud Link assistant (learn,
-computer setup, subscribe, pair), with shared illustration/heading/subheading
-spacing and pinned primary actions. Pair reuses the computer drawing beneath a
-thin transparent, theme-tinted corner frame outside the display. It owns only
-clipboard feedback; step and
-scanner visibility are local presentation state in `connect-pairing.tsx`.
-`connect-camera-gate.tsx` requests permission only after Scan QR code (including
-the Connection section's local Scan QR code choice); denial returns to the
-illustrated Pair step.
-`connect-pairing.tsx` retains the existing scanner, appbar options, link fallback
-and recovery overlays. Deep links bypass the assistant and camera gate. Returning
-subscribers start on Pair; native subscription verification and pairing remain in
-the provider. `connect-scanner.tsx` owns camera presentation/lifecycle and only
-previews after permission is granted.
-`connect-subscription.tsx` reuses native offers and explicit purchase/Restore.
-Its assistant layout has a static single-offer summary (selection for multiple
-offers), native pricing at body size, inline recovery, and a Restore text link
-above Subscribe & continue. Other Settings/management callers retain their
-existing compact layout.
-`sections/cloud-link-section.tsx` renders the consolidated Cloud Link surface in
-this order: the access summary, the connector's exposed services (when a Cloud
-Link connection is active), Subscription actions (native store management,
-offers when inactive, one Restore row), and a Machines shortcut to the existing
-management route, closing with a learn-more row. It uses the shared Settings
-overlay and provider state; it
-never opens the camera or starts a purchase merely by opening the section.
-`connect-panel.tsx` renders the separate machine/profile management view. `app/pair.tsx` ingests links and navigates only; deep links skip the camera gate.
-Domain state/actions come from `useConnection().connectSetup`; see [Cloud Link](connect.md).
-
-After a valid Cloud Link claim, the pairing surface shows desktop-confirmation
-progress and hides recovery controls while the provider checks activation. A
-delayed activation uses neutral text with Retry and Scan the new QR code on your
-computer; the scan action resets the provider checkpoint and resumes the existing
-scanner. It preserves stored profiles. Components do not poll or classify errors.
+`connect-camera-gate.tsx` requests permission only after Scan QR code; denial
+returns to the connection method chooser. `connect-scanner.tsx` owns camera
+presentation/lifecycle and only previews after permission is granted.
+See [Connection setup](connect.md).
 
 ## `components/settings/settings-sections.tsx`
 
@@ -494,8 +461,6 @@ scanner. It preserves stored profiles. Components do not poll or classify errors
 - `GeneralSection`
 - `UpdateSection`
 - `ConnectionSection`
-- `CloudLinkSection`
-- `ServicesSection`
 - `AiDefaultsSection`
 - `NotificationsSection`
 - `VoiceSection`
@@ -509,7 +474,7 @@ Responsibility:
 - show connection state card
 - show the current connection message or error hint from provider state
 - render the saved-connection list (`ConnectionProfiles`)
-- offer Scan QR code (local), Manual and Cloud Link creation choices through
+- offer Scan QR code (local) and Manual creation choices through
   `Add connection`
 
 The server URL/username/password fields are no longer a standalone form; they
@@ -527,9 +492,9 @@ dialog, so there is a single place to configure a connection.
 - add a connection through `Add connection` (saves metadata to AsyncStorage, password to SecureStore, and connects)
 - edit a connection through the same dialog; editing the active connection applies to the live settings but waits for Reconnect, so an in-flight session is never dropped
 - delete a saved connection and its SecureStore password, except the active one
-- mark the active Cloud Link row by trusted environment and machine ID, so rotating usernames do not create a temporary `Current connection` row; manual connections still compare `getConnectionScope()`
+- mark the active row by comparing `getConnectionScope()`
 
-The component owns only local state (expanded row, dialog, switching row); profile state, persistence orchestration, and credential ordering live in `providers/use-connection-profiles.ts`, backed by `lib/connection-profiles.ts`; switching/reconnecting stay in the provider. The profile hook refreshes after the Cloud Link profile snapshot changes, including inactive-machine renewal while Settings remains mounted. The UI accesses these through `useConnection().connectionProfiles`.
+The component owns only local state (expanded row, dialog, switching row); profile state, persistence orchestration, and credential ordering live in `providers/use-connection-profiles.ts`, backed by `lib/connection-profiles.ts`; switching/reconnecting stay in the provider. The UI accesses these through `useConnection().connectionProfiles`.
 
 ## `components/settings/connection-profile-dialog.tsx`
 
@@ -559,12 +524,10 @@ Editing uses the same form but saves without automatically reconnecting.
 
 - own the native-only local QR setup flow, separate from the manual address form;
   opened by the Scan QR code choice in Settings and onboarding
-- reuse `ConnectCameraGate` and `ConnectScanner` full-bleed without a Cloud Link
-  entitlement; claiming the code stays in the provider's
+- reuse `ConnectCameraGate` and `ConnectScanner` full-bleed; claiming the code stays in the provider's
   `connectionProfiles.pair`
 - overlay the `opencode pair` instructions, scan progress and recovery messages
-  on top of the full-screen camera rather than boxing it into a step layout like
-  the Cloud Link scanner
+  on top of the full-screen camera rather than boxing it into a step layout
 - save and connect through the caller's submit callback with the redeemed
   credential, retaining it across a failed save/connect so Retry never re-pairs
 - return to the chooser on Back or camera denial, and offer Scan again after an
@@ -572,28 +535,6 @@ Editing uses the same form but saves without automatically reconnecting.
 
 The manual address/details surface stays in `connection-profile-dialog.tsx`; the
 scan flow never renders it.
-
-## `components/settings/service-editor.tsx`
-
-### Responsibility
-
-- render the full-screen add/edit form for one connector service: id (create
-  only), optional name, path, target, access, enabled and strip-prefix
-- mirror the connector's validation through `prepareServiceDraft`, showing
-  per-field errors before spending a round trip
-- offer the management revision 2 port picker (occupied and shared labels,
-  disabled for the mode being edited) and the legacy path-only form with an
-  update hint for older connectors
-- own only local form state; every read/write goes through the provider's
-  `services` domain, and Save returns through the caller's `onDone`
-
-## `app/service.tsx`
-
-Thin full-screen route for the service editor, registered beside `app/pair.tsx`
-under the Cloud Link guard. It resolves the edited service from the provider's
-services list, renders the shared `ServiceEditor`, and returns with
-`router.back()`; a missing id shows a recoverable message instead of an empty
-create form. No fetch or protocol logic lives here.
 
 ### `AiDefaultsSection`
 
@@ -694,18 +635,6 @@ Main relevant props:
 - show status and failure details
 - connect/disconnect, enable/disable, remove, refresh, and complete remote OAuth
 - retain only form, busy, error, and OAuth-code UI state locally
-
-## `components/settings/sections/services-section.tsx`
-
-### Responsibility
-
-- list the connector's exposed services from `useConnection().services`, with name, full `https://<host>:<port><path>/` URL, address (`:2053` or `:8443/app`) → target, access and enabled state
-- add/replace a service through an inline form (id fixed when editing), choosing a port from the connector's `service_ports`, and remove with confirmation
-- keep the path optional on management revision 2 (empty serves the port root, with the keep-prefix toggle shown only for path services) and stay on the legacy path-only form, plus a non-blocking update hint, for revision 1 or unknown older connectors
-- mirror the connector's validation locally and surface the connector's own error message on rejection
-- copy the service's shareable `https://<host>:<port>/` or `https://<host>:<port><path>/` link
-- own only form, busy, error and feedback UI state; all reads/writes and canonical values come from the provider's services domain
-- rendered only for Cloud Link connections; the provider hides it for manual connections
 
 ## `components/settings/settings-utils.ts`
 
@@ -972,7 +901,7 @@ But parity is easiest if these responsibilities remain separated:
 - `ChatView` creates the shared task-progress FAB and owns progress-overlay visibility. It renders the FAB beside the changes chip when visible; `PendingInteractions` renders it floating at the bottom-right otherwise and retains the detailed progress overlay. The detailed progress overlay remains available. Patch summary chips open the Files changed overlay and select their parent user turn when that message is present in the current session; otherwise the existing changes scope is retained. `TranscriptMessage` memoization includes the review callback to keep the session mapping current.
 - The chat library's connection-wide group is Running & recent, with an explicit Running indicator. Deduplicated chats do not create an empty Chats section. Search-empty copy is distinct from a truly empty library.
 - `components/project/files-panel.tsx` owns one FlashList for browser entries and changed-file rows, with search, breadcrumbs, status and branch/title content in its header. It renders provider-owned changed-file statuses immediately. Added/modified files use the existing reader; deleted rows explain unavailable content. Button and keyboard search share one guarded handler. Query, submitted query, loading, and failure presentation are local and reset with the connection/project key; results remain provider-owned.
-- Setup has one guarded Connect & continue action through `switchConnection`. Input survives failures; connection controls and Skip are disabled while submitting. The shared Cloud Link/Manual chooser precedes the manual form.
+- Setup has one guarded Connect & continue action through `switchConnection`. Input survives failures; connection controls and Skip are disabled while submitting. The shared Scan QR code/Manual chooser precedes the manual form.
 - Approval cards separate the current resources from server-provided future `always` patterns and explain that the server controls rule duration. Missing patterns explicitly have unspecified scope. Question descriptions appear before selection, while existing custom/multiple/conditional answer handling remains intact.
 - Starter examples fill the draft; the bug example appends a symptoms prompt. Terminal's empty state calls the existing creation handler and describes line-at-a-time commands.
 - Icon actions and provider-credential removal expose translated action names. All supported locales carry matching keys and plural forms.

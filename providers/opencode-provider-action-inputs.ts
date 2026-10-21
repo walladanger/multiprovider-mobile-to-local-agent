@@ -134,8 +134,6 @@ export type SessionActionsInput = {
 export type ConnectionActionsInput = {
   settings: OpencodeConnectionSettings;
   setSettings: Dispatch<SetStateAction<OpencodeConnectionSettings>>;
-  controlPlaneUrl: string;
-  setControlPlaneUrl: Dispatch<SetStateAction<string>>;
   connection: ConnectionState;
   setConnection: Dispatch<SetStateAction<ConnectionState>>;
   serverContract: ServerContract;
@@ -146,7 +144,6 @@ export type ConnectionActionsInput = {
   projectPathsByConnectionRef: { current: ProjectPathsByConnection };
   connectionScopeRef: { current: string };
   clearProjectState: () => void;
-  softResetProjectState: () => void;
   isHydrated: boolean;
   isCurrentCatalogClient: (candidate: object) => boolean;
   loadProjectCatalog: (silent?: boolean, targetClient?: ScopedOpencodeClient) => Promise<ProjectCatalog>;

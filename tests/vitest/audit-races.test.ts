@@ -61,15 +61,6 @@ describe('composer admission races', () => {
     expect([...runtime.presentation.values()].some((value) => value?.draft)).toBe(false);
     runtime.unmount();
   });
-  it('keeps failed-input ownership across credential rotation on the same Cloud Link machine', async () => {
-    const scopes = await loadTs('lib/connection-scope.ts', { 'base-64': { encode: (value: string) => Buffer.from(value, 'binary').toString('base64') } });
-    const machine = { serverUrl: 'https://machine.test', username: 'device-a', connect: { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine' } };
-    const runtime = await mountDraft();
-    runtime.update({ owner: scopes.getConnectionUiScope(machine) });
-    runtime.value.setDraft('Keep this'); const pending = runtime.value.capture(); pending.clear('s');
-    runtime.update({ owner: scopes.getConnectionUiScope({ ...machine, username: 'device-b' }) });
-    expect(pending.restore('s')).toBe(true); runtime.flush(); expect(runtime.value.draft).toBe('Keep this'); runtime.unmount();
-  });
 });
 
 describe('partial interaction reads', () => {
@@ -168,22 +159,5 @@ describe('prompt submission ownership', () => {
     const newer = submission.current; gate.resolve(); await stop; await runtime.settle();
     expect(submission.current).toBe(newer); expect(runtime.value.sendingState.active).toBe(true);
     b.resolve(); await second; runtime.unmount();
-  });
-  it('cleans a canceled submission after its notification record moves to a renewed Cloud Link scope', async () => {
-    const { runtime, notifications, submission, input, currentClient, scopes } = await mount();
-    const settings: any = { serverUrl: 'https://machine.test', username: 'device-a', connect: { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine' } };
-    input.settingsRef.current = settings;
-    const oldScope = scopes.getConnectionScope(settings);
-    runtime.update({ connectionScope: oldScope });
-    const gate = deferred(); notifications.trackPendingTaskFinishedNotification.mockReturnValueOnce(gate.promise);
-    const sending = runtime.value.sendPrompt('s', 'A'); await runtime.settle();
-    input.settingsRef.current = { ...settings, username: 'device-b' };
-    const nextScope = scopes.getConnectionScope(input.settingsRef.current);
-    currentClient.current = {}; runtime.update({ client: currentClient.current, connectionScope: nextScope });
-    gate.resolve(); expect(await sending).toBe(false); await runtime.settle();
-    const stamp = notifications.trackPendingTaskFinishedNotification.mock.calls[0][0].requestedAt;
-    expect(notifications.clearPendingTaskFinishedNotification).toHaveBeenCalledWith(oldScope, 's', stamp);
-    expect(notifications.clearPendingTaskFinishedNotification).toHaveBeenCalledWith(nextScope, 's', stamp);
-    expect(input.submitPrompt).not.toHaveBeenCalled(); expect(submission.current.active).toBe(false); runtime.unmount();
   });
 });

@@ -55,30 +55,20 @@ describe('connection setup probe', () => {
 });
 
 describe('local pairing', () => {
-  it('preserves Cloudflare startup errors before SDK parsing, while auth denials and manual transport stay actionable', async () => {
+  it('passes error responses through to the SDK for manual connections', async () => {
     const transport = await loadTs('lib/opencode/client/fetch.ts', {
       './read-deadline': readDeadline, 'base-64': {}, 'expo/fetch': { fetch: async () => response },
-      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} },
-      '@/lib/connect': { getConnectCredentialError: () => undefined }, './url': {},
+      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} }, './url': {},
     }, { fetch: async () => response });
-    const html = (status: number) => new Response('<html>Cloudflare Error 1033</html>', { status, headers: { 'content-type': 'text/html' } });
-    let response = html(530);
-    const cloudSettings = { ...settings, connect: {} };
-    await expect(transport.fetchConnection('https://machine.test', {}, cloudSettings)).rejects.toThrow('1033');
-    for (const status of [401, 403]) {
-      response = html(status);
-      await expect(transport.fetchConnection('https://machine.test', {}, cloudSettings)).rejects.toThrow(status === 401 ? 'credentials were rejected' : 'access was denied');
-    }
-    response = html(530);
-    expect(await (await transport.fetchConnection('http://manual.test')).text()).toContain('1033');
+    const response = new Response('<html>Cloudflare Error 1033</html>', { status: 530, headers: { 'content-type': 'text/html' } });
+    expect(await (await transport.fetchConnection('http://manual.test', {}, settings)).text()).toContain('1033');
   });
   it('uses redirect-aware native transport for redemption while preserving normal manual transport', async () => {
     const manualFetch = vi.fn(async () => json({}));
     const nativeFetch = vi.fn(async () => json({}));
     const transport = await loadTs('lib/opencode/client/fetch.ts', {
       './read-deadline': readDeadline, 'base-64': {}, 'expo/fetch': { fetch: nativeFetch },
-      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} },
-      '@/lib/connect': { getConnectCredentialError: () => undefined }, './url': {},
+      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} }, './url': {},
     }, { fetch: manualFetch });
     await transport.fetchConnection('http://example.test/api/info');
     await transport.fetchConnection('http://example.test/auth/connect/code', { redirect: 'error' });

@@ -105,21 +105,6 @@ V1 translates events with matching semantics at `compat/v1/events.ts`. Legacy me
 
 SSE reconnects with bounded backoff and reconciles sessions, pending interactions and active transcript state after recovery. Polling continues when SSE is unavailable and while busy even with a connected stream, so missed events cannot strand a prompt. Retry state keeps safety polling alive until execution resumes or completes. Completion notifications, review selections and conversation mode use provider-derived state on both contracts.
 
-## Connector Service Management (Cloud Link)
-
-A paired device manages the connector's exposed services directly over the tunnel, on the `server_url` origin (never a service port), using the same HTTP Basic credential as OpenCode traffic (`username = device_id`, `password = device_secret`). The control plane is not involved.
-
-- `GET /_cloudlink/services` → `{ services: [Service, ...] }`
-- `PUT /_cloudlink/services/{id}` → `201` created / `200` replaced, body is the bare `Service` (`port` and `target` required on management revision 2), response `{ service: Service }` with stored canonical values
-- `DELETE /_cloudlink/services/{id}` → `204`
-- `GET /_cloudlink/version` → `{ version, api, service_ports }`; every authenticated `/_cloudlink` reply also stamps the connector version in `x-cloudlink-connector-version`
-
-On management revision 2 (connector 0.1.14+) `Service` is `{ id, name, port, path: string | null, target, enabled, access: 'private' | 'public', strip_prefix }`. A service with no `path` owns its port root, so apps that emit absolute URLs, cookies, redirects and WebSockets work untouched; services with a `path` share a port and keep prefix stripping plus path-absolute redirect re-prefixing. `port` must be one of `service_ports`; a root service needs a fully free port, a path service may share only a root-free port, `port`/`path` pairs are unique, and at most 16 services exist. Omitted PUT fields default to `name = id`, `path = null`, `enabled = false`, `access = 'private'`, `strip_prefix = true`. Links are `https://<host>:<port>/` for root services and `https://<host>:<port><path>/` for path services.
-
-Management revision 1 and pre-version connectors keep the legacy path-only surface on `:8443`: listed services carry an implicit `port`, links stay `https://<host>:8443<path>/`, and the PUT body omits `port`. A `404` on the version endpoint without the version header means an unknown older connector: the app warns and stays in legacy mode. Root services and the port picker require revision 2 and otherwise show a non-blocking update hint. Errors are `400` invalid, `401` unauthorized, `404` unknown id, `405` method, `413` too large, `415` wrong content type; the app shows the connector's message and never branches on its wording. The list reflects connector-side (tray/CLI) edits, so the Settings surface re-fetches on open.
-
-Client code and the validation mirror live in `lib/opencode/client/management.ts`; the provider exposes it through the connection domain (`useConnection().services`). The provider resolves the target machine from the active Cloud Link connection or a saved Cloud Link profile, so management keeps working while another connection is active and links use the target machine's own origin. See the connector's frozen `protocol/README.md` → "Service management API (device-authenticated)".
-
 ## Compatibility-only Features And Validation
 
 Sharing, archive/restore, title summarization, general config writes, persistent MCP enablement, worktree reset and LSP/formatter diagnostics remain available through v1 compatibility. Capability flags hide these on v2, and their service mutations reject unsupported calls.
