@@ -172,7 +172,8 @@ const withAndroidAppConfig = (config: ExpoConfig) => {
 };
 
 const config: ExpoConfig = {
-  name: isDevelopmentVariant ? 'OpenCode Mobile Dev' : 'OpenCode Mobile',
+  // EXPO_APP_NAME lets CI build side-by-side test APKs; defaults are unchanged.
+  name: env('EXPO_APP_NAME') ?? (isDevelopmentVariant ? 'OpenCode Mobile Dev' : 'OpenCode Mobile'),
   slug: 'opencode-mobile',
   version: '1.0.85',
   orientation: 'default',

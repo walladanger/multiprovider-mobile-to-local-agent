@@ -27,6 +27,16 @@ on:
         options:
           - development
           - release
+      package_id:
+        description: 'Override Android package ID (e.g. com.walladanger.agentlink to install next to the original app). Empty = repo default'
+        required: false
+        default: ''
+        type: string
+      app_name:
+        description: 'Override app display name (e.g. "Agent Link (test)"). Empty = default'
+        required: false
+        default: ''
+        type: string
   push:
     tags:
       - 'v*'
@@ -47,7 +57,8 @@ jobs:
 
     env:
       VARIANT: ${{ inputs.variant || 'release' }}
-      EXPO_ANDROID_PACKAGE: ${{ vars.EXPO_ANDROID_PACKAGE }}
+      EXPO_ANDROID_PACKAGE: ${{ inputs.package_id || vars.EXPO_ANDROID_PACKAGE }}
+      EXPO_APP_NAME: ${{ inputs.app_name }}
       ABIS: arm64-v8a,armeabi-v7a,x86_64
 
     steps:
