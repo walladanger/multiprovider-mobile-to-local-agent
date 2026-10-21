@@ -138,6 +138,7 @@ function RootNavigator() {
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Screen name="share" options={{ headerShown: false }} />
+      <Stack.Screen name="connect" options={{ headerShown: false }} />
     </Stack>
   );
 }
