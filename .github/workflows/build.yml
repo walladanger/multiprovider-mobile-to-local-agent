@@ -237,7 +237,7 @@ jobs:
           sha256sum "$KEYSTORE_PATH" || true
         shell: bash
 
-      # Builds the de-Googled FOSS flavor: no Play Billing (expo-iap), no ML Kit
+      # Builds the de-Googled FOSS flavor: no ML Kit
       # barcode scanner (expo-camera), and expo-notifications compiled against
       # F-Droid's firebase-stubs instead of firebase-messaging.
       - name: Build FOSS Android release

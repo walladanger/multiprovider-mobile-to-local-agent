@@ -43,7 +43,7 @@ export function useConnectionLinkActions({
     const profile = findProfileByConnectionScope(await loadConnectionProfiles(), scope);
     if (!profile) throw new Error('The saved connection for this session no longer exists.');
     const password = await getProfilePassword(profile.id);
-    await switchConnection({ serverUrl: profile.serverUrl, username: profile.username, password, connect: profile.connect }, profile.modelPreferences);
+    await switchConnection({ serverUrl: profile.serverUrl, username: profile.username, password }, profile.modelPreferences);
     if (!await waitForConnectionScope(scope)) throw new Error('Could not switch to the connection that owns this session.');
   }, [connectionScopeRef, switchConnection, waitForConnectionScope]);
 

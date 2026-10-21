@@ -188,9 +188,8 @@ describe('background notification monitor', () => {
       seedPending();
 
       // A resolves from its saved profile; B resolves from the active connection.
-      const connect = { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine-a', machineName: 'A', deviceId: 'alice', expiresAt: '2030-01-01T00:00:00Z' };
       g.__notificationsTestResolver = ({ serverUrl }: any) => (
-        serverUrl.includes('a.example') ? { password: 'secret-a', connect } : 'secret-b'
+        serverUrl.includes('a.example') ? { password: 'secret-a' } : 'secret-b'
       );
       g.__notificationsTestClientFactory = (settings: any) => ({
         session: {
@@ -214,7 +213,6 @@ describe('background notification monitor', () => {
       const aBuild = g.__notificationsTestBuilds.find(({ settings }: any) => settings.serverUrl.includes('a.example'));
       assert.equal(aBuild.settings.password, 'secret-a');
       assert.equal(aBuild.settings.directory, '/repo');
-      assert.deepEqual(aBuild.settings.connect, connect, 'Background clients preserve Connect expiry and transport guards.');
       const bBuild = g.__notificationsTestBuilds.find(({ settings }: any) => settings.serverUrl.includes('b.example'));
       assert.equal(bBuild.settings.password, 'secret-b');
     }

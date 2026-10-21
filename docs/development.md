@@ -31,13 +31,7 @@ The unit suite runs under Vitest 5, which requires Node `^22.12.0 || ^24.0.0 || 
    npm run start:dev-client
    ```
 
-   Native Cloud Link is available in every build. Purchase/Restore requires a native
-   development or store build, not Expo Go. Use
-   `EXPO_APP_VARIANT=development npm run start:dev-client` for the separate dev app.
-   Cloud Link routes real purchases to `https://api.opencodecloud.link` and test purchases
-   to `https://apistaging.opencodecloud.link` automatically. No manual URL configuration
-   is needed. The resolved environment survives relaunch. Products come from its backend catalog,
-   never app configuration. See [Cloud Link prerequisites and validation](connect.md).
+   Use `EXPO_APP_VARIANT=development npm run start:dev-client` for the separate dev app.
 
 ### Common Commands
 
@@ -71,9 +65,7 @@ npm run build:foss:android
 
 Install `android/app/build/outputs/apk/debug/app-debug.apk` (**OpenCode Mobile
 Dev**) and use `EXPO_APP_VARIANT=development npm run start:dev-client`. Both prebuild and Gradle use the
-development variant. The APK built from a push to `main` uses production and
-also exposes Cloud Link subscriptions. See [Cloud Link](connect.md) for native store,
-trusted environment, and sandbox configuration. See
+development variant. The APK built from a push to `main` uses production. See
 [F-Droid and FOSS builds](fdroid.md) for the FOSS variant's scope and distribution.
 
 **Release Automation**:

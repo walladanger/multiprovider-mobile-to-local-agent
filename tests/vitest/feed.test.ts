@@ -19,7 +19,6 @@ vi.mock('expo/fetch', () => ({ fetch: (...args: any[]) => (globalThis.fetch as a
 vi.mock('@/lib/opencode/client/types', () => ({ defaultConnectionSettings: { serverUrl: 'http://localhost' } }));
 vi.mock('react-native', () => ({ Platform: native }));
 vi.mock('@/lib/i18n', () => ({ getFormatLocale: () => 'en' }));
-vi.mock('@/lib/connect', () => ({ parseConnectMetadata: () => undefined }));
 vi.mock('@/lib/opencode/client', () => ({ getServerBase: () => ({ origin: 'http://test', pathPrefix: '' }) }));
 vi.mock('expo-sharing', () => ({ isAvailableAsync: async () => true, shareAsync: native.shared }));
 vi.mock('expo-file-system', () => ({

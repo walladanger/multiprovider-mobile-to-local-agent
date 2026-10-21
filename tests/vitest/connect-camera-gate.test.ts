@@ -4,7 +4,7 @@ import { hookRuntime, loadTs } from '../helpers/runtime.mjs';
 
 type Element = { type: unknown; props: Record<string, any> };
 
-describe('Cloud Link camera permission gate', () => {
+describe('camera permission gate', () => {
   it.each([
     ['granted', true, true],
     ['requestable denial', false, true],
@@ -30,7 +30,7 @@ describe('Cloud Link camera permission gate', () => {
       'react-native-paper': { ActivityIndicator: 'ActivityIndicator' },
     });
 
-    runtime.mount(ConnectCameraGate, { onCancel, children: 'pairing-and-subscription' });
+    runtime.mount(ConnectCameraGate, { onCancel, children: 'scanner' });
     await runtime.settle();
 
     expect(useCameraPermissions).toHaveBeenCalledWith({ request: true });
@@ -51,7 +51,7 @@ describe('Cloud Link camera permission gate', () => {
       'react-native-paper': { ActivityIndicator: 'ActivityIndicator' },
     });
 
-    runtime.mount(ConnectCameraGate, { onCancel: vi.fn(), children: 'pairing-and-subscription' });
+    runtime.mount(ConnectCameraGate, { onCancel: vi.fn(), children: 'scanner' });
 
     expect(useCameraPermissions).toHaveBeenCalledWith({ request: false });
     expect((runtime.value as Element).type).toBe('Fragment');

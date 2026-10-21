@@ -46,7 +46,7 @@ malformed persisted values are cleared through the existing helper.
 
 Update actions recheck foreground, route and safety after the async native read.
 Active/sending/queued tasks, conversation mode, pending permissions/questions,
-connection work, terminal creation/open/close and Cloud Link purchase/setup suppress
+connection work, terminal creation/open/close suppress
 offers. Components retain their local drafts, attachments and form contents;
 `useUpdateBlocker` only registers that they are busy. Open sheets, pickers, file
 previews, connection/provider forms, voice input/playback and native attachment

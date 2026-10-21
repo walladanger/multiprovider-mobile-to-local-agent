@@ -16,7 +16,7 @@ import { useConnection } from '@/providers/opencode-contexts';
 
 // Local QR setup is its own flow. It never falls back to the manual address
 // form: Back returns to the chooser where Manual remains available. The camera
-// fills the screen like the Cloud Link scanner; instructions and recovery are
+// fills the screen; instructions and recovery are
 // overlaid on top instead of being boxed into a step layout.
 export function ConnectionScanFlow({ onSubmit, onDismiss, onBusyChange }: {
   onSubmit: (values: ConnectionProfileFormValues) => Promise<void> | void;

@@ -2,13 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 
 import type { OpencodeConnectionSettings } from '@/lib/opencode/client';
-import { normalizeTrustedControlPlaneUrl } from '@/lib/connect';
 import { getConnectionPassword, saveConnectionPassword, withoutConnectionPassword } from '@/lib/connection-password';
 import { isValidServerUrl } from '@/lib/opencode/client/url';
 import {
   ACTIVE_PROJECT_STORAGE_KEY,
   CHAT_PREFERENCES_STORAGE_KEY,
-  CONNECT_CONTROL_PLANE_STORAGE_KEY,
   FAVORITE_SESSIONS_STORAGE_KEY,
   LAST_SESSION_BY_PROJECT_STORAGE_KEY,
   ONBOARDING_VERSION_STORAGE_KEY,
@@ -38,14 +36,12 @@ export function useOpencodePersistence({
   defaultSettings,
   activeProjectPath,
   chatPreferences,
-  controlPlaneUrl,
   favoriteSessions,
   lastSessionByConnection,
   onboardingVersion,
   projectPathsByConnection,
   setActiveProjectPath,
   setChatPreferences,
-  setControlPlaneUrl,
   setFavoriteSessions,
   setLastSessionByConnection,
   setOnboardingVersion,
@@ -57,14 +53,12 @@ export function useOpencodePersistence({
   defaultSettings: OpencodeConnectionSettings;
   activeProjectPath?: string;
   chatPreferences: ChatPreferences;
-  controlPlaneUrl: string;
   favoriteSessions: FavoriteSession[];
   lastSessionByConnection: LastSessionByConnection;
   onboardingVersion: number;
   projectPathsByConnection: ProjectPathsByConnection;
   setActiveProjectPath: (value?: string) => void;
   setChatPreferences: Dispatch<SetStateAction<ChatPreferences>>;
-  setControlPlaneUrl: Dispatch<SetStateAction<string>>;
   setFavoriteSessions: Dispatch<SetStateAction<FavoriteSession[]>>;
   setLastSessionByConnection: Dispatch<SetStateAction<LastSessionByConnection>>;
   setOnboardingVersion: Dispatch<SetStateAction<number>>;
@@ -122,8 +116,6 @@ export function useOpencodePersistence({
 
         await load(PROJECTS_STORAGE_KEY, parseProjectPathsByConnection, setProjectPathsByConnection);
 
-        await load(CONNECT_CONTROL_PLANE_STORAGE_KEY, normalizeTrustedControlPlaneUrl, setControlPlaneUrl);
-
         // Resolve first-run completion last so `isHydrated` already implies the
         // onboarding decision is known. The marker, including the migration
         // decision, is persisted by the write-back effect below.
@@ -135,11 +127,7 @@ export function useOpencodePersistence({
     }
 
     void hydrateState().catch((reason) => console.warn('Could not hydrate app settings.', reason));
-  }, [defaultChatPreferences, defaultSettings, setActiveProjectPath, setChatPreferences, setControlPlaneUrl, setFavoriteSessions, setLastSessionByConnection, setOnboardingVersion, setProjectPathsByConnection, setSettings, writeChanged]);
-
-  useEffect(() => {
-    if (isHydrated && controlPlaneUrl) void persist(CONNECT_CONTROL_PLANE_STORAGE_KEY, controlPlaneUrl).catch((reason) => console.warn('Could not save Connect settings.', reason));
-  }, [controlPlaneUrl, isHydrated, persist]);
+  }, [defaultChatPreferences, defaultSettings, setActiveProjectPath, setChatPreferences, setFavoriteSessions, setLastSessionByConnection, setOnboardingVersion, setProjectPathsByConnection, setSettings, writeChanged]);
 
   useEffect(() => {
     if (!isHydrated) {
@@ -147,9 +135,9 @@ export function useOpencodePersistence({
     }
 
     const metadata = JSON.stringify(withoutConnectionPassword(settings));
-    const credential = JSON.stringify([settings.password, Boolean(settings.connect)]);
+    const credential = JSON.stringify([settings.password]);
     void writeChanged(SETTINGS_STORAGE_KEY, JSON.stringify([metadata, credential]), async () => {
-      await writeChanged('connection-password', credential, () => saveConnectionPassword(settings.password, Boolean(settings.connect)));
+      await writeChanged('connection-password', credential, () => saveConnectionPassword(settings.password));
       await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, metadata);
     }).catch((reason) => console.warn('Could not save connection settings.', reason));
   }, [isHydrated, settings, writeChanged]);

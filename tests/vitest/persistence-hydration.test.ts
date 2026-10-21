@@ -74,25 +74,14 @@ describe('persistence hydration and write-back', () => {
 
     await loadPersistedValue(storage, 'missing', JSON.parse, () => assert.fail('missing value should not apply'));
 
-    const connect = await loadTs('lib/connect.ts', {
-      'expo/fetch': {}, 'expo-constants': { default: {} }, 'react-native': { Platform: { OS: 'android' } }, 'expo-secure-store': {},
-    });
-    for (const legacyControlPlane of ['https://api.getopencode.app', 'https://apistaging.getopencode.app']) {
-      const storedControlPlane = new Map([['control-plane', legacyControlPlane]]);
-      const controlPlaneStorage = createStorage(storedControlPlane);
-      let controlPlane = connect.CONNECT_PRODUCTION_URL;
-      await loadPersistedValue(controlPlaneStorage, 'control-plane', connect.normalizeTrustedControlPlaneUrl, (value) => { controlPlane = value; });
-      assert.equal(controlPlane, 'https://api.opencodecloud.link', 'Discarded legacy preferences retain the new production default.');
-      assert.deepEqual(controlPlaneStorage.removed, ['control-plane']);
-    }
     const preferences = await loadTs('providers/opencode-preferences.ts');
     const profileUrls = await loadTs('lib/opencode/client/url.ts', { './types': { defaultConnectionSettings: { serverUrl: 'http://localhost' } } });
     const { parseConnectionSettings, parseChatPreferences } = await loadTs('providers/persisted-preferences.ts', {
-      '@/lib/connect': connect, '@/providers/opencode-preferences': preferences, '@/lib/opencode/client/url': profileUrls,
+      '@/providers/opencode-preferences': preferences, '@/lib/opencode/client/url': profileUrls,
     });
     assert.throws(() => parseConnectionSettings('{"serverUrl":123}'), /Invalid/);
     assert.equal(parseConnectionSettings('{"serverUrl":"https://alice:secret@host.test/proxy","username":"configured"}').serverUrl, 'https://host.test/proxy');
-    assert.throws(() => parseConnectionSettings('{"username":"alice","connect":{}}'), /Invalid/);
+    assert.deepEqual(JSON.parse(JSON.stringify(parseConnectionSettings('{"username":"alice","connect":{}}'))), { username: 'alice' });
     assert.deepEqual(JSON.parse(JSON.stringify(parseConnectionSettings('{"serverUrl":"http://test","password":"legacy","unknown":true}'))), { serverUrl: 'http://test', password: 'legacy' });
     const parsed = parseChatPreferences(JSON.stringify({ mode: 'build', enabledModelIds: null, recentModelIds: 42,
       providerModelSelections: { p: false }, speechRate: 100, workingSoundVolume: -1, transcriptFontSize: 99,
@@ -134,7 +123,6 @@ describe('persistence hydration and write-back', () => {
         getItem: async (key: string) => { if (key === keys.SETTINGS_STORAGE_KEY) throw new Error('temporarily unreadable'); return stored.get(key) ?? null; },
         setItem: async (key: string, value: string) => { stored.set(key, value); }, removeItem: async (key: string) => { stored.delete(key); },
       } },
-      '@/lib/connect': { normalizeTrustedControlPlaneUrl: (raw: string) => raw },
       '@/lib/connection-password': {
         getConnectionPassword: async () => { credentialReads++; return 'another-server-secret'; },
         saveConnectionPassword: async () => assert.fail('unread credentials must remain untouched'),
@@ -154,14 +142,13 @@ describe('persistence hydration and write-back', () => {
       const [settings, setSettings] = hydrationRuntime.react.useState(defaultSettings);
       const [chatPreferences, setChatPreferences] = hydrationRuntime.react.useState(preferences.defaultChatPreferences);
       const [activeProjectPath, setActiveProjectPath] = hydrationRuntime.react.useState();
-      const [controlPlaneUrl, setControlPlaneUrl] = hydrationRuntime.react.useState('control');
       const [favoriteSessions, setFavoriteSessions] = hydrationRuntime.react.useState([]);
       const [lastSessionByConnection, setLastSessionByConnection] = hydrationRuntime.react.useState({});
       const [projectPathsByConnection, setProjectPathsByConnection] = hydrationRuntime.react.useState({});
       const [onboardingVersion, setOnboardingVersion] = hydrationRuntime.react.useState(0);
       return { ...hook.useOpencodePersistence({ defaultSettings, defaultChatPreferences: preferences.defaultChatPreferences,
         settings, setSettings, chatPreferences, setChatPreferences, activeProjectPath, setActiveProjectPath,
-        controlPlaneUrl, setControlPlaneUrl, favoriteSessions, setFavoriteSessions,
+        favoriteSessions, setFavoriteSessions,
         projectPathsByConnection, setProjectPathsByConnection,
         lastSessionByConnection, setLastSessionByConnection, onboardingVersion, setOnboardingVersion }), chatPreferences, settings, projectPathsByConnection };
     }, {});

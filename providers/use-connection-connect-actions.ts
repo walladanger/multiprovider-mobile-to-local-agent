@@ -1,13 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
-import { AppState } from 'react-native';
+import { useCallback, useRef } from 'react';
 
 import {
   findMatchingProfile,
-  loadConnectionProfiles,
   pickModelPreferences,
   mutateConnectionProfiles,
 } from '@/lib/connection-profiles';
-import { getConnectCredentialError } from '@/lib/connect';
 import {
   buildClient,
   classifyConnectionFailure,
@@ -16,7 +13,6 @@ import {
   getNormalizedServerUrl,
   isContractMismatchError,
   isAuthConnectionFailure,
-  isRetryableCloudLinkStartupError,
   isValidServerUrl,
   type ConnectionFailureKind,
   type OpencodeConnectionSettings,
@@ -24,26 +20,21 @@ import {
   type ServerContract,
 } from '@/lib/opencode/client';
 import type { ChatPreferences, ConnectionState, ProjectCatalog } from '@/providers/opencode-provider-types';
-import type { ConnectSetup } from '@/providers/use-connect-state';
 import type { ConnectionActionsInput } from '@/providers/opencode-provider-action-inputs';
 
 // Joining concurrent connects is keyed on the exact credentials and generation
 // so a rotation that lands mid-flight starts a new attempt instead of adopting
 // stale credentials.
 function getConnectRequestKey(settings: OpencodeConnectionSettings, generation: number) {
-  return [generation, settings.serverUrl, settings.username, settings.password, settings.connect?.machineId ?? '', settings.connect?.expiresAt ?? ''].join('\u0000');
+  return [generation, settings.serverUrl, settings.username, settings.password].join('\u0000');
 }
 
 export function useConnectionConnectActions({
-  settings,
-  connectSetup,
   setSettings,
   activeProjectPath,
   setActiveProjectPath,
   activeProjectPathRef,
   clearProjectState,
-  softResetProjectState,
-  isHydrated,
   isCurrentCatalogClient,
   loadProjectCatalog,
   serverProjectsRef,
@@ -73,52 +64,13 @@ export function useConnectionConnectActions({
   catalogGenerationRef,
   scopeGenerationRef,
   initialConnectStartedRef,
-}: ConnectionActionsInput & { connectSetup: ConnectSetup }) {
-  const prepareConnectSettingsRef = useRef<(settings: OpencodeConnectionSettings) => Promise<OpencodeConnectionSettings>>(async (value) => value);
+}: ConnectionActionsInput) {
   const connectInFlightRef = useRef<{ key: string; promise: Promise<ConnectionState> } | undefined>(undefined);
 
-  const performConnect = useCallback(async (targetSettings: OpencodeConnectionSettings, onPrepared?: (prepared: OpencodeConnectionSettings) => void): Promise<ConnectionState> => {
+  const performConnect = useCallback(async (targetSettings: OpencodeConnectionSettings): Promise<ConnectionState> => {
     initialConnectStartedRef.current = true;
-    let generation = serverGenerationRef.current;
+    const generation = serverGenerationRef.current;
     const current = () => generation === serverGenerationRef.current;
-    if (targetSettings.connect) {
-      try {
-        const prepared = await prepareConnectSettingsRef.current(targetSettings);
-        if (!current()) return connectionRef.current;
-        const credentialError = getConnectCredentialError(prepared.connect, prepared.password);
-        if (credentialError) throw new Error(credentialError);
-        if (prepared.serverUrl !== settingsRef.current.serverUrl || prepared.username !== settingsRef.current.username || prepared.password !== settingsRef.current.password || prepared.connect?.expiresAt !== settingsRef.current.connect?.expiresAt) {
-          const previous = settingsRef.current;
-          const sameMachineRotation = Boolean(
-            prepared.connect && previous.connect
-            && prepared.connect.controlPlaneUrl === previous.connect.controlPlaneUrl
-            && prepared.connect.machineId === previous.connect.machineId
-            && prepared.serverUrl === previous.serverUrl,
-          );
-          settingsRef.current = prepared;
-          setSettings(prepared);
-          scopeGenerationRef.current += 1;
-          serverGenerationRef.current += 1;
-          generation = serverGenerationRef.current;
-          // A same-machine credential renewal keeps project, session, terminal
-          // and editor state; only client-bound in-flight bookkeeping resets.
-          if (sameMachineRotation) softResetProjectState(); else clearProjectState();
-        }
-        targetSettings = prepared;
-        onPrepared?.(prepared);
-      } catch (reason) {
-        if (!current()) return connectionRef.current;
-        const failed: ConnectionState = { status: 'error', message: reason instanceof Error ? reason.message : 'Could not recover Cloud Link access.', kind: classifyConnectionFailure(reason), checkedAt: Date.now() };
-        setConnection(failed);
-        return failed;
-      }
-    }
-    const credentialError = getConnectCredentialError(targetSettings.connect, targetSettings.password);
-    if (credentialError) {
-      const failed: ConnectionState = { status: 'error', message: credentialError, kind: 'auth', checkedAt: Date.now() };
-      setConnection(failed);
-      return failed;
-    }
     if (!isValidServerUrl(targetSettings.serverUrl)) {
       const failed: ConnectionState = {
         status: 'error',
@@ -175,7 +127,6 @@ export function useConnectionConnectActions({
       const failed: ConnectionState = {
         status: 'error',
         message: getConnectionError(targetSettings.serverUrl, failure),
-        retryableStartup: Boolean(targetSettings.connect) && isRetryableCloudLinkStartupError(lastError),
         kind: classifyConnectionFailure(failure),
         checkedAt: Date.now(),
       };
@@ -220,15 +171,13 @@ export function useConnectionConnectActions({
     }
 
     return connected;
-  }, [activeProjectPath, catalogGenerationRef, clearProjectState, softResetProjectState, isCurrentCatalogClient, loadProjectCatalog, initialConnectStartedRef, serverContractRef, serverGenerationRef, scopeGenerationRef, settingsRef, setAvailableAgents, setAvailableModels, setAvailableProviders, setConnection, setCurrentConfig, setCurrentProjectPath, setProviderAuthMethodsById, setServerContract, setServerProjects, setServerRootPath, setSessionStatuses, setSessions, setSettings, serverProjectsRef, connectionRef]);
+  }, [activeProjectPath, catalogGenerationRef, clearProjectState, isCurrentCatalogClient, loadProjectCatalog, initialConnectStartedRef, serverContractRef, serverGenerationRef, setAvailableAgents, setAvailableModels, setAvailableProviders, setConnection, setCurrentConfig, setCurrentProjectPath, setProviderAuthMethodsById, setServerContract, setServerProjects, setServerRootPath, setSessionStatuses, setSessions, serverProjectsRef, connectionRef]);
 
   const runConnect = useCallback((targetSettings: OpencodeConnectionSettings) => {
     const inFlight = connectInFlightRef.current;
     if (inFlight && inFlight.key === getConnectRequestKey(targetSettings, serverGenerationRef.current)) return inFlight.promise;
     const record = { key: '', promise: Promise.resolve(connectionRef.current) };
-    record.promise = performConnect(targetSettings, (prepared) => {
-      record.key = getConnectRequestKey(prepared, serverGenerationRef.current);
-    }).finally(() => {
+    record.promise = performConnect(targetSettings).finally(() => {
       if (connectInFlightRef.current === record) connectInFlightRef.current = undefined;
     });
     record.key = getConnectRequestKey(targetSettings, serverGenerationRef.current);
@@ -238,15 +187,10 @@ export function useConnectionConnectActions({
 
   const connect = useCallback(() => runConnect(settingsRef.current), [runConnect, settingsRef]);
 
-  // A revoked or invalid credential on the data plane cannot heal by retrying.
-  // Cloud Link reuses its prepared credential/recovery path; manual servers ask
-  // the user to reconnect. Server-derived caches are cleared, project
-  // selection is not.
+  // A revoked or invalid credential on the data plane cannot heal by retrying,
+  // so the user is asked to reconnect. Server-derived caches are cleared,
+  // project selection is not.
   const handleStreamAuthFailure = useCallback((kind: ConnectionFailureKind) => {
-    if (settingsRef.current.connect) {
-      void connect().catch(() => undefined);
-      return;
-    }
     if (connectionRef.current.status === 'error' && connectionRef.current.kind === kind) return;
     scopeGenerationRef.current += 1;
     serverGenerationRef.current += 1;
@@ -255,12 +199,10 @@ export function useConnectionConnectActions({
     setConnection({
       status: 'error',
       kind,
-      message: kind === 'entitlement'
-        ? 'Access was denied. Reconnect or restore access to continue.'
-        : 'Authentication failed. Check the credentials and reconnect.',
+      message: 'Authentication failed. Check the credentials and reconnect.',
       checkedAt: Date.now(),
     });
-  }, [clearProjectState, connect, connectionRef, scopeGenerationRef, serverGenerationRef, setConnection, setSendingState, settingsRef]);
+  }, [clearProjectState, connectionRef, scopeGenerationRef, serverGenerationRef, setConnection, setSendingState]);
 
   const updateSettings = useCallback((patch: Partial<OpencodeConnectionSettings>) => {
     const connectionChanged = (['serverUrl', 'username', 'password'] as const)
@@ -281,11 +223,7 @@ export function useConnectionConnectActions({
       setServerRootPath(undefined);
       setDiagnostics(undefined);
     }
-    setSettings((current) => ({
-      ...current,
-      ...patch,
-      connect: connectionChanged ? patch.connect : current.connect,
-    }));
+    setSettings((current) => ({ ...current, ...patch }));
   }, [activeProjectPathRef, clearProjectState, scopeGenerationRef, serverGenerationRef, serverProjectsRef, settingsRef, setActiveProjectPath, setConnection, setCurrentProjectPath, setDiagnostics, setDiffsBySession, setMessagesBySession, setServerRootPath, setServerProjects, setSettings, setTodosBySession]);
 
   const captureActiveProfilePreferences = useCallback(async () => {
@@ -303,22 +241,13 @@ export function useConnectionConnectActions({
   }, [chatPreferencesRef, settingsRef]);
 
   const switchConnection = useCallback(async (
-    next: Pick<OpencodeConnectionSettings, 'serverUrl' | 'username' | 'password' | 'connect'>,
+    next: Pick<OpencodeConnectionSettings, 'serverUrl' | 'username' | 'password'>,
     modelPreferences?: Partial<ChatPreferences>,
   ) => {
     await captureActiveProfilePreferences().catch(() => undefined);
 
-    const connectMetadata = next.connect ?? findMatchingProfile(await loadConnectionProfiles(), next)?.connect;
-    const targetSettings: OpencodeConnectionSettings = {
-      ...settingsRef.current,
-      ...next,
-      connect: connectMetadata,
-    };
-    if (connectMetadata && settingsRef.current.connect?.controlPlaneUrl === connectMetadata.controlPlaneUrl
-      && settingsRef.current.connect.machineId === connectMetadata.machineId) {
-      return runConnect(targetSettings);
-    }
-    updateSettings({ ...next, connect: connectMetadata });
+    const targetSettings: OpencodeConnectionSettings = { ...settingsRef.current, ...next };
+    updateSettings(next);
     settingsRef.current = targetSettings;
     if (modelPreferences) {
       setChatPreferences((current) => ({ ...current, ...modelPreferences }));
@@ -327,59 +256,5 @@ export function useConnectionConnectActions({
     return runConnect(targetSettings);
   }, [captureActiveProfilePreferences, runConnect, settingsRef, setChatPreferences, updateSettings]);
 
-  const connectPhaseRef = useRef(connectSetup.phase);
-  const activationPaused = connectSetup.phase === 'waitingForApproval' || connectSetup.phase === 'delayed';
-  useLayoutEffect(() => {
-    prepareConnectSettingsRef.current = connectSetup.prepareSettings;
-    connectPhaseRef.current = connectSetup.phase;
-  });
-
-  const connectAccessRefreshRef = useRef('');
-  useEffect(() => {
-    if (!isHydrated || !settings.connect) return;
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
-    let refreshTimer: ReturnType<typeof setTimeout>;
-    const scheduleRefresh = () => {
-      clearTimeout(refreshTimer);
-      if (connectPhaseRef.current === 'waitingForApproval' || connectPhaseRef.current === 'delayed') return;
-      const remaining = Date.parse(settings.connect!.expiresAt) - Date.now();
-      const refreshKey = `${settings.connect!.controlPlaneUrl}:${settings.connect!.machineId}:${settings.connect!.expiresAt}`;
-      const recover = getConnectCredentialError(settings.connect, settings.password) || connectionRef.current.status === 'error';
-      if (!recover && connectAccessRefreshRef.current === refreshKey) return;
-      refreshTimer = setTimeout(() => {
-        if (AppState.currentState === 'active' && connectPhaseRef.current !== 'waitingForApproval' && connectPhaseRef.current !== 'delayed') {
-          connectAccessRefreshRef.current = refreshKey;
-          void connect().then((result) => {
-            if (cancelled || AppState.currentState !== 'active') return;
-            if (result.status !== 'connected') { connectAccessRefreshRef.current = ''; refreshTimer = setTimeout(scheduleRefresh, 60_000); }
-          });
-        }
-      }, recover ? 1000 : Math.min(Math.max(remaining - 5 * 60_000, 1000), 2_147_483_647));
-    };
-    const check = () => {
-      const message = getConnectCredentialError(settings.connect, settings.password);
-      if (message) {
-        if (connectionRef.current.status !== 'error' || connectionRef.current.message !== message) {
-          scopeGenerationRef.current += 1;
-          serverGenerationRef.current += 1;
-          clearProjectState();
-          setSendingState({ active: false });
-          setConnection({ status: 'error', message, kind: 'auth', checkedAt: Date.now() });
-        }
-        scheduleRefresh();
-        return;
-      }
-      timer = setTimeout(check, Math.min(Date.parse(settings.connect!.expiresAt) - Date.now(), 2_147_483_647));
-    };
-    check();
-    scheduleRefresh();
-    const subscription = AppState.addEventListener('change', (state) => {
-      clearTimeout(timer); clearTimeout(refreshTimer);
-      if (state === 'active') { check(); scheduleRefresh(); }
-    });
-    return () => { cancelled = true; clearTimeout(timer); clearTimeout(refreshTimer); subscription.remove(); };
-  }, [activationPaused, clearProjectState, connect, connectionRef, isHydrated, scopeGenerationRef, serverGenerationRef, setConnection, setSendingState, settings.connect, settings.password]);
-
-  return { connect, updateSettings, switchConnection, connectSetup, handleStreamAuthFailure };
+  return { connect, updateSettings, switchConnection, handleStreamAuthFailure };
 }

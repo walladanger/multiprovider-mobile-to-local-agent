@@ -112,7 +112,7 @@ connection, AI & Providers, project, General Settings, and ready. Without a
 connection, AI & Providers and project are omitted (five visible steps). Shared
 navigation derives progress and forward/back destinations from that sequence;
 temporary reconnects retain the AI step and its sign-in dialog. Manual connection
-and Cloud Link pairing both continue to AI & Providers. General Settings edits
+and QR pairing both continue to AI & Providers. General Settings edits
 language, transcript detail, the remembered Chat model, and V2 Steer/Append
 delivery. The model field requires a connection; delivery also requires V2.
 Provider setup embeds the same composition as Settings, including auth dialogs,
@@ -223,14 +223,6 @@ The completion version, preference schema and first-run migration are unchanged.
 - `providers/use-connection-actions.ts`
   Connect/switch/profile orchestration, deep-link restore, and session
   restore.
-- `providers/connect/`
-  Cloud Link pairing, subscription, and access state machine
-  (`use-connect-machine.ts`), with catalog discovery (`catalog.ts`), purchase
-  finalization/recovery (`purchases.ts`), pairing link handling (`pairing.ts`),
-  and access credential preparation (`access.ts`); re-exported through
-  `providers/use-connect-state.ts`.
-  `activation.ts` owns the bounded post-claim desktop-approval/startup wait,
-  foreground suspension and delayed saved-profile checkpoint.
 - `providers/conversation/`
   Conversation listening, playback, connection-feedback, and shared feedback
   helpers composed by `providers/use-conversation-state.ts`.
@@ -345,25 +337,15 @@ onboarding. Components own fields, step changes and the native camera surface;
 the provider owns probe/pair/save/connect actions. `lib/opencode/client/probe.ts`
 preserves setup detection uncertainty while retaining the existing connect-time
 fallback. `lib/opencode/pairing.ts` validates local QR formats and redeems V2
-one-use codes, independently of Cloud Link subscriptions. The resulting session
+one-use codes. The resulting session
 token uses the existing per-profile password storage and Basic-auth transport.
 
-The optional native Cloud Link method composes `use-connect-state.ts`
-inside the provider, verifies native subscriptions through the Cloud Link service,
-validates catalog/session/pairing protocol in `lib/connect.ts`, and
-activates Basic-auth profiles through `switchConnection()`. Shared connection
-preparation refreshes credentials on the same owned machine, shares in-flight
-access requests, and waits for native initialization when recovery needs it.
-Foreground return recovers expired or missing credentials automatically; expiry
-still blocks data-plane traffic. Same-machine renewal preserves the selected
-project and migrates remembered state to the rotated credential scope. Saved
-profile rows match Cloud Link machine identity and refresh after rotation. The `pair` route is
-independent of onboarding completion. See [Cloud Link pilot](connect.md).
+See [Connection setup](connect.md).
 
 - `lib/connection-scope.ts`
   Canonical, deterministic, password-free connection identity (`getConnectionScope`). Every server-scoped storage key, favorite, and pending notification record derives from it; scheme/host are normalized while URL path and query casing are preserved.
 - `lib/connection-profiles.ts`
-  Saved connection metadata in AsyncStorage, per-profile passwords in SecureStore, whole-DTO validation, one shared read/modify/write transaction queue (manual, Cloud Link, preferences, removal and sanitation), and credential resolution for a connection that is not currently active.
+  Saved connection metadata in AsyncStorage, per-profile passwords in SecureStore, whole-DTO validation, one shared read/modify/write transaction queue (saves, preferences, removal and sanitation), and credential resolution for a connection that is not currently active.
 - `lib/connection-password.ts`
   Active connection password in SecureStore, including legacy plaintext migration.
 - `lib/notification-pending.ts`
@@ -394,17 +376,6 @@ independent of onboarding completion. See [Cloud Link pilot](connect.md).
   Provider auth modal.
 - `components/settings/settings-utils.ts`
   Provider copy and option lists.
-
-Cloud Link's four-step assistant is presentation in
-`components/settings/connect-onboarding.tsx` and `connect-pairing.tsx`, sharing
-`connect-subscription.tsx` and the existing scanner. It introduces no new routes,
-stores or persistence. Native offers, purchase verification, secure saving,
-finalization and automatic pairing still belong to the existing provider flow.
-`lib/connect-install.ts` (resolved into `connectSetup.storeInstall`) gates the
-Cloud Link Settings row to App Store and Google Play installs; the row sits
-directly below AI & Providers and orders status, exposed services, subscription,
-then machines. See [Cloud Link](connect.md) for entry, camera and deep-link
-behavior.
 
 ### Platform Integrations
 
@@ -655,9 +626,8 @@ bypasses the remaining backoff or cycles a stream that was backgrounded long
 enough. Reconnects keep a first-envelope authoritative reconcile (sessions,
 interactions, and native surfaces) and tail-merge the transcript; if a poll is
 already in flight, the reconnect pass is queued behind it instead of being
-coalesced away. Invalid-credential and entitlement failures stop the retry
-loop and are surfaced through `ConnectionState.kind` (`auth`/`entitlement`),
-while Cloud Link reuses its prepared credential recovery.
+coalesced away. Invalid-credential failures stop the retry loop and are surfaced through
+`ConnectionState.kind` (`auth`).
 
 Recognized events update local state or schedule refreshes for:
 
@@ -739,7 +709,6 @@ Responsibilities:
 - configure providers
 - remove configured provider credentials
 - choose model enablement defaults
-- show the Cloud Link section directly below AI & Providers, and only for store installs, with status → exposed services → subscription → machines ordering
 - inspect and enable notification setup
 - manage voice and response-style preferences
 - adjust the chat transcript text size, bubble/flat layout, and slim interface density
@@ -756,7 +725,7 @@ Responsibilities:
 - request a short-lived connect ticket and stream PTY data over a project-scoped WebSocket
 - provide xterm terminal emulation with immediate input and a system-keyboard accessory
 
-The provider delivers raw VT output in ordered acknowledged batches to xterm. It owns reconnect cursors, resize, and per-PTY transport lifetime; xterm owns the display and 10,000-line scrollback. Retained PTYs read the live client and credentials through a context accessor, so a same-machine Cloud Link credential rotation reconnects the transport with fresh credentials instead of disposing the renderer and cursor. Unexpected disconnects retry with jittered 1/2/4/8/15-second delays.
+The provider delivers raw VT output in ordered acknowledged batches to xterm. It owns reconnect cursors, resize, and per-PTY transport lifetime; xterm owns the display and 10,000-line scrollback. Retained PTYs read the live client and credentials through a context accessor. Unexpected disconnects retry with jittered 1/2/4/8/15-second delays.
 
 ## Conversation Mode Architecture
 
@@ -910,7 +879,7 @@ safety gates and FOSS exclusion.
 
 `use-workspace-connections.ts` owns explicit connect/disconnect, restoration, and composite connection/project identity. A runtime stays mounted when another chat or tab is selected. Its clients, generations, transcript windows, prompt inbox, approvals, file browser and PTY connections remain separate. `shared-event-stream.ts` fans one server subscription out to retained projects; events are still filtered by directory and the existing polling/reconciliation paths remain active.
 
-Hydration, compatibility settings writes, device sharing, Cloud Link setup/billing, updates, language, audio and native surfaces have one app-wide owner. Favorites, opened projects and remembered sessions keep their existing connection-scoped persistence. Activity observation has one owner per server, with one app-wide Android notification publisher combining counts and releasing only the disconnected server. Native shortcuts carry each row's connection scope; widget publication remains app-wide.
+Hydration, compatibility settings writes, device sharing, updates, language, audio and native surfaces have one app-wide owner. Favorites, opened projects and remembered sessions keep their existing connection-scoped persistence. Activity observation has one owner per server, with one app-wide Android notification publisher combining counts and releasing only the disconnected server. Native shortcuts carry each row's connection scope; widget publication remains app-wide.
 
 The chat library combines the unscoped server catalogs with live project state. It keeps current/running/recency order, uses composite keys and labels each row with its server. Project selection changes chat/project focus. Terminal selection and Settings inspection are independent. Paper portals explicitly restore their caller's workspace scope; otherwise their children would inherit the app host's current chat server.
 

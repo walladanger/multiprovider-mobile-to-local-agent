@@ -83,16 +83,7 @@ describe('connection scope identity', () => {
       valid: true,
     });
 
-    // 8. The UI scope stays stable across a same-machine credential rotation and
-    // still separates manual connections.
-    assert.equal(
-      getConnectionUiScope({ serverUrl: 'https://machine.test', username: 'device-1', connect: { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine-a' } }),
-      getConnectionUiScope({ serverUrl: 'https://machine.test', username: 'device-2', connect: { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine-a' } }),
-    );
-    assert.notEqual(
-      getConnectionUiScope({ serverUrl: 'https://machine.test', username: 'device-1', connect: { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine-a' } }),
-      getConnectionUiScope({ serverUrl: 'https://machine.test', username: 'device-1', connect: { controlPlaneUrl: 'https://api.opencodecloud.link', machineId: 'machine-b' } }),
-    );
+    // 8. The UI scope is the canonical storage scope.
     assert.equal(getConnectionUiScope({ serverUrl: 'https://example.com', username: 'manual' }), scope('https://example.com', 'manual'));
   });
 });

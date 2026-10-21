@@ -4,7 +4,7 @@ import { DATA_USAGE_STORAGE_KEY } from '@/lib/storage-keys';
 
 // Lightweight network usage counter for diagnosing data-heavy sessions
 // (issue #68). Every app request funnels through fetchConnection in client.ts,
-// so counting there captures V1, V2, and Cloud Link traffic. Streaming responses
+// so counting there captures V1 and V2 traffic. Streaming responses
 // are counted by requests only; their byte stream is not buffered just to
 // measure it. Totals are persisted per calendar day so a relaunch does not hide
 // the day's usage.

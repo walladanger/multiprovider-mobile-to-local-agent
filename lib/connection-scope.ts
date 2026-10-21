@@ -62,21 +62,12 @@ export function getConnectionScope({ serverUrl, username }: ConnectionIdentity):
   return toKeySegment(`${url.origin}${url.pathAndQuery}\n${username.trim()}`);
 }
 
-type ConnectionUiIdentity = ConnectionIdentity & {
-  connect?: { controlPlaneUrl: string; machineId: string };
-};
-
 /**
- * Presentation identity that stays stable while only a Cloud Link machine's
- * device credentials rotate. Components keyed by this value keep local state
- * (editor drafts, terminal surfaces) across a same-machine renewal, while a
- * genuinely different server or machine still gets a fresh identity. Manual
- * connections fall back to the canonical storage scope.
+ * Presentation identity for a connection. Components keyed by this value keep
+ * local state (editor drafts, terminal surfaces) for the connection.
  */
-export function getConnectionUiScope(settings: ConnectionUiIdentity): string {
-  return settings.connect
-    ? `connect:${settings.connect.controlPlaneUrl}:${settings.connect.machineId}`
-    : getConnectionScope(settings);
+export function getConnectionUiScope(settings: ConnectionIdentity): string {
+  return getConnectionScope(settings);
 }
 
 function toKeySegment(value: string): string {
