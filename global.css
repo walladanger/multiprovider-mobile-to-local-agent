@@ -1,0 +1,29 @@
+/* Indigo glass theme CSS variables. Keep in sync with theme/tokens.ts. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, .dark {
+    --background: 245 61% 11%;
+    --foreground: 248 100% 96%;
+    --card: 247 55% 24%;
+    --card-foreground: 248 100% 96%;
+    --popover: 249 55% 18%;
+    --popover-foreground: 248 100% 96%;
+    --primary: 248 100% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 249 50% 26%;
+    --secondary-foreground: 248 100% 96%;
+    --muted: 249 40% 22%;
+    --muted-foreground: 247 39% 74%;
+    --accent: 255 92% 76%;
+    --accent-foreground: 245 61% 11%;
+    --destructive: 350 100% 74%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100% / 0.1;
+    --input: 0 0% 100% / 0.12;
+    --ring: 248 100% 68%;
+    --radius: 12px;
+  }
+}

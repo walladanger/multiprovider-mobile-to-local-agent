@@ -1,5 +1,6 @@
+import '../global.css';
 import Constants from 'expo-constants';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider, usePathname } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useLayoutEffect } from 'react';
@@ -18,7 +19,21 @@ import '@/lib/i18n';
 import { isConnectEnabled } from '@/lib/connect';
 import { useOnboarding, useUpdates } from '@/providers/opencode-contexts';
 import { UpdateNotice } from '@/components/ui/update-notice';
+import { MotionBackground } from '@/components/background/motion-background';
+import { palette as themePalette } from '@/theme/tokens';
 import { OpencodeProvider } from '@/providers/opencode-provider';
+
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: 'transparent',
+    card: 'transparent',
+    primary: themePalette.primarySoft,
+    text: themePalette.text,
+    border: 'rgba(255, 255, 255, 0.10)',
+  },
+};
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -31,8 +46,7 @@ export { ErrorBoundary } from 'expo-router';
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const paperTheme = getPaperTheme(colorScheme === 'dark' ? 'dark' : 'light');
+  const paperTheme = getPaperTheme('dark');
   const isE2EMode = Boolean(Constants.expoConfig?.extra?.e2eMode);
 
   useEffect(() => {
@@ -56,10 +70,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <OpencodeProvider>
           <PaperProvider theme={paperTheme}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <ThemeProvider value={navigationTheme}>
+              <MotionBackground />
               <RootNavigator />
               <UpdateHost />
-              <StatusBar style="auto" />
+              <StatusBar style="light" />
             </ThemeProvider>
           </PaperProvider>
         </OpencodeProvider>
@@ -98,7 +113,7 @@ function RootNavigator() {
 
   if (!isHydrated) {
     return (
-      <View style={[styles.hydration, { backgroundColor: palette.background }]}>
+      <View style={[styles.hydration, { backgroundColor: palette.backgroundSolid }]}>
         <ActivityIndicator size="large" color={palette.tint} />
       </View>
     );
@@ -107,7 +122,7 @@ function RootNavigator() {
   const onboardingVisible = !onboardingCompleted || onboardingActive;
 
   return (
-    <Stack>
+    <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Protected guard={onboardingCompleted}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="session/[id]" options={{ headerShown: false }} />
@@ -125,6 +140,6 @@ function RootNavigator() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { backgroundColor: themePalette.bgDeep, flex: 1 },
   hydration: { alignItems: 'center', flex: 1, justifyContent: 'center' },
 });
