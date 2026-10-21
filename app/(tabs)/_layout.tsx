@@ -2,7 +2,7 @@ import { Tabs, usePathname } from 'expo-router';
 import { BottomTabBar } from 'expo-router/js-tabs';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Text, View, type ColorValue } from 'react-native';
+import { Platform, StyleSheet, Text, View, type ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -38,6 +38,8 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? 'light'].tabBackground,
           borderTopColor: Colors[colorScheme ?? 'light'].border,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          elevation: 0,
           height: 56 + insets.bottom,
           paddingTop: 6,
           paddingBottom: Math.max(insets.bottom, 8),
@@ -47,6 +49,7 @@ export default function TabLayout() {
           fontWeight: '600',
         },
         headerShown: false,
+        sceneStyle: { backgroundColor: 'transparent' },
       }}>
       <Tabs.Screen
         name="index"
