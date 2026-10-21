@@ -12,7 +12,7 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
 fi
 
 PORT="${EXPO_DEV_PORT:-8081}"
-PUBLIC_URL="${EXPO_PUBLIC_URL:-http://expo.alvarolorente.dev:80}"
+PUBLIC_URL="${EXPO_PUBLIC_URL:?Set EXPO_PUBLIC_URL to the public packager URL, e.g. http://expo.example.com:80}"
 START_TARGET="${EXPO_START_TARGET:-go}"
 
 cd "$ROOT_DIR"

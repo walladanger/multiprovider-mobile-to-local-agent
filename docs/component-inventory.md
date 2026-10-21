@@ -404,7 +404,6 @@ This is important to parity because the chat layout is intentionally dense and h
 - uses the same safe-area app header and title treatment as Chat and Terminal
 - groups MCP servers and diagnostics under the `Advanced` category
 - shows a `Language` category for the app interface language
-- shows a `Support` category for store rating, feedback, and the support page
 - shows compact category summaries and renders one category at a time in the shared overlay
 - opens connection and provider forms in keyboard-safe full-screen surfaces
 
@@ -502,7 +501,6 @@ scanner. It preserves stored profiles. Components do not poll or classify errors
 - `VoiceSection`
 - `LanguageSection`
 - `DiagnosticsSection`
-- `SupportSection`
 
 ### `ConnectionSection`
 
@@ -660,15 +658,6 @@ Responsibility:
 - show each rule's resource and action, confirm-remove one, refresh on demand
 - reads and mutates provider-owned `savedPermissions` through the chat
   `approvals` value; performs no fetch itself
-
-### `SupportSection`
-
-Responsibility:
-
-- open the Play Store listing to rate the app, but only when a Play Store build exists (`hasPlayStoreRating()`: Android and not the foss variant)
-- open the GitHub issue tracker for improvement feedback
-- open the `getopencode.app/support/` page in the browser
-- hold only URL constants/opening in `lib/support.ts`; no provider state
 
 ## `components/settings/provider-config-dialog.tsx`
 

@@ -522,19 +522,6 @@ Behavior exposed today:
 - "When available" checks on every foreground entry so a new version surfaces immediately; Daily and Weekly throttle discovery to that interval
 - the preference is persisted with the app update state, and the group is hidden when the update module is unavailable (web, FOSS, development, or iOS without a configured store ID)
 
-### Support Section
-
-Purpose:
-
-- let users rate the app, send improvement feedback, or reach the support page
-
-Behavior exposed today:
-
-- `Rate us on Play Store` opens the Play Store listing, shown only on Android builds without the foss variant
-- `Give us feedback` opens the GitHub issue tracker
-- `Open support page` opens `https://getopencode.app/support/` in the browser
-- no provider state or persistence; the section only opens external URLs
-
 ## Conversation Mode Detailed Behavior
 
 Conversation mode is a hands-free loop around one active session.

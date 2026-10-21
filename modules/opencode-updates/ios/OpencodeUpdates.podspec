@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.description = s.summary
   s.license = 'Apache-2.0'
   s.author = 'OpenCode Mobile'
-  s.homepage = 'https://getopencode.app'
+  s.homepage = 'https://github.com/walladanger/multiprovider-mobile-to-local-agent'
   s.source = { :path => '.' }
   s.platform = :ios, '16.4'
   s.swift_version = '6.0'

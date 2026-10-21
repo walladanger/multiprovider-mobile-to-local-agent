@@ -70,24 +70,11 @@ alongside a Play Store build.
 
 There is no self-hosted F-Droid repo. The FOSS build is distributed two ways:
 
-- **Main F-Droid repository** — the intended distribution. Submission requires a
-  recipe in an `fdroiddata` fork; a draft lives at
-  `fdroid/fdroiddata/app.getopencode.fdroid.yml` (see `fdroid/README.md`). Because
-  the project does not commit `android/`, the recipe cannot use `subdir`
-  (fdroidserver checks it exists before `prebuild`). Instead it runs `npm ci`,
-  `scripts/foss-prepare.mjs`, `npx expo prebuild -p android --clean`, strips the
-  release `signingConfig`, then uses a manual `build:` to run
-  `gradle assembleRelease`, with `output:` pointing at the unsigned APK.
-  The recipe follows F-Droid's React Native template and uses its pinned
-  `firebase-stub` srclib; upstream FOSS builds download the same revision only
-  when building the FOSS variant. Reproducible builds are **not enabled**:
-  upstream uses JDK 17 and Expo
-  prebuilts, whereas the F-Droid recipe uses JDK 21 and builds Expo modules from
-  source. No byte-identical APK comparison has passed. The recipe therefore has
-  no `Binaries` or `AllowedAPKSigningKeys` field. F-Droid will sign with its own
-  key, so GitHub APKs cannot update an F-Droid installation. Resolve this before
-  the first F-Droid publication if the upstream signing key must be retained;
-  matching the JDK alone does not establish reproducibility. See
+- **Main F-Droid repository** — submission requires a build recipe in an
+  `fdroiddata` fork. Because the project does not commit `android/`, a recipe
+  cannot use `subdir`; it should run `npm ci`, `scripts/foss-prepare.mjs`,
+  `npx expo prebuild -p android --clean`, strip the release `signingConfig`, and
+  run `gradle assembleRelease`. Reproducible builds are not enabled. See
   [F-Droid's reproducible-build guide](https://f-droid.org/docs/Reproducible_Builds/).
 - **GitHub releases** — the `foss-release` CI job attaches
   `opencode-mobile-fdroid.apk` to `v*` releases for direct sideloading.
@@ -111,13 +98,8 @@ When changing dependencies or native config:
 F-Droid imports the English text and artwork from
 `fastlane/metadata/android/en-US/` at the recipe's pinned source commit. It
 contains the summary, full description, title, version-code changelogs, a
-512 × 512 PNG icon, and five 1080 × 2424 PNG phone screenshots. The artwork was
-retrieved from the author's [Google Play listing](https://play.google.com/store/apps/details?id=app.getopencode)
-on 2026-10-07. Keep this content in the upstream repository; copy only the build
+512 × 512 PNG icon, and five 1080 × 2424 PNG phone screenshots. Keep this content in the upstream repository; copy only the build
 recipe to fdroiddata. A local or uncommitted asset is not available to F-Droid.
-
-See [`fdroid/checklist.md`](../fdroid/checklist.md) for the submission review and
-the remaining publication conditions.
 
 The shared FOSS preparation also excludes the local `opencode-updates` Expo module
 from autolinking, so Google Play In-App Updates is absent from the FOSS artifact.

@@ -7,7 +7,6 @@
       "voice": "Voice & responses",
       "advanced": "Advanced",
       "appearance": "Appearance",
-      "support": "Support",
       "permissions": "Approvals",
       "subscription": "Subscription",
       "services": "Services",
@@ -18,17 +17,9 @@
       "replyPlaybackOn": "Reply playback on",
       "replyPlaybackOff": "Reply playback off",
       "advanced": "Editor, general, MCP servers and diagnostics",
-      "support": "Rate the app, send feedback, get help",
       "permissions": "{{value}} saved",
       "services": "{{value}} exposed"
     }
-  },
-  "support": {
-    "title": "Support",
-    "description": "Rate OpenCode Mobile on Google Play, send improvement feedback, or get help from the support page.",
-    "rate": "Rate us on Play Store",
-    "feedback": "Give us feedback",
-    "openSupport": "Open support page"
   },
   "connection": {
     "currentConnection": "Current connection",

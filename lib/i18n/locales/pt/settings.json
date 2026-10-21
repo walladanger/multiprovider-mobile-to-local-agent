@@ -7,7 +7,6 @@
       "voice": "Voz e respostas",
       "advanced": "Avançado",
       "appearance": "Aparência",
-      "support": "Suporte",
       "permissions": "Aprovações",
       "subscription": "Assinatura",
       "services": "Serviços",
@@ -18,17 +17,9 @@
       "replyPlaybackOn": "Reprodução de respostas ativada",
       "replyPlaybackOff": "Reprodução de respostas desativada",
       "advanced": "Editor, geral, servidores MCP e diagnósticos",
-      "support": "Avalie o app, envie feedback, obtenha ajuda",
       "permissions": "{{value}} salvos",
       "services": "{{value}} expostos"
     }
-  },
-  "support": {
-    "title": "Suporte",
-    "description": "Avalie o OpenCode Mobile no Google Play, envie sugestões de melhoria ou obtenha ajuda na página de suporte.",
-    "rate": "Avalie-nos na Play Store",
-    "feedback": "Envie seu feedback",
-    "openSupport": "Abrir página de suporte"
   },
   "connection": {
     "currentConnection": "Conexão atual",
