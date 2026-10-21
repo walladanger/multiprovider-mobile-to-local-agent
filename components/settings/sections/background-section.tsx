@@ -12,7 +12,8 @@ import { CODE_FONT_IDS, FONT_FAMILIES, TEXT_SCALE_MAX, TEXT_SCALE_MIN, UI_FONT_I
 import { SKIN_IDS } from '@/lib/backgrounds/skins';
 import { BUILTIN_PRESETS, presetThumbnail } from '@/lib/backgrounds/builtin-presets';
 import { MESH_PRESETS } from '@/lib/backgrounds/mesh-presets';
-import { BACKGROUND_KINDS, PARTICLE_COUNT_MAX, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
+import { fromOffset, SLIDER_RANGES, toOffset, type SliderKey } from '@/lib/backgrounds/offsets';
+import { BACKGROUND_DEFAULTS, BACKGROUND_KINDS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
 import { useBackground } from '@/providers/background-context';
 import type { Palette } from './setting-rows';
 
@@ -20,7 +21,6 @@ const SWATCHES = ['#6d5cff', '#8b5cf6', '#3b82f6', '#00ffff', '#c9c2ff', '#f0abf
 
 type ColorKey = 'colorA' | 'colorB' | 'colorBack';
 // Which controls make sense for each background.
-type SliderKey = 'speed' | 'density' | 'intensity' | 'blur' | 'opacity' | 'scale' | 'distortion' | 'swirl' | 'particleCount' | 'noiseIntensity' | 'particleSizeMin' | 'particleSizeMax';
 const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: SliderKey[] }> = {
   gradient: { colors: ['colorA', 'colorB', 'colorBack'], sliders: [] },
   video: { colors: [], sliders: ['intensity'] },
@@ -35,7 +35,7 @@ const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: SliderKey[
   papermesh: { colors: ['colorBack'], sliders: ['speed', 'distortion', 'swirl', 'density', 'scale', 'intensity', 'opacity'] },
   hive: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
 };
-const RANGES: Record<SliderKey, readonly [number, number, number]> = { speed: [0, 2, 0.05], density: [0, 1, 0.05], intensity: [0, 1, 0.05], blur: [0, 20, 1], opacity: [0, 1, 0.05], scale: [0, 1, 0.05], distortion: [0, 1, 0.05], swirl: [0, 1, 0.05], particleCount: [50, PARTICLE_COUNT_MAX, 50], noiseIntensity: [0.0005, 0.01, 0.0005], particleSizeMin: [0.2, 4, 0.1], particleSizeMax: [0.5, 6, 0.1] };
+const RANGES = SLIDER_RANGES;
 const valueText = (key: SliderKey, v: number) => key === 'blur' ? `${v}px` : key === 'particleCount' ? String(v) : key === 'noiseIntensity' ? v.toFixed(4) : v.toFixed(2);
 
 export function BackgroundSection({ palette }: { palette: Palette }) {
@@ -143,13 +143,23 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
       ))}
 
       {controls.sliders.map((key) => {
-        const [min, rawMax, step] = RANGES[key];
+        // Sliders show an offset (-100..+100) from OUR default; 0 = our variant. Values stay absolute.
+        const [min, rawMax] = RANGES[key];
         const max = key === 'blur' && settings.kind === 'mesh' ? 120 : rawMax;
+        const def = BACKGROUND_DEFAULTS[settings.kind][key];
+        const offset = toOffset(settings[key], def, min, max);
         return (
-          <NumericSlider key={key} label={t(`settings:backgrounds.controls.${key}`)} minimum={min} maximum={max} step={step} palette={palette}
-            value={settings[key]} valueLabel={valueText(key, settings[key])} onValueChange={(v) => bg.update({ [key]: v })} />
+          <View key={key} style={styles.sliderRow}>
+            <View style={styles.flex}>
+              <NumericSlider label={t(`settings:backgrounds.controls.${key}`)} minimum={-100} maximum={100} step={5} palette={palette}
+                value={offset} valueLabel={`${offset > 0 ? '+' : ''}${offset} (${valueText(key, settings[key])})`}
+                onValueChange={(o) => bg.update({ [key]: key === 'particleCount' ? Math.round(fromOffset(o, def, min, max)) : fromOffset(o, def, min, max) })} />
+            </View>
+            <Button compact disabled={offset === 0 && settings[key] === def} onPress={() => bg.update({ [key]: def })}>{t('settings:backgrounds.controls.reset')}</Button>
+          </View>
         );
       })}
+      <Button mode="outlined" onPress={() => bg.applySettings(BACKGROUND_DEFAULTS[settings.kind])}>{t('settings:backgrounds.controls.resetAll')}</Button>
 
       <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.presets.title')}</Text>
       <View style={styles.saveRow}>
@@ -199,6 +209,7 @@ const styles = StyleSheet.create({
   chip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
   colorRow: { gap: 6 },
   themeChip: { alignItems: 'center', borderRadius: 999, borderWidth: 1, flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 8 },
+  sliderRow: { alignItems: 'center', flexDirection: 'row', gap: 4 },
   thumbChip: { alignItems: 'center', flexDirection: 'row', gap: 8 },
   thumb: { borderRadius: 6, flexDirection: 'row', height: 18, overflow: 'hidden', width: 28 },
   themeDot: { borderRadius: 6, height: 12, width: 12 },

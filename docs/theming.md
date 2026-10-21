@@ -62,3 +62,21 @@ Text, Dialog, GlassPanel) rather than from a kit package. To swap kits:
 
 All shader backgrounds render at half resolution, unmount while the app is backgrounded and fall back to the
 static gradient when reduce motion is on (`components/background/motion-background.tsx`).
+
+## Reference vs default
+
+Every ported or reference-inspired background keeps its faithful look as a `REFERENCE` constant
+(`BACKGROUND_REFERENCES`, `MESH_PRESET_REFERENCES`) and ships a nudged **default** derived with
+`applyNudge()` (`BACKGROUND_NUDGES` in `lib/backgrounds/settings.ts`). The default is never the reference
+(`tests/vitest/reference-defaults.test.ts`).
+
+| Preset | Hue shift | Other deltas (default vs reference) |
+| --- | --- | --- |
+| See `BACKGROUND_NUDGES` | 10–25° per kind | speed / density / intensity / scale multipliers plus per-kind extras (counts, offsets) |
+| Mesh presets (Indigo Aurora, Deep Ocean, Soft Mesh) | +14° | stop x ±0.05, drift ×1.15, blur +6 |
+| Aurora Flow (Deep Blue) | −14° | — |
+| Gradient, Video | none | our own (theme / user video), not references |
+
+The exact per-kind numbers sit in code next to each preset. In the UI, sliders show an offset from the
+default (−100..+100, 0 = our default); **Reset** returns to 0. Saved presets store absolute values plus
+`schema` (`PRESET_SCHEMA = 2`), so changing defaults later does not move saved presets.

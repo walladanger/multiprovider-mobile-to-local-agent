@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { kokonutPath, P512, perlin3, stepParticles } from '../../lib/backgrounds/background-math';
-import { BACKGROUND_DEFAULTS, normalizeSettings, PARTICLE_COUNT_MAX } from '../../lib/backgrounds/settings';
+import { BACKGROUND_REFERENCES, normalizeSettings, PARTICLE_COUNT_MAX } from '../../lib/backgrounds/settings';
 import { MESH_PRESETS } from '../../lib/backgrounds/mesh-presets';
 
 describe('ported background math', () => {
@@ -32,7 +32,7 @@ describe('ported background math', () => {
     const s = normalizeSettings({ kind: 'cyber', particleCount: 2000, particleSizeMin: 3, particleSizeMax: 1 });
     expect(s.particleCount).toBe(PARTICLE_COUNT_MAX);
     expect(s.particleSizeMax).toBeGreaterThanOrEqual(s.particleSizeMin);
-    expect(BACKGROUND_DEFAULTS.cyber.noiseIntensity).toBe(0.003);
+    expect(BACKGROUND_REFERENCES.cyber.noiseIntensity).toBe(0.003);
     expect(normalizeSettings({ kind: 'paths', position: -1 }).position).toBe(-1);
     expect(normalizeSettings({ kind: 'paths', position: 5 }).position).toBe(0);
   });

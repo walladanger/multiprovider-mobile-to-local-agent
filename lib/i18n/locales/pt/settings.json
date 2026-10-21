@@ -446,7 +446,9 @@
       "stop": "Color {{value}}",
       "scale": "Scale",
       "distortion": "Distortion",
-      "swirl": "Swirl"
+      "swirl": "Swirl",
+      "reset": "Redefinir",
+      "resetAll": "Redefinir tudo"
     },
     "presets": {
       "title": "Predefinições salvas",

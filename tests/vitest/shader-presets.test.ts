@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { BUILTIN_PRESETS, presetThumbnail } from '../../lib/backgrounds/builtin-presets';
-import { MESH_PRESETS } from '../../lib/backgrounds/mesh-presets';
+import { MESH_PRESET_REFERENCES, MESH_PRESETS } from '../../lib/backgrounds/mesh-presets';
 import { BACKGROUND_DEFAULTS, normalizePresets, savePreset } from '../../lib/backgrounds/settings';
 import { declaredUniforms, SHADER_KINDS, SHADER_SOURCES, shaderUniforms } from '../../lib/backgrounds/shader-sources';
 
@@ -22,7 +22,8 @@ describe('shader background presets', () => {
   it('includes all requested presets, the deep-blue aurora variant and Soft Mesh', () => {
     const ids = BUILTIN_PRESETS.map((p) => p.id);
     for (const id of ['prismaticLattice', 'auroraFlow', 'auroraDeepBlue', 'halftoneClouds', 'paperMesh', 'hive', 'softMesh']) expect(ids).toContain(id);
-    expect(MESH_PRESETS.find((m) => m.id === 'softMesh')!.stops.map((s) => s.color)).toEqual(['#14b8a6', '#3b82f6', '#8b5cf6']);
+    expect(MESH_PRESET_REFERENCES.find((m) => m.id === 'softMesh')!.stops.map((s) => s.color)).toEqual(['#14b8a6', '#3b82f6', '#8b5cf6']);
+    expect(MESH_PRESETS.find((m) => m.id === 'softMesh')).toBeTruthy();
     const paper = BUILTIN_PRESETS.find((p) => p.id === 'paperMesh')!.settings;
     expect(paper.stops.length).toBeGreaterThanOrEqual(4);
   });

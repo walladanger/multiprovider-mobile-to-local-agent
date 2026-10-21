@@ -3,11 +3,13 @@
  * screenshots) by appending an entry: 2-8 stops, positions/radii as fractions of
  * the screen, drift as fraction of the screen, speed as a multiplier.
  */
+import { hueShift } from './color-math';
 import type { MeshStop } from './settings';
 
 export type MeshPreset = { id: string; name: string; colorBack: string; blur: number; stops: MeshStop[] };
 
-export const MESH_PRESETS: MeshPreset[] = [
+/** Reference looks (faithful to the brief / screenshot). Use MESH_PRESETS (nudged defaults) in the app. */
+export const MESH_PRESET_REFERENCES: MeshPreset[] = [
   {
     id: 'indigoAurora', name: 'Indigo Aurora', colorBack: '#0b0a2a', blur: 60,
     stops: [
@@ -35,3 +37,19 @@ export const MESH_PRESETS: MeshPreset[] = [
     ],
   },
 ];
+
+/** Reference -> default: hue +14 deg, stops offset +-0.05 in x, drift x1.15, blur +6. */
+export const MESH_PRESET_NUDGE = { hue: 14, offset: 0.05, drift: 1.15, blur: 6 } as const;
+
+export const MESH_PRESETS: MeshPreset[] = MESH_PRESET_REFERENCES.map((m) => ({
+  ...m,
+  colorBack: hueShift(m.colorBack, MESH_PRESET_NUDGE.hue),
+  blur: m.blur + MESH_PRESET_NUDGE.blur,
+  stops: m.stops.map((x, i) => ({
+    ...x,
+    color: hueShift(x.color, MESH_PRESET_NUDGE.hue),
+    x: x.x + (i % 2 ? MESH_PRESET_NUDGE.offset : -MESH_PRESET_NUDGE.offset),
+    driftX: Math.round(x.driftX * MESH_PRESET_NUDGE.drift * 1000) / 1000,
+    driftY: Math.round(x.driftY * MESH_PRESET_NUDGE.drift * 1000) / 1000,
+  })),
+}));
