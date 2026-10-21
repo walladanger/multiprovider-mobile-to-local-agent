@@ -433,6 +433,44 @@
       "delete": "Supprimer",
       "empty": "Aucun préréglage enregistré."
     },
-    "summary": "Arrière-plan : {{value}}"
+    "summary": "Arrière-plan : {{value}}",
+    "theme": {
+      "title": "Thème de couleurs",
+      "hint": "S'applique immédiatement et suggère des couleurs d'arrière-plan assorties, modifiables ci-dessous.",
+      "names": {
+        "deepIndigo": "Deep Indigo",
+        "midnightViolet": "Midnight Violet",
+        "royalPurple": "Royal Purple",
+        "abyssBlue": "Abyss Blue",
+        "nebulaMagenta": "Nebula Magenta",
+        "cosmicTeal": "Cosmic Teal",
+        "emberNight": "Ember Night"
+      }
+    },
+    "skin": {
+      "title": "Style",
+      "names": {
+        "glass": "Verre",
+        "solid": "Opaque",
+        "crisp": "Net",
+        "compact": "Compact"
+      }
+    },
+    "fonts": {
+      "ui": "Police de l'interface",
+      "code": "Police du code",
+      "system": "Système",
+      "textSize": "Taille du texte",
+      "textSizeHint": "S'ajoute à la taille de police du système."
+    },
+    "icons": {
+      "title": "Icônes",
+      "packs": {
+        "material": "Material",
+        "lucide": "Lucide",
+        "phosphor": "Phosphor",
+        "tabler": "Tabler"
+      }
+    }
   }
 }

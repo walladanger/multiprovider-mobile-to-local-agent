@@ -433,6 +433,44 @@
       "delete": "Delete",
       "empty": "No saved presets yet."
     },
-    "summary": "Background: {{value}}"
+    "summary": "Background: {{value}}",
+    "theme": {
+      "title": "Color theme",
+      "hint": "Applies instantly and suggests matching background colors, which you can still change below.",
+      "names": {
+        "deepIndigo": "Deep Indigo",
+        "midnightViolet": "Midnight Violet",
+        "royalPurple": "Royal Purple",
+        "abyssBlue": "Abyss Blue",
+        "nebulaMagenta": "Nebula Magenta",
+        "cosmicTeal": "Cosmic Teal",
+        "emberNight": "Ember Night"
+      }
+    },
+    "skin": {
+      "title": "Style",
+      "names": {
+        "glass": "Glass",
+        "solid": "Solid",
+        "crisp": "Crisp",
+        "compact": "Compact"
+      }
+    },
+    "fonts": {
+      "ui": "Interface font",
+      "code": "Code font",
+      "system": "System",
+      "textSize": "Text size",
+      "textSizeHint": "Stacks with your system font size."
+    },
+    "icons": {
+      "title": "Icons",
+      "packs": {
+        "material": "Material",
+        "lucide": "Lucide",
+        "phosphor": "Phosphor",
+        "tabler": "Tabler"
+      }
+    }
   }
 }

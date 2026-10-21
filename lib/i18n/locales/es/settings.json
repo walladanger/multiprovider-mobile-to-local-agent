@@ -433,6 +433,44 @@
       "delete": "Eliminar",
       "empty": "Aún no hay ajustes guardados."
     },
-    "summary": "Fondo: {{value}}"
+    "summary": "Fondo: {{value}}",
+    "theme": {
+      "title": "Tema de color",
+      "hint": "Se aplica al instante y sugiere colores de fondo a juego, que puedes cambiar abajo.",
+      "names": {
+        "deepIndigo": "Deep Indigo",
+        "midnightViolet": "Midnight Violet",
+        "royalPurple": "Royal Purple",
+        "abyssBlue": "Abyss Blue",
+        "nebulaMagenta": "Nebula Magenta",
+        "cosmicTeal": "Cosmic Teal",
+        "emberNight": "Ember Night"
+      }
+    },
+    "skin": {
+      "title": "Estilo",
+      "names": {
+        "glass": "Cristal",
+        "solid": "Sólido",
+        "crisp": "Nítido",
+        "compact": "Compacto"
+      }
+    },
+    "fonts": {
+      "ui": "Fuente de la interfaz",
+      "code": "Fuente de código",
+      "system": "Sistema",
+      "textSize": "Tamaño del texto",
+      "textSizeHint": "Se suma al tamaño de letra del sistema."
+    },
+    "icons": {
+      "title": "Iconos",
+      "packs": {
+        "material": "Material",
+        "lucide": "Lucide",
+        "phosphor": "Phosphor",
+        "tabler": "Tabler"
+      }
+    }
   }
 }

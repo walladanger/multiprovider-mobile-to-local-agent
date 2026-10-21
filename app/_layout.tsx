@@ -20,10 +20,11 @@ import { useOnboarding, useUpdates } from '@/providers/opencode-contexts';
 import { UpdateNotice } from '@/components/ui/update-notice';
 import { MotionBackground } from '@/components/background/motion-background';
 import { BackgroundProvider } from '@/providers/background-context';
-import { palette as themePalette } from '@/theme/tokens';
+import { glass as themeGlass, palette as themePalette } from '@/theme/tokens';
 import { OpencodeProvider } from '@/providers/opencode-provider';
 
-const navigationTheme = {
+function getNavigationTheme() {
+  return {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
@@ -31,9 +32,10 @@ const navigationTheme = {
     card: 'transparent',
     primary: themePalette.primarySoft,
     text: themePalette.text,
-    border: 'rgba(255, 255, 255, 0.10)',
+    border: themeGlass.border,
   },
-};
+  };
+}
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -46,7 +48,10 @@ export { ErrorBoundary } from 'expo-router';
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
+  // Subscribes to live color-theme changes.
+  useColorScheme();
   const paperTheme = getPaperTheme('dark');
+  const navigationTheme = getNavigationTheme();
   const isE2EMode = Boolean(Constants.expoConfig?.extra?.e2eMode);
 
   useEffect(() => {
@@ -66,7 +71,7 @@ export default function RootLayout() {
   }, [isE2EMode]);
 
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={[styles.root, { backgroundColor: themePalette.bgDeep }]}>
       <SafeAreaProvider>
         <OpencodeProvider>
           <BackgroundProvider>
@@ -138,6 +143,6 @@ function RootNavigator() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: themePalette.bgDeep, flex: 1 },
+  root: { flex: 1 },
   hydration: { alignItems: 'center', flex: 1, justifyContent: 'center' },
 });

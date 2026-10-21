@@ -433,6 +433,44 @@
       "delete": "Löschen",
       "empty": "Noch keine Vorlagen gespeichert."
     },
-    "summary": "Hintergrund: {{value}}"
+    "summary": "Hintergrund: {{value}}",
+    "theme": {
+      "title": "Farbschema",
+      "hint": "Wird sofort angewendet und schlägt passende Hintergrundfarben vor, die du unten ändern kannst.",
+      "names": {
+        "deepIndigo": "Deep Indigo",
+        "midnightViolet": "Midnight Violet",
+        "royalPurple": "Royal Purple",
+        "abyssBlue": "Abyss Blue",
+        "nebulaMagenta": "Nebula Magenta",
+        "cosmicTeal": "Cosmic Teal",
+        "emberNight": "Ember Night"
+      }
+    },
+    "skin": {
+      "title": "Stil",
+      "names": {
+        "glass": "Glas",
+        "solid": "Massiv",
+        "crisp": "Klar",
+        "compact": "Kompakt"
+      }
+    },
+    "fonts": {
+      "ui": "Oberflächenschrift",
+      "code": "Code-Schrift",
+      "system": "System",
+      "textSize": "Textgröße",
+      "textSizeHint": "Wird mit der Systemschriftgröße kombiniert."
+    },
+    "icons": {
+      "title": "Symbole",
+      "packs": {
+        "material": "Material",
+        "lucide": "Lucide",
+        "phosphor": "Phosphor",
+        "tabler": "Tabler"
+      }
+    }
   }
 }

@@ -1,39 +1,43 @@
 import { Platform } from 'react-native';
 
-import { glass, palette } from '@/theme/tokens';
+import { glass, palette, subscribeThemeTokens, typography } from '@/theme/tokens';
 
 // Derived from theme/tokens.ts (the single theme file). Both schemes use the
-// indigo glass theme; `background` is transparent so MotionBackground shows
-// through, and `backgroundSolid` is for surfaces that must stay opaque.
-const indigo = {
-  text: palette.text,
-  background: 'transparent',
-  backgroundSolid: palette.bg,
-  surface: glass.panel,
-  surfaceAlt: glass.panelAlt,
-  surfaceSolid: palette.bgRaised,
-  card: glass.panel,
-  tint: palette.primarySoft,
-  accent: palette.accent,
-  muted: palette.textMuted,
-  border: glass.border,
-  icon: palette.icon,
-  success: palette.success,
-  warning: palette.warning,
-  danger: palette.danger,
-  bubbleUser: palette.primary,
-  onBubbleUser: palette.onPrimary,
-  bubbleAssistant: glass.panel,
-  onBubbleAssistant: palette.text,
-  tabBackground: glass.panelStrong,
-  tabIconDefault: palette.icon,
-  tabIconSelected: palette.primarySoft,
-};
+// glass theme; `background` is transparent so MotionBackground shows through,
+// and `backgroundSolid` is for surfaces that must stay opaque. Rebuilt in place
+// whenever a color theme is applied (see applyThemeTokens).
+function buildColors() {
+  return {
+    text: palette.text,
+    background: 'transparent',
+    backgroundSolid: palette.bg,
+    surface: glass.panel,
+    surfaceAlt: glass.panelAlt,
+    surfaceSolid: palette.bgRaised,
+    card: glass.panel,
+    tint: palette.primarySoft,
+    accent: palette.accent,
+    muted: palette.textMuted,
+    border: glass.border,
+    icon: palette.icon,
+    success: palette.success,
+    warning: palette.warning,
+    danger: palette.danger,
+    bubbleUser: palette.primary,
+    onBubbleUser: palette.onPrimary,
+    bubbleAssistant: glass.panel,
+    onBubbleAssistant: palette.text,
+    tabBackground: glass.panelStrong,
+    tabIconDefault: palette.icon,
+    tabIconSelected: palette.primarySoft,
+  };
+}
 
 export const Colors = {
-  light: indigo,
-  dark: indigo,
+  light: buildColors(),
+  dark: buildColors(),
 };
+
 
 export const Fonts = Platform.select({
   ios: {
@@ -57,4 +61,18 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
     display: "'Avenir Next', 'Segoe UI', 'Trebuchet MS', sans-serif",
   },
+});
+
+const platformFonts = { ...Fonts };
+
+// Keep Colors and Fonts in sync with live theme / font changes from Settings > Appearance.
+subscribeThemeTokens(() => {
+  Object.assign(Colors.light, buildColors());
+  Object.assign(Colors.dark, buildColors());
+  Object.assign(Fonts, {
+    sans: typography.sans ?? platformFonts.sans,
+    display: typography.sansBold ?? platformFonts.display,
+    rounded: typography.sans ?? platformFonts.rounded,
+    mono: typography.mono ?? platformFonts.mono,
+  });
 });

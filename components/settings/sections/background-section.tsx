@@ -4,7 +4,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 
 import { BackgroundLayer } from '@/components/background/motion-background';
+import { Icon } from '@/components/ui/icon';
 import { NumericSlider } from '@/components/ui/numeric-slider';
+import { ICON_PACKS } from '@/lib/backgrounds/appearance';
+import { COLOR_THEME_IDS, COLOR_THEMES } from '@/lib/backgrounds/color-themes';
+import { CODE_FONT_IDS, FONT_FAMILIES, TEXT_SCALE_MAX, TEXT_SCALE_MIN, UI_FONT_IDS } from '@/lib/backgrounds/fonts';
+import { SKIN_IDS } from '@/lib/backgrounds/skins';
 import { BACKGROUND_KINDS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
 import { useBackground } from '@/providers/background-context';
 import type { Palette } from './setting-rows';
@@ -35,6 +40,40 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
       <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.preview')}</Text>
       <View style={[styles.preview, { borderColor: palette.border }]} testID="background-preview">
         <BackgroundLayer settings={settings} width={PREVIEW_W} height={PREVIEW_H} />
+      </View>
+
+      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.theme.title')}</Text>
+      <View style={styles.chips}>
+        {COLOR_THEME_IDS.map((id) => {
+          const th = COLOR_THEMES[id];
+          const selected = bg.appearance.themeId === id;
+          return (
+            <Pressable key={id} accessibilityRole="button" accessibilityState={{ selected }} onPress={() => bg.selectTheme(id)} testID={`color-theme-${id}`}
+              style={[styles.themeChip, { backgroundColor: th.bg, borderColor: selected ? th.primarySoft : palette.border }]}>
+              <View style={[styles.themeDot, { backgroundColor: th.primary }]} />
+              <View style={[styles.themeDot, { backgroundColor: th.accent }]} />
+              <Text style={{ color: th.text }}>{t(`settings:backgrounds.theme.names.${id}`)}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:backgrounds.theme.hint')}</Text>
+
+      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.skin.title')}</Text>
+      <ChipRow palette={palette} options={SKIN_IDS.map((id) => ({ id, label: t(`settings:backgrounds.skin.names.${id}`) }))} value={bg.appearance.skinId} onChange={(id) => bg.updateAppearance({ skinId: id })} />
+
+      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.fonts.ui')}</Text>
+      <ChipRow palette={palette} options={UI_FONT_IDS.map((id) => ({ id, label: id === 'system' ? t('settings:backgrounds.fonts.system') : FONT_FAMILIES[id].label, fontFamily: id === 'system' || !bg.fontsLoaded ? undefined : FONT_FAMILIES[id].regular }))} value={bg.appearance.uiFont} onChange={(id) => bg.updateAppearance({ uiFont: id })} />
+      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.fonts.code')}</Text>
+      <ChipRow palette={palette} options={CODE_FONT_IDS.map((id) => ({ id, label: id === 'system' ? t('settings:backgrounds.fonts.system') : FONT_FAMILIES[id].label, fontFamily: id === 'system' || !bg.fontsLoaded ? undefined : FONT_FAMILIES[id].regular }))} value={bg.appearance.codeFont} onChange={(id) => bg.updateAppearance({ codeFont: id })} />
+      <NumericSlider label={t('settings:backgrounds.fonts.textSize')} minimum={TEXT_SCALE_MIN} maximum={TEXT_SCALE_MAX} step={0.05} palette={palette}
+        value={bg.appearance.textScale} valueLabel={`${Math.round(bg.appearance.textScale * 100)}%`} onValueChange={(v) => bg.updateAppearance({ textScale: v })} />
+      <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:backgrounds.fonts.textSizeHint')}</Text>
+
+      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.icons.title')}</Text>
+      <ChipRow palette={palette} options={ICON_PACKS.map((id) => ({ id, label: t(`settings:backgrounds.icons.packs.${id}`) }))} value={bg.appearance.iconPack} onChange={(id) => bg.updateAppearance({ iconPack: id })} />
+      <View style={styles.chips}>
+        {(['chat', 'terminal', 'folder', 'settings', 'palette', 'bell'] as const).map((n) => <Icon key={n} name={n} size={22} color={palette.tint} />)}
       </View>
 
       <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.style')}</Text>
@@ -93,6 +132,19 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
   );
 }
 
+function ChipRow<T extends string>({ options, value, onChange, palette }: { options: { id: T; label: string; fontFamily?: string }[]; value: T; onChange: (id: T) => void; palette: Palette }) {
+  return (
+    <View style={styles.chips}>
+      {options.map((o) => (
+        <Pressable key={o.id} accessibilityRole="button" accessibilityState={{ selected: value === o.id }} onPress={() => onChange(o.id)}
+          style={[styles.chip, { borderColor: value === o.id ? palette.tint : palette.border, backgroundColor: value === o.id ? palette.surfaceAlt : palette.surface }]}>
+          <Text style={{ color: palette.text, fontFamily: o.fontFamily }}>{o.label}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 const PREVIEW_W = 300;
 const PREVIEW_H = 170;
 
@@ -102,6 +154,8 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
   colorRow: { gap: 6 },
+  themeChip: { alignItems: 'center', borderRadius: 999, borderWidth: 1, flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 8 },
+  themeDot: { borderRadius: 6, height: 12, width: 12 },
   swatch: { borderRadius: 14, height: 28, width: 28 },
   saveRow: { alignItems: 'center', flexDirection: 'row', gap: 8 },
   presetRow: { alignItems: 'center', borderRadius: 12, borderWidth: 1, flexDirection: 'row', gap: 4, paddingLeft: 12 },

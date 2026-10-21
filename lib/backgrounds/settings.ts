@@ -1,4 +1,6 @@
 /** Pure model for animated background settings and named presets (no React/RN imports). */
+import { normalizeAppearance, type AppearanceSettings } from './appearance';
+
 export const BACKGROUND_KINDS = ['gradient', 'video', 'paths', 'liquid', 'swirl'] as const;
 export type BackgroundKind = (typeof BACKGROUND_KINDS)[number];
 
@@ -22,7 +24,8 @@ export type BackgroundSettings = {
   opacity: number;
 };
 
-export type BackgroundPreset = { id: string; name: string; settings: BackgroundSettings };
+/** A user preset: background settings plus (optionally) the full appearance: theme, skin, fonts, icons. */
+export type BackgroundPreset = { id: string; name: string; settings: BackgroundSettings; appearance?: AppearanceSettings };
 
 export const BACKGROUND_DEFAULTS: Record<BackgroundKind, BackgroundSettings> = {
   gradient: { kind: 'gradient', colorA: '#6d5cff', colorB: '#1a1446', colorBack: '#0b0a2a', speed: 1, density: 0.5, intensity: 0.5, blur: 0, opacity: 1 },
@@ -60,15 +63,16 @@ export function normalizePresets(input: unknown): BackgroundPreset[] {
   if (!Array.isArray(input)) return [];
   return input
     .filter((p): p is BackgroundPreset => Boolean(p) && typeof p.id === 'string' && typeof p.name === 'string')
-    .map((p) => ({ id: p.id, name: p.name.trim().slice(0, 60) || 'Preset', settings: normalizeSettings(p.settings) }));
+    .map((p) => ({ id: p.id, name: p.name.trim().slice(0, 60) || 'Preset', settings: normalizeSettings(p.settings), ...(p.appearance ? { appearance: normalizeAppearance(p.appearance) } : {}) }));
 }
 
-export function savePreset(presets: BackgroundPreset[], name: string, settings: BackgroundSettings, id = `p${Date.now().toString(36)}`): BackgroundPreset[] {
+export function savePreset(presets: BackgroundPreset[], name: string, settings: BackgroundSettings, id = `p${Date.now().toString(36)}`, appearance?: AppearanceSettings): BackgroundPreset[] {
   const trimmed = name.trim().slice(0, 60);
   if (!trimmed) return presets;
   const existing = presets.find((p) => p.name === trimmed);
-  if (existing) return presets.map((p) => (p.id === existing.id ? { ...p, settings: normalizeSettings(settings) } : p));
-  return [...presets, { id, name: trimmed, settings: normalizeSettings(settings) }];
+  const extra = appearance ? { appearance: normalizeAppearance(appearance) } : {};
+  if (existing) return presets.map((p) => (p.id === existing.id ? { ...p, settings: normalizeSettings(settings), ...extra } : p));
+  return [...presets, { id, name: trimmed, settings: normalizeSettings(settings), ...extra }];
 }
 
 export function renamePreset(presets: BackgroundPreset[], id: string, name: string): BackgroundPreset[] {
@@ -81,4 +85,4 @@ export function deletePreset(presets: BackgroundPreset[], id: string): Backgroun
   return presets.filter((p) => p.id !== id);
 }
 
-export const BACKGROUND_STORAGE_KEYS = { active: 'ui.background.active.v1', presets: 'ui.background.presets.v1' } as const;
+export const BACKGROUND_STORAGE_KEYS = { active: 'ui.background.active.v1', presets: 'ui.background.presets.v1', appearance: 'ui.appearance.v1' } as const;
