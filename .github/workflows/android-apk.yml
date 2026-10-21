@@ -1,0 +1,169 @@
+name: Android APK
+
+# Builds an installable Android APK without EAS.
+# - workflow_dispatch: pick a ref and variant (development | release)
+# - push of v* tags: release APK, attached to the GitHub Release
+# - pull requests labeled `build-apk`: release APK as a workflow artifact
+#
+# Signing: when the ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD /
+# ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD secrets are all set, release builds
+# reuse scripts/build-android-release.mjs and are release-signed. Otherwise the
+# APK is signed with the Android debug keystore (Expo template default) and the
+# file name ends in `-debug-signed.apk`.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or SHA to build (empty = the selected workflow ref)'
+        required: false
+        default: ''
+        type: string
+      variant:
+        description: 'Build variant'
+        required: true
+        default: development
+        type: choice
+        options:
+          - development
+          - release
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    types: [labeled, opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.ref || github.ref }}-${{ inputs.variant || 'release' }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+
+jobs:
+  apk:
+    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'build-apk') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+
+    env:
+      VARIANT: ${{ inputs.variant || 'release' }}
+      EXPO_ANDROID_PACKAGE: ${{ vars.EXPO_ANDROID_PACKAGE }}
+      ABIS: arm64-v8a,armeabi-v7a,x86_64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle (cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      # Same retried pre-install as build.yml: AGP's on-demand CMake download is flaky.
+      - name: Install CMake
+        shell: bash
+        run: |
+          set -eo pipefail
+          for attempt in 1 2 3; do
+            if sdkmanager --install 'cmake;3.22.1' </dev/null; then exit 0; fi
+            rm -rf "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/.temp"
+            sleep $((attempt * 5))
+          done
+          echo "::error::Failed to install cmake;3.22.1 after 3 attempts"
+          exit 1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Decide signing
+        id: signing
+        shell: bash
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ "$VARIANT" = release ] && [ -n "$KS" ] && [ -n "$KS_PASS" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASS" ]; then
+            echo "mode=release-key" >> "$GITHUB_OUTPUT"
+            echo "Signing with the release keystore from repository secrets."
+          else
+            echo "mode=debug" >> "$GITHUB_OUTPUT"
+            echo "::notice::Release signing secrets not used; the APK will be signed with the Android debug keystore."
+          fi
+
+      - name: Build development APK
+        if: env.VARIANT == 'development'
+        run: npm run build:development:android
+        env:
+          GRADLE_ARGS: -PreactNativeArchitectures=${{ env.ABIS }}
+
+      - name: Build release APK (release keystore)
+        if: env.VARIANT == 'release' && steps.signing.outputs.mode == 'release-key'
+        run: npm run build:android
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_RELEASE_ABIS: ${{ env.ABIS }}
+
+      # Without secrets: same prebuild as the release script, then assembleRelease.
+      # The Expo android template signs the release build type with the debug keystore.
+      - name: Build release APK (debug keystore)
+        if: env.VARIANT == 'release' && steps.signing.outputs.mode == 'debug'
+        shell: bash
+        env:
+          EXPO_APP_VARIANT: production
+          CI: '1'
+        run: |
+          set -eo pipefail
+          npx expo prebuild --platform android --clean
+          cd android
+          ./gradlew assembleRelease -PreactNativeArchitectures="$ABIS"
+
+      - name: Collect and verify APK
+        id: apk
+        shell: bash
+        run: |
+          set -eo pipefail
+          if [ "$VARIANT" = development ]; then SRC=android/app/build/outputs/apk/debug/app-debug.apk; else SRC=android/app/build/outputs/apk/release/app-release.apk; fi
+          SUFFIX=""
+          if [ "${{ steps.signing.outputs.mode }}" = debug ]; then SUFFIX="-debug-signed"; fi
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then LABEL="${GITHUB_REF_NAME}"; else LABEL="$(git rev-parse --short HEAD)"; fi
+          NAME="opencode-mobile-${VARIANT}-${LABEL}${SUFFIX}.apk"
+          mkdir -p out && cp "$SRC" "out/$NAME"
+          APKSIGNER=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$APKSIGNER" verify --verbose --print-certs "out/$NAME"
+          ls -l out
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "path=out/$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.apk.outputs.name }}
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach APK to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ steps.apk.outputs.path }}
