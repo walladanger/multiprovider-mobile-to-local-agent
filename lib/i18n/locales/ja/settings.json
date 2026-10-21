@@ -395,5 +395,16 @@
     "removeTitle": "保存された権限を削除",
     "removeMessage": "{{resource}} の自動許可を停止しますか？",
     "refresh": "更新"
+  },
+  "universalPairing": {
+    "title": "Connect",
+    "confirm": "Pair this app with the server above? Only continue if you just ran the pairing command yourself.",
+    "pair": "Pair",
+    "comingSoon": "{{type}} connections are coming soon. This link was recognized but can't be used yet.",
+    "errors": {
+      "invalid": "This link is not a valid pairing link.",
+      "unsupportedVersion": "This pairing link needs a newer version of the app.",
+      "unknownType": "This pairing link uses a connection type this app doesn't know."
+    }
   }
 }

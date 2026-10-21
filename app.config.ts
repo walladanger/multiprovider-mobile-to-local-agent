@@ -12,6 +12,8 @@ const isDevelopmentVariant = appVariant === 'development';
 const isFossVariant = appVariant === 'foss' || env('EXPO_PUBLIC_FOSS') === '1';
 const isE2EMode = env('EXPO_PUBLIC_E2E_MODE') === '1';
 const e2eServerUrl = env('EXPO_PUBLIC_E2E_SERVER_URL');
+// Host for https pairing App Links (https://<host>/connect...). See docs/pairing.md.
+const pairingHost = env('EXPO_PAIRING_HOST') ?? 'opencode.8466crosstimbers.com';
 const defaultAndroidPackage = isFossVariant ? 'app.getopencode.fdroid' : 'app.getopencode';
 const releaseAndroidPackage = env('EXPO_ANDROID_PACKAGE') ?? defaultAndroidPackage;
 const developmentAndroidPackage = env('EXPO_ANDROID_PACKAGE_DEV') ?? `${releaseAndroidPackage}.dev`;
@@ -188,6 +190,21 @@ const config: ExpoConfig = {
     },
     predictiveBackGestureEnabled: false,
     softwareKeyboardLayoutMode: 'resize',
+    // Camera-app QR scans and links open the app. The opencodemobile:// scheme is
+    // registered from `scheme` above; this adds a verified https App Link.
+    intentFilters: [
+      {
+        action: 'VIEW',
+        autoVerify: true,
+        data: [{ scheme: 'https', host: pairingHost, pathPrefix: '/connect' }],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+      {
+        action: 'VIEW',
+        data: [{ scheme: 'opencodemobile', host: 'connect' }],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+    ],
   },
   web: {
     output: 'static',
@@ -308,6 +325,7 @@ const config: ExpoConfig = {
     router: {},
     e2eMode: isE2EMode,
     e2eServerUrl,
+    pairingHost,
     foss: isFossVariant,
     updates: {
       enabled: !isDevelopmentVariant && !isFossVariant && !isE2EMode,
