@@ -15,7 +15,6 @@ import { useNotificationRoute } from '@/hooks/use-notification-route';
 import { useQuickActionRoute } from '@/hooks/use-quick-action-route';
 import { installGlobalErrorHandler } from '@/lib/error-reporting';
 import '@/lib/i18n';
-import { isConnectEnabled } from '@/lib/connect';
 import { useOnboarding, useUpdates } from '@/providers/opencode-contexts';
 import { UpdateNotice } from '@/components/ui/update-notice';
 import { OpencodeProvider } from '@/providers/opencode-provider';
@@ -114,10 +113,6 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={onboardingVisible}>
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      </Stack.Protected>
-      <Stack.Protected guard={isConnectEnabled()}>
-        <Stack.Screen name="pair" options={{ headerShown: false }} />
-        <Stack.Screen name="service" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Screen name="share" options={{ headerShown: false }} />
     </Stack>

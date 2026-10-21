@@ -3,7 +3,6 @@ import type { LegacyClient } from '../compat/v1/client';
 import type { V2Context } from '../v2/shared';
 import Constants from 'expo-constants';
 
-import type { ConnectMetadata } from '@/lib/connect';
 import type { ProviderAuthValues } from '@/lib/opencode/types';
 import type { PromptInboxApi } from '@/lib/opencode/prompt-inbox';
 
@@ -70,7 +69,6 @@ export type OpencodeConnectionSettings = {
   username: string;
   password: string;
   directory: string;
-  connect?: ConnectMetadata;
 };
 
 export const defaultConnectionSettings: OpencodeConnectionSettings = {

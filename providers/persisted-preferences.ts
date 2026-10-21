@@ -1,5 +1,4 @@
 import type { OpencodeConnectionSettings } from '@/lib/opencode/client';
-import { parseConnectMetadata } from '@/lib/connect';
 import { stripServerUrlCredentials } from '@/lib/opencode/client/url';
 import { normalizeTranscriptFontSize, type ChatPreferences } from '@/providers/opencode-preferences';
 
@@ -18,11 +17,6 @@ export function parseConnectionSettings(raw: string): Partial<OpencodeConnection
     settings[key] = value[key];
   }
   if (settings.serverUrl) settings.serverUrl = stripServerUrlCredentials(settings.serverUrl);
-  if (value.connect !== undefined) {
-    const connect = parseConnectMetadata(value.connect);
-    if (!connect || connect.deviceId !== settings.username?.trim()) throw new Error('Invalid Cloud Link identity.');
-    settings.connect = connect;
-  }
   return settings;
 }
 

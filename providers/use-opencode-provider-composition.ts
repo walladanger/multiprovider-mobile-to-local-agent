@@ -197,17 +197,6 @@ export function useOpencodeProviderComposition(input: WorkspaceRuntimeInput) {
     resetWorktrees();
   }, [resetMcpState, resetPermissionRules, resetTerminal, resetTranscript, resetWorktrees, bootstrapPromiseRef, bootstrapTokenRef, busyNotificationsRef, sessionRefreshOptionsRef, sessionRefreshTimeoutsRef, setArchivedSessions, setAvailableAgents, setAvailableModels, setAvailableProviders, setCommands, setCurrentConfig, setCurrentSessionId, setMcpAuthPrompt, setPendingPermissionsBySession, setPendingQuestionsBySession, setProviderAuthMethodsById, setSelectedProjectFile, setSessionStatuses, setSessions, setVcsInfo, setProjectFileStatuses]);
 
-  const softResetProjectState = useCallback(() => {
-    // Same-machine credential rotation: keep server-derived data (still valid
-    // for the same server) but drop in-flight bookkeeping bound to the old
-    // client so a new bootstrap can start.
-    bootstrapPromiseRef.current = null;
-    bootstrapTokenRef.current = undefined;
-    Object.values(sessionRefreshTimeoutsRef.current).forEach((timeout) => clearTimeout(timeout));
-    sessionRefreshTimeoutsRef.current = {};
-    sessionRefreshOptionsRef.current = {};
-  }, [bootstrapPromiseRef, bootstrapTokenRef, sessionRefreshOptionsRef, sessionRefreshTimeoutsRef]);
-
   const project = useProjectActions({ ...state, client, catalogClient, isCurrentClient, isCurrentCatalogClient, clearProjectState, isHydrated, refreshMessages: inbox.refreshMessages });
 
   const capabilities = useCapabilitiesActions({ ...state, client, isCurrentClient });
@@ -244,7 +233,6 @@ export function useOpencodeProviderComposition(input: WorkspaceRuntimeInput) {
     isCurrentCatalogClient,
     ensureActiveSessionRef,
     clearProjectState,
-    softResetProjectState,
     isHydrated,
     refreshActiveSessions: activeSessionsHook.refreshActiveSessions,
   }, input);

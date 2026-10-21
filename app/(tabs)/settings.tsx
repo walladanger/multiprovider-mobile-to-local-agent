@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { type ComponentProps, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,7 +20,6 @@ import { McpSection } from '@/components/settings/mcp-section';
 import {
   EditorSection,
   ConnectionSection,
-  CloudLinkSection,
   DiagnosticsSection,
   GeneralSection,
   NotificationsSection,
@@ -65,7 +64,7 @@ function SettingsContent() {
   const { configuredProviders, currentConfig } = useCapabilities();
   const { addMcpServer, mcpOAuth, connectMcpServer, disconnectMcpServer, mcpStatuses, refreshMcpServers, setMcpServerEnabled } = useMcp();
   const { chatPreferences, updateChatPreferences } = usePreferences();
-  const { connect, connection, settings, serverCapabilities, connectSetup, services: serviceManagement } = useConnection();
+  const { connect, connection, settings, serverCapabilities } = useConnection();
   const { activeProjectPath } = useProjects();
   const { diagnostics, eventStreamStatus, refreshDiagnostics } = useDiagnostics();
   const { lastJsError, refreshLastJsError } = useLastJsError();
@@ -82,9 +81,6 @@ function SettingsContent() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [advancedTab, setAdvancedTab] = useState<'mcp' | 'diagnostics'>('mcp');
   const [openSection, setOpenSection] = useState<string>();
-  // Reopening Cloud Link after the full-screen service editor returns keeps the
-  // user in context without leaving a portal sheet over the pushed route.
-  const returnToCloudLink = useRef(false);
   const [availableSpeechVoices, setAvailableSpeechVoices] = useState<SpeechVoiceOption[]>([]);
   const [isRefreshingSpeechVoices, setIsRefreshingSpeechVoices] = useState(false);
 
@@ -96,19 +92,6 @@ function SettingsContent() {
       setIsConnecting(false);
     }
   }
-
-  function openServiceEditor(id?: string) {
-    returnToCloudLink.current = true;
-    setOpenSection(undefined);
-    router.push(id ? `/service?id=${encodeURIComponent(id)}` : '/service');
-  }
-
-  useFocusEffect(useCallback(() => {
-    if (!returnToCloudLink.current) return;
-    returnToCloudLink.current = false;
-    setOpenSection('cloud-link');
-    void serviceManagement.refresh();
-  }, [serviceManagement]));
 
   async function refreshSpeechVoices() {
     setIsRefreshingSpeechVoices(true);
@@ -146,7 +129,7 @@ function SettingsContent() {
       title: t('settings:screen.categories.connection'),
       summary: connection.status === 'connected' ? t('common:labels.connected') : connection.message,
       onPress: () => setOpenSection('connection'),
-      render: () => <ConnectionSection connection={connection} palette={palette} onManageConnect={connectSetup.enabled ? () => { setOpenSection(undefined); router.push('/pair?mode=manage'); } : undefined} onPair={connectSetup.enabled ? () => { setOpenSection(undefined); router.push('/pair'); } : undefined} />,
+      render: () => <ConnectionSection connection={connection} palette={palette} />,
     },
     {
       id: 'ai',
@@ -156,14 +139,6 @@ function SettingsContent() {
       onPress: () => setOpenSection('ai'),
       render: () => <AiSettingsPanel />,
     },
-    ...(connectSetup.enabled && connectSetup.storeInstall ? [{
-      id: 'cloud-link',
-      icon: 'cloud-outline' as const,
-      title: t('settings:screen.categories.cloudLink'),
-      summary: connectSetup.initialization === 'loading' ? t('settings:connect.progress.idle') : connectSetup.entitled ? t('common:labels.active') : t('settings:subscription.inactive'),
-      onPress: () => { setOpenSection('cloud-link'); void serviceManagement.refresh(); },
-      render: () => <CloudLinkSection setup={connectSetup} services={serviceManagement} palette={palette} onManageMachines={() => { setOpenSection(undefined); router.push('/pair?mode=manage'); }} onAddService={() => openServiceEditor()} onEditService={(service) => openServiceEditor(service.id)} />,
-    }] : []),
     {
       id: 'notifications',
       icon: 'bell-outline',
@@ -239,7 +214,7 @@ function SettingsContent() {
       </Appbar.Header>
       <ScrollView style={[styles.screen, { backgroundColor: palette.background }]} contentContainerStyle={styles.content}>
         {[{ label: t('common:servers.serverSettings'), ids: ['ai', 'advanced', 'permissions'], server: true },
-          { label: t('common:servers.appSettings'), ids: ['connection', 'cloud-link', 'general', 'notifications', 'voice'], server: false }].map((group) => <View key={group.label} style={{ gap: 12, marginBottom: 20 }}>
+          { label: t('common:servers.appSettings'), ids: ['connection', 'general', 'notifications', 'voice'], server: false }].map((group) => <View key={group.label} style={{ gap: 12, marginBottom: 20 }}>
           <Text variant="titleMedium">{group.label}</Text>
           {group.server ? <ServerContextPicker /> : null}
           <View style={[styles.categoryGroup, { backgroundColor: palette.surface, borderColor: palette.border }]}>

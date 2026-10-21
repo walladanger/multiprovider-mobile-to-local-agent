@@ -52,14 +52,13 @@ const buildPropertiesPlugin: [string, {
 ];
 
 // The F-Droid/FOSS build drops the proprietary expo-camera (ML Kit barcode
-// scanning) and expo-iap (Google Play Billing) plugins. Typed constants keep
+// scanning) plugin. Typed constants keep
 // the tuple shape so `plugins` stays assignable to ExpoConfig.
 type PluginList = NonNullable<ExpoConfig['plugins']>;
 const cameraPlugin: PluginList = [['expo-camera', {
   cameraPermission: 'Allow $(PRODUCT_NAME) to scan an OpenCode pairing QR code.',
   recordAudioAndroid: false,
 }]];
-const iapPlugin: PluginList = ['expo-iap'];
 
 // The Expo template defaults to -Xmx2048m -XX:MaxMetaspaceSize=512m, which OOMs
 // during release AAB packaging (bundletool) with the four default ABIs. Raise
@@ -262,7 +261,6 @@ const config: ExpoConfig = {
     'expo-image',
     'expo-video',
     'expo-secure-store',
-    ...(isFossVariant ? [] : iapPlugin),
     'expo-status-bar',
     [
       // Android home-screen widget. Widget trees and the headless task handler
@@ -317,9 +315,7 @@ const config: ExpoConfig = {
       appStoreId: env('EXPO_IOS_APP_STORE_ID'),
       appStoreCountry: env('EXPO_IOS_APP_STORE_COUNTRY'),
     },
-    connectPilot: {
-      testing: isDevelopmentVariant && isE2EMode,
-    },
+    webTestSecrets: isDevelopmentVariant && isE2EMode,
   },
 };
 
