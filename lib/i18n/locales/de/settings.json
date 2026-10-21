@@ -557,5 +557,44 @@
       "targetReserved": "Dieser Port ist für freigegebene Dienste reserviert.",
       "targetPort": "Verwende einen unprivilegierten Port zwischen 1024 und 65535."
     }
+  },
+  "backgrounds": {
+    "preview": "Live-Vorschau",
+    "style": "Hintergrundstil",
+    "kinds": {
+      "gradient": "Verlauf",
+      "video": "Video",
+      "paths": "Fließende Linien",
+      "liquid": "Flüssiges Leuchten",
+      "swirl": "Pixelwirbel"
+    },
+    "descriptions": {
+      "gradient": "A static indigo gradient. Lightest on battery.",
+      "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
+      "paths": "Thin animated lines flowing across the screen.",
+      "liquid": "Soft glowing liquid blobs in blue and violet.",
+      "swirl": "A dithered pixel swirl, cyan on dark plum."
+    },
+    "controls": {
+      "colorA": "Primärfarbe",
+      "colorB": "Sekundärfarbe",
+      "colorBack": "Grundfarbe",
+      "speed": "Geschwindigkeit",
+      "density": "Dichte",
+      "intensity": "Intensität",
+      "blur": "Unschärfe",
+      "opacity": "Deckkraft"
+    },
+    "presets": {
+      "title": "Gespeicherte Vorlagen",
+      "name": "Name der Vorlage",
+      "newName": "Neuer Name",
+      "save": "Speichern",
+      "load": "Laden",
+      "rename": "Umbenennen",
+      "delete": "Löschen",
+      "empty": "Noch keine Vorlagen gespeichert."
+    },
+    "summary": "Hintergrund: {{value}}"
   }
 }

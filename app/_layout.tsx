@@ -20,6 +20,7 @@ import { isConnectEnabled } from '@/lib/connect';
 import { useOnboarding, useUpdates } from '@/providers/opencode-contexts';
 import { UpdateNotice } from '@/components/ui/update-notice';
 import { MotionBackground } from '@/components/background/motion-background';
+import { BackgroundProvider } from '@/providers/background-context';
 import { palette as themePalette } from '@/theme/tokens';
 import { OpencodeProvider } from '@/providers/opencode-provider';
 
@@ -69,6 +70,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <OpencodeProvider>
+          <BackgroundProvider>
           <PaperProvider theme={paperTheme}>
             <ThemeProvider value={navigationTheme}>
               <MotionBackground />
@@ -77,6 +79,7 @@ export default function RootLayout() {
               <StatusBar style="light" />
             </ThemeProvider>
           </PaperProvider>
+          </BackgroundProvider>
         </OpencodeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

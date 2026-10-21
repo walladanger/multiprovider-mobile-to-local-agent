@@ -557,5 +557,44 @@
       "targetReserved": "यह पोर्ट उजागर सेवाओं के लिए आरक्षित है।",
       "targetPort": "1024 से 65535 के बीच गैर-विशेषाधिकार पोर्ट इस्तेमाल करें।"
     }
+  },
+  "backgrounds": {
+    "preview": "Live preview",
+    "style": "Background style",
+    "kinds": {
+      "gradient": "Gradient",
+      "video": "Video",
+      "paths": "Flowing paths",
+      "liquid": "Liquid glow",
+      "swirl": "Pixel swirl"
+    },
+    "descriptions": {
+      "gradient": "A static indigo gradient. Lightest on battery.",
+      "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
+      "paths": "Thin animated lines flowing across the screen.",
+      "liquid": "Soft glowing liquid blobs in blue and violet.",
+      "swirl": "A dithered pixel swirl, cyan on dark plum."
+    },
+    "controls": {
+      "colorA": "Primary color",
+      "colorB": "Secondary color",
+      "colorBack": "Base color",
+      "speed": "Speed",
+      "density": "Density",
+      "intensity": "Intensity",
+      "blur": "Blur",
+      "opacity": "Opacity"
+    },
+    "presets": {
+      "title": "Saved presets",
+      "name": "Preset name",
+      "newName": "New name",
+      "save": "Save",
+      "load": "Load",
+      "rename": "Rename",
+      "delete": "Delete",
+      "empty": "No saved presets yet."
+    },
+    "summary": "Background: {{value}}"
   }
 }

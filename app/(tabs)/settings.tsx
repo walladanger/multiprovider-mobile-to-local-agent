@@ -28,6 +28,8 @@ import {
   VoiceSection,
 } from '@/components/settings/settings-sections';
 import { useNotificationSetup } from '@/components/settings/use-notification-setup';
+import { BackgroundSection } from '@/components/settings/sections/background-section';
+import { useBackground } from '@/providers/background-context';
 import { AiSettingsPanel } from '@/components/settings/ai-settings-panel';
 import { useVoiceSetup } from '@/components/settings/use-voice-setup';
 import {
@@ -72,6 +74,7 @@ function SettingsContent() {
   const { approvals } = useApprovals();
   const { startOnboardingReview } = useOnboarding();
   const updates = useUpdates();
+  const background = useBackground();
   const router = useRouter();
   const notifications = useNotificationSetup();
   const voiceSetup = useVoiceSetup({
@@ -181,6 +184,14 @@ function SettingsContent() {
       render: () => <VoiceSection availableSpeechVoices={availableSpeechVoices} chatPreferences={chatPreferences} isRefreshingSpeechVoices={isRefreshingSpeechVoices} isRefreshingVoiceCapabilities={voiceSetup.isRefreshing} isTestingVoice={voiceSetup.isTesting} onEnableVoiceInput={() => void voiceSetup.enable()} onOpenVoiceSettings={() => void voiceSetup.openAppSettings()} onRefreshVoiceCapabilities={() => void voiceSetup.refreshStatus()} onTestVoicePlayback={() => void voiceSetup.testPlayback()} palette={palette} selectedResponseScope={selectedResponseScope} selectedSpeechVoiceLabel={selectedSpeechVoiceLabel} selectedWorkingSound={selectedWorkingSound} updateChatPreferences={updateChatPreferences} voiceCapabilities={voiceSetup.capabilities} />,
     },
     {
+      id: 'appearance',
+      icon: 'palette-outline',
+      title: t('settings:screen.categories.appearance'),
+      summary: t('settings:backgrounds.summary', { value: t(`settings:backgrounds.kinds.${background.settings.kind}`) }),
+      onPress: () => setOpenSection('appearance'),
+      render: () => <BackgroundSection palette={palette} />,
+    },
+    {
       id: 'general', icon: 'cog-outline', title: t('common:servers.appSettings'), summary: t('common:servers.appSettingsSummary'),
       onPress: () => setOpenSection('general'), render: () => <>
           <EditorSection chatPreferences={chatPreferences} contract={serverCapabilities.contract} palette={palette} updateChatPreferences={updateChatPreferences} />
@@ -239,7 +250,7 @@ function SettingsContent() {
       </Appbar.Header>
       <ScrollView style={[styles.screen, { backgroundColor: palette.background }]} contentContainerStyle={styles.content}>
         {[{ label: t('common:servers.serverSettings'), ids: ['ai', 'advanced', 'permissions'], server: true },
-          { label: t('common:servers.appSettings'), ids: ['connection', 'cloud-link', 'general', 'notifications', 'voice'], server: false }].map((group) => <View key={group.label} style={{ gap: 12, marginBottom: 20 }}>
+          { label: t('common:servers.appSettings'), ids: ['connection', 'cloud-link', 'appearance', 'general', 'notifications', 'voice'], server: false }].map((group) => <View key={group.label} style={{ gap: 12, marginBottom: 20 }}>
           <Text variant="titleMedium">{group.label}</Text>
           {group.server ? <ServerContextPicker /> : null}
           <View style={[styles.categoryGroup, { backgroundColor: palette.surface, borderColor: palette.border }]}>

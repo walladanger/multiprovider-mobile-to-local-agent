@@ -557,5 +557,44 @@
       "targetReserved": "Essa porta está reservada para serviços expostos.",
       "targetPort": "Use uma porta não privilegiada entre 1024 e 65535."
     }
+  },
+  "backgrounds": {
+    "preview": "Pré-visualização",
+    "style": "Estilo do fundo",
+    "kinds": {
+      "gradient": "Gradiente",
+      "video": "Vídeo",
+      "paths": "Linhas fluidas",
+      "liquid": "Brilho líquido",
+      "swirl": "Redemoinho de pixels"
+    },
+    "descriptions": {
+      "gradient": "A static indigo gradient. Lightest on battery.",
+      "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
+      "paths": "Thin animated lines flowing across the screen.",
+      "liquid": "Soft glowing liquid blobs in blue and violet.",
+      "swirl": "A dithered pixel swirl, cyan on dark plum."
+    },
+    "controls": {
+      "colorA": "Cor principal",
+      "colorB": "Cor secundária",
+      "colorBack": "Cor base",
+      "speed": "Velocidade",
+      "density": "Densidade",
+      "intensity": "Intensidade",
+      "blur": "Desfoque",
+      "opacity": "Opacidade"
+    },
+    "presets": {
+      "title": "Predefinições salvas",
+      "name": "Nome",
+      "newName": "Novo nome",
+      "save": "Salvar",
+      "load": "Carregar",
+      "rename": "Renomear",
+      "delete": "Excluir",
+      "empty": "Nenhuma predefinição salva."
+    },
+    "summary": "Fundo: {{value}}"
   }
 }

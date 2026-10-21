@@ -557,5 +557,44 @@
       "targetReserved": "Ce port est réservé aux services exposés.",
       "targetPort": "Utilisez un port non privilégié entre 1024 et 65535."
     }
+  },
+  "backgrounds": {
+    "preview": "Aperçu en direct",
+    "style": "Style d'arrière-plan",
+    "kinds": {
+      "gradient": "Dégradé",
+      "video": "Vidéo",
+      "paths": "Lignes fluides",
+      "liquid": "Lueur liquide",
+      "swirl": "Tourbillon de pixels"
+    },
+    "descriptions": {
+      "gradient": "A static indigo gradient. Lightest on battery.",
+      "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
+      "paths": "Thin animated lines flowing across the screen.",
+      "liquid": "Soft glowing liquid blobs in blue and violet.",
+      "swirl": "A dithered pixel swirl, cyan on dark plum."
+    },
+    "controls": {
+      "colorA": "Couleur principale",
+      "colorB": "Couleur secondaire",
+      "colorBack": "Couleur de fond",
+      "speed": "Vitesse",
+      "density": "Densité",
+      "intensity": "Intensité",
+      "blur": "Flou",
+      "opacity": "Opacité"
+    },
+    "presets": {
+      "title": "Préréglages enregistrés",
+      "name": "Nom du préréglage",
+      "newName": "Nouveau nom",
+      "save": "Enregistrer",
+      "load": "Charger",
+      "rename": "Renommer",
+      "delete": "Supprimer",
+      "empty": "Aucun préréglage enregistré."
+    },
+    "summary": "Arrière-plan : {{value}}"
   }
 }
