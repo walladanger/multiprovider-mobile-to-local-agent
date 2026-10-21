@@ -10,7 +10,8 @@ import { ICON_PACKS } from '@/lib/backgrounds/appearance';
 import { COLOR_THEME_IDS, COLOR_THEMES } from '@/lib/backgrounds/color-themes';
 import { CODE_FONT_IDS, FONT_FAMILIES, TEXT_SCALE_MAX, TEXT_SCALE_MIN, UI_FONT_IDS } from '@/lib/backgrounds/fonts';
 import { SKIN_IDS } from '@/lib/backgrounds/skins';
-import { BACKGROUND_KINDS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
+import { MESH_PRESETS } from '@/lib/backgrounds/mesh-presets';
+import { BACKGROUND_KINDS, PARTICLE_COUNT_MAX, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
 import { useBackground } from '@/providers/background-context';
 import type { Palette } from './setting-rows';
 
@@ -18,14 +19,18 @@ const SWATCHES = ['#6d5cff', '#8b5cf6', '#3b82f6', '#00ffff', '#c9c2ff', '#f0abf
 
 type ColorKey = 'colorA' | 'colorB' | 'colorBack';
 // Which controls make sense for each background.
-const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: ('speed' | 'density' | 'intensity' | 'blur' | 'opacity')[] }> = {
+type SliderKey = 'speed' | 'density' | 'intensity' | 'blur' | 'opacity' | 'particleCount' | 'noiseIntensity' | 'particleSizeMin' | 'particleSizeMax';
+const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: SliderKey[] }> = {
   gradient: { colors: ['colorA', 'colorB', 'colorBack'], sliders: [] },
   video: { colors: [], sliders: ['intensity'] },
-  paths: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
+  paths: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
   liquid: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
   swirl: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
+  cyber: { colors: ['colorA', 'colorBack'], sliders: ['particleCount', 'noiseIntensity', 'particleSizeMin', 'particleSizeMax', 'speed', 'intensity', 'blur', 'opacity'] },
+  mesh: { colors: ['colorBack'], sliders: ['speed', 'blur', 'opacity'] },
 };
-const RANGES = { speed: [0, 2, 0.05], density: [0, 1, 0.05], intensity: [0, 1, 0.05], blur: [0, 20, 1], opacity: [0, 1, 0.05] } as const;
+const RANGES: Record<SliderKey, readonly [number, number, number]> = { speed: [0, 2, 0.05], density: [0, 1, 0.05], intensity: [0, 1, 0.05], blur: [0, 20, 1], opacity: [0, 1, 0.05], particleCount: [50, PARTICLE_COUNT_MAX, 50], noiseIntensity: [0.0005, 0.01, 0.0005], particleSizeMin: [0.2, 4, 0.1], particleSizeMax: [0.5, 6, 0.1] };
+const valueText = (key: SliderKey, v: number) => key === 'blur' ? `${v}px` : key === 'particleCount' ? String(v) : key === 'noiseIntensity' ? v.toFixed(4) : v.toFixed(2);
 
 export function BackgroundSection({ palette }: { palette: Palette }) {
   const { t } = useTranslation();
@@ -87,6 +92,28 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
       </View>
       <Text variant="bodySmall" style={{ color: palette.muted }}>{t(`settings:backgrounds.descriptions.${settings.kind}`)}</Text>
 
+      {settings.kind === 'paths' ? (
+        <ChipRow palette={palette} options={[{ id: '0', label: t('settings:backgrounds.controls.positionBoth') }, { id: '1', label: t('settings:backgrounds.controls.positionRight') }, { id: '-1', label: t('settings:backgrounds.controls.positionLeft') }]}
+          value={String(settings.position) as '0' | '1' | '-1'} onChange={(id) => bg.update({ position: Number(id) })} />
+      ) : null}
+      {settings.kind === 'mesh' ? (
+        <>
+          <ChipRow palette={palette} options={MESH_PRESETS.map((m) => ({ id: m.id, label: m.name }))} value={MESH_PRESETS.find((m) => JSON.stringify(m.stops) === JSON.stringify(settings.stops))?.id ?? ''}
+            onChange={(id) => { const m = MESH_PRESETS.find((x) => x.id === id); if (m) bg.update({ stops: m.stops, colorBack: m.colorBack, blur: m.blur }); }} />
+          {settings.stops.map((stop, index) => (
+            <View key={index} style={styles.colorRow}>
+              <Text variant="bodyMedium" style={{ color: palette.text }}>{t('settings:backgrounds.controls.stop', { value: index + 1 })}</Text>
+              <View style={styles.chips}>
+                {SWATCHES.map((hex) => (
+                  <Pressable key={hex} accessibilityRole="button" accessibilityLabel={`${t('settings:backgrounds.controls.stop', { value: index + 1 })} ${hex}`}
+                    onPress={() => bg.update({ stops: settings.stops.map((x, j) => (j === index ? { ...x, color: hex } : x)) })}
+                    style={[styles.swatch, { backgroundColor: hex, borderColor: stop.color === hex ? palette.text : palette.border, borderWidth: stop.color === hex ? 2 : 1 }]} />
+                ))}
+              </View>
+            </View>
+          ))}
+        </>
+      ) : null}
       {controls.colors.map((key) => (
         <View key={key} style={styles.colorRow}>
           <Text variant="bodyMedium" style={{ color: palette.text }}>{t(`settings:backgrounds.controls.${key}`)}</Text>
@@ -100,10 +127,11 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
       ))}
 
       {controls.sliders.map((key) => {
-        const [min, max, step] = RANGES[key];
+        const [min, rawMax, step] = RANGES[key];
+        const max = key === 'blur' && settings.kind === 'mesh' ? 120 : rawMax;
         return (
           <NumericSlider key={key} label={t(`settings:backgrounds.controls.${key}`)} minimum={min} maximum={max} step={step} palette={palette}
-            value={settings[key]} valueLabel={key === 'blur' ? `${settings[key]}px` : settings[key].toFixed(2)} onValueChange={(v) => bg.update({ [key]: v })} />
+            value={settings[key]} valueLabel={valueText(key, settings[key])} onValueChange={(v) => bg.update({ [key]: v })} />
         );
       })}
 

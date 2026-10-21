@@ -1,7 +1,7 @@
 /** Pure model for animated background settings and named presets (no React/RN imports). */
 import { normalizeAppearance, type AppearanceSettings } from './appearance';
 
-export const BACKGROUND_KINDS = ['gradient', 'video', 'paths', 'liquid', 'swirl'] as const;
+export const BACKGROUND_KINDS = ['gradient', 'video', 'paths', 'liquid', 'swirl', 'cyber', 'mesh'] as const;
 export type BackgroundKind = (typeof BACKGROUND_KINDS)[number];
 
 export type BackgroundSettings = {
@@ -22,25 +22,64 @@ export type BackgroundSettings = {
   blur: number;
   /** Layer opacity, 0..1. */
   opacity: number;
+  /** Floating paths: 1 or -1 draws one fan (the original `position` prop); 0 draws both mirrored fans. */
+  position: number;
+  /** Cyber particles: particle count (original default 2000; capped for mobile). */
+  particleCount: number;
+  /** Cyber particles: Perlin noise frequency (original `noiseIntensity`, default 0.003). */
+  noiseIntensity: number;
+  /** Cyber particles: radius range in px (original `particleSize` {min,max}). */
+  particleSizeMin: number;
+  particleSizeMax: number;
+  /** Mesh gradient color stops (see mesh-presets.ts). */
+  stops: MeshStop[];
 };
+
+/** One drifting blob of the mesh gradient. x/y/radius are fractions of the screen. */
+export type MeshStop = { color: string; x: number; y: number; radius: number; driftX: number; driftY: number; speed: number };
+
+export const PARTICLE_COUNT_MAX = 1200;
+
+const DEFAULT_MESH_STOPS: MeshStop[] = [
+  { color: '#6d5cff', x: 0.2, y: 0.2, radius: 0.6, driftX: 0.12, driftY: 0.08, speed: 0.6 },
+  { color: '#2a1d6b', x: 0.8, y: 0.3, radius: 0.7, driftX: 0.1, driftY: 0.12, speed: 0.4 },
+  { color: '#a78bfa', x: 0.5, y: 0.85, radius: 0.55, driftX: 0.14, driftY: 0.06, speed: 0.5 },
+  { color: '#0b0a2a', x: 0.1, y: 0.75, radius: 0.6, driftX: 0.08, driftY: 0.1, speed: 0.3 },
+];
 
 /** A user preset: background settings plus (optionally) the full appearance: theme, skin, fonts, icons. */
 export type BackgroundPreset = { id: string; name: string; settings: BackgroundSettings; appearance?: AppearanceSettings };
 
+const EXTRAS = { position: 0, particleCount: 600, noiseIntensity: 0.003, particleSizeMin: 0.5, particleSizeMax: 2, stops: DEFAULT_MESH_STOPS };
+
 export const BACKGROUND_DEFAULTS: Record<BackgroundKind, BackgroundSettings> = {
-  gradient: { kind: 'gradient', colorA: '#6d5cff', colorB: '#1a1446', colorBack: '#0b0a2a', speed: 1, density: 0.5, intensity: 0.5, blur: 0, opacity: 1 },
-  video: { kind: 'video', colorA: '#6d5cff', colorB: '#1a1446', colorBack: '#0b0a2a', speed: 1, density: 0.5, intensity: 0.6, blur: 0, opacity: 1 },
+  gradient: { kind: 'gradient', colorA: '#6d5cff', colorB: '#1a1446', colorBack: '#0b0a2a', speed: 1, density: 0.5, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
+  video: { kind: 'video', colorA: '#6d5cff', colorB: '#1a1446', colorBack: '#0b0a2a', speed: 1, density: 0.5, intensity: 0.6, blur: 0, opacity: 1, ...EXTRAS },
   // Kokonut UI "Background Paths": thin flowing curves, white-ish strokes.
-  paths: { kind: 'paths', colorA: '#c9c2ff', colorB: '#6d5cff', colorBack: '#0b0a2a', speed: 1, density: 0.6, intensity: 0.5, blur: 0, opacity: 1 },
+  paths: { kind: 'paths', colorA: '#c9c2ff', colorB: '#6d5cff', colorBack: '#0b0a2a', speed: 1, density: 0.6, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
   // "liquid Shader": soft blue/violet glowing blobs.
-  liquid: { kind: 'liquid', colorA: '#3b82f6', colorB: '#8b5cf6', colorBack: '#0b0a2a', speed: 0.6, density: 0.5, intensity: 0.7, blur: 0, opacity: 1 },
+  liquid: { kind: 'liquid', colorA: '#3b82f6', colorB: '#8b5cf6', colorBack: '#0b0a2a', speed: 0.6, density: 0.5, intensity: 0.7, blur: 0, opacity: 1, ...EXTRAS },
   // Ali Imam "Swirl": 4x4 Bayer-dithered swirl, cyan on dark plum, pxSize 4, speed 0.9.
-  swirl: { kind: 'swirl', colorA: '#00ffff', colorB: '#00ffff', colorBack: '#220011', speed: 0.9, density: 0.4, intensity: 0.5, blur: 0, opacity: 1 },
+  // FluidParticlesBackground ("CyberBackground"): Perlin-noise particle field, white particles with trails.
+  cyber: { kind: 'cyber', colorA: '#ffffff', colorB: '#ffffff', colorBack: '#000000', speed: 1, density: 0.5, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
+  // Animated mesh gradient: slow drifting color blobs.
+  mesh: { kind: 'mesh', colorA: '#6d5cff', colorB: '#a78bfa', colorBack: '#0b0a2a', speed: 0.5, density: 0.5, intensity: 0.5, blur: 60, opacity: 1, ...EXTRAS },
+  swirl: { kind: 'swirl', colorA: '#00ffff', colorB: '#00ffff', colorBack: '#220011', speed: 0.9, density: 0.4, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
 };
 
 const clamp = (v: unknown, min: number, max: number, fallback: number) =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback;
 const isColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v);
+
+export function normalizeStops(input: unknown, fallback: MeshStop[]): MeshStop[] {
+  if (!Array.isArray(input)) return fallback.map((x) => ({ ...x }));
+  const stops = input.slice(0, 8).filter((x) => x && isColor(x.color)).map((x) => ({
+    color: x.color as string,
+    x: clamp(x.x, -0.5, 1.5, 0.5), y: clamp(x.y, -0.5, 1.5, 0.5), radius: clamp(x.radius, 0.05, 2, 0.5),
+    driftX: clamp(x.driftX, 0, 1, 0.1), driftY: clamp(x.driftY, 0, 1, 0.1), speed: clamp(x.speed, 0, 3, 0.5),
+  }));
+  return stops.length >= 2 ? stops : fallback.map((x) => ({ ...x }));
+}
 
 export function normalizeSettings(input: unknown): BackgroundSettings {
   const raw = (input && typeof input === 'object' ? input : {}) as Partial<BackgroundSettings>;
@@ -54,8 +93,14 @@ export function normalizeSettings(input: unknown): BackgroundSettings {
     speed: clamp(raw.speed, 0, 2, d.speed),
     density: clamp(raw.density, 0, 1, d.density),
     intensity: clamp(raw.intensity, 0, 1, d.intensity),
-    blur: clamp(raw.blur, 0, 20, d.blur),
+    blur: clamp(raw.blur, 0, kind === 'mesh' ? 120 : 20, d.blur),
     opacity: clamp(raw.opacity, 0, 1, d.opacity),
+    position: raw.position === 1 || raw.position === -1 ? raw.position : 0,
+    particleCount: Math.round(clamp(raw.particleCount, 50, PARTICLE_COUNT_MAX, d.particleCount)),
+    noiseIntensity: clamp(raw.noiseIntensity, 0.0005, 0.02, d.noiseIntensity),
+    particleSizeMin: clamp(raw.particleSizeMin, 0.2, 6, d.particleSizeMin),
+    particleSizeMax: Math.max(clamp(raw.particleSizeMin, 0.2, 6, d.particleSizeMin), clamp(raw.particleSizeMax, 0.2, 8, d.particleSizeMax)),
+    stops: normalizeStops(raw.stops, d.stops),
   };
 }
 

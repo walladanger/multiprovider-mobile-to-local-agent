@@ -404,14 +404,18 @@
       "video": "Video",
       "paths": "Flowing paths",
       "liquid": "Liquid glow",
-      "swirl": "Pixel swirl"
+      "swirl": "Pixel swirl",
+      "cyber": "Cyber particles",
+      "mesh": "Mesh gradient"
     },
     "descriptions": {
       "gradient": "A static indigo gradient. Lightest on battery.",
       "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
-      "paths": "Thin animated lines flowing across the screen.",
+      "paths": "Thin animated lines flowing across the screen (Kokonut UI Background Paths).",
       "liquid": "Soft glowing liquid blobs in blue and violet.",
-      "swirl": "A dithered pixel swirl, cyan on dark plum."
+      "swirl": "A dithered pixel swirl, cyan on dark plum.",
+      "cyber": "A flowing field of tiny particles driven by Perlin noise.",
+      "mesh": "Slowly drifting, blurred color blobs."
     },
     "controls": {
       "colorA": "Primary color",
@@ -421,7 +425,15 @@
       "density": "Density",
       "intensity": "Intensity",
       "blur": "Blur",
-      "opacity": "Opacity"
+      "opacity": "Opacity",
+      "particleCount": "Particle count",
+      "noiseIntensity": "Noise frequency",
+      "particleSizeMin": "Smallest particle",
+      "particleSizeMax": "Largest particle",
+      "positionBoth": "Both sides",
+      "positionRight": "Right",
+      "positionLeft": "Left",
+      "stop": "Color {{value}}"
     },
     "presets": {
       "title": "Saved presets",

@@ -41,9 +41,11 @@ export const BACKGROUND_REGISTRY: Record<BackgroundKind, (props: LayerProps) => 
   paths: (props) => renderSkia('paths', props),
   liquid: (props) => renderSkia('liquid', props),
   swirl: (props) => renderSkia('swirl', props),
+  cyber: (props) => renderSkia('cyber', props),
+  mesh: (props) => renderSkia('mesh', props),
 };
 
-function renderSkia(kind: 'paths' | 'liquid' | 'swirl', { settings, width, height, paused }: LayerProps) {
+function renderSkia(kind: 'paths' | 'liquid' | 'swirl' | 'cyber' | 'mesh', { settings, width, height, paused }: LayerProps) {
   const Component = SKIA_BACKGROUNDS[kind];
   // Unmounting the canvas while paused stops its frame clock entirely.
   if (!Component || paused) return null;

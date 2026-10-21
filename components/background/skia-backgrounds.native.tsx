@@ -1,16 +1,19 @@
 /**
  * Animated Skia backgrounds, ported from 21st.dev web components:
- *  - PathsBackground: Kokonut UI "Background Paths" (two mirrored fans of flowing bezier lines)
+ *  - PathsBackground: Kokonut UI FloatingPathsBackground (faithful port of the supplied source)
+ *  - CyberBackground: FluidParticlesBackground / CyberBackground (Perlin particle field, supplied source)
+ *  - MeshGradientBackground: drifting color blobs from N stops (data presets in lib/backgrounds/mesh-presets.ts)
  *  - LiquidBackground: "liquid Shader" by Freedom (soft blue/violet glowing liquid blobs)
  *  - SwirlBackground: Ali Imam "Swirl" (4x4 Bayer-dithered pixel swirl, cyan on dark plum)
  * Shaders are drawn at half resolution and scaled up to keep fill cost low on mid-range Android.
  */
-import { Blur, Canvas, Fill, Group, Paint, Path, Shader, Skia, useClock, type Uniforms } from '@shopify/react-native-skia';
+import { Blur, Canvas, Circle, Fill, Group, Paint, Path, RadialGradient, Shader, Skia, useClock, vec, type SkPath, type Uniforms } from '@shopify/react-native-skia';
 import * as React from 'react';
 import { View, useWindowDimensions } from 'react-native';
-import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
+import { useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
 
-import type { BackgroundSettings } from '@/lib/backgrounds/settings';
+import { kokonutPath, stepParticles } from '@/lib/backgrounds/background-math';
+import type { BackgroundSettings, MeshStop } from '@/lib/backgrounds/settings';
 
 export type SkiaBackgroundProps = { settings: BackgroundSettings; width?: number; height?: number };
 
@@ -32,48 +35,123 @@ function Layer({ settings, children }: { settings: BackgroundSettings; children:
   );
 }
 
-// ---------- Background Paths ----------
-function kokonutPath(i: number, position: number) {
-  const p = (v: number) => v.toFixed(1);
-  const x = (base: number) => p(base - i * 5 * position);
-  return `M-${x(380)} -${p(189 + i * 6)}C-${x(380)} -${p(189 + i * 6)} -${x(312)} ${p(216 - i * 6)} ${x(152)} ${p(343 - i * 6)}C${x(616)} ${p(470 - i * 6)} ${x(684)} ${p(875 - i * 6)} ${x(684)} ${p(875 - i * 6)}`;
+// ---------- Background Paths (Kokonut UI FloatingPathsBackground) ----------
+// Same path math, stroke widths and stroke opacities as the original; the motion/react
+// animation (pathLength 0.3 -> 1, opacity [0.3, 0.6, 0.3], pathOffset [0, 1, 0],
+// linear, 20-30 s, repeat) is reproduced per path from a shared clock.
+const PATH_COUNT = 36;
+
+/** Deterministic stand-in for the original's `20 + Math.random() * 10` seconds. */
+function pathDurationMs(i: number, position: number) {
+  const r = Math.abs(Math.sin((i + 1) * 12.9898 + position * 78.233) * 43758.5453) % 1;
+  return (20 + r * 10) * 1000;
 }
 
-function FlowingPath({ d, index, count, clock, settings }: { d: string; index: number; count: number; clock: SharedValue<number>; settings: BackgroundSettings }) {
-  const path = React.useMemo(() => Skia.Path.MakeFromSVGString(d) ?? Skia.Path.Make(), [d]);
-  const duration = 20000 + ((index * 7919) % 10000);
-  const speed = Math.max(0.05, settings.speed);
-  const phase = useDerivedValue(() => ((clock.value * speed) / duration + index / count) % 1);
-  const start = useDerivedValue(() => { const t = phase.value; return Math.max(0, t - 0.35 - 0.35 * Math.sin(t * Math.PI)); });
-  const end = useDerivedValue(() => Math.min(1, phase.value + 0.3));
-  return (
-    <Path
-      path={path}
-      style="stroke"
-      strokeWidth={0.5 + index * 0.03}
-      color={index % 3 === 0 ? settings.colorB : settings.colorA}
-      opacity={(0.1 + index * 0.03) * (0.4 + settings.intensity)}
-      start={start}
-      end={end}
-    />
-  );
+function FloatingPath({ i, position, clock, settings }: { i: number; position: number; clock: SharedValue<number>; settings: BackgroundSettings }) {
+  const path = React.useMemo(() => Skia.Path.MakeFromSVGString(kokonutPath(i, position)) ?? Skia.Path.Make(), [i, position]);
+  const duration = pathDurationMs(i, position) / Math.max(0.05, settings.speed);
+  const progress = useDerivedValue(() => (clock.value % duration) / duration);
+  // pathOffset [0, 1, 0] and pathLength 0.3 -> 1 over one cycle.
+  const start = useDerivedValue(() => { const p = progress.value; return Math.min(1, p < 0.5 ? p * 2 : 2 - p * 2); });
+  const end = useDerivedValue(() => { const p = progress.value; return Math.min(1, start.value + 0.3 + 0.7 * p); });
+  const strokeOpacity = Math.min(1, 0.1 + i * 0.03);
+  const opacity = useDerivedValue(() => { const p = progress.value; return strokeOpacity * (p < 0.5 ? 0.3 + 0.6 * p : 0.9 - 0.6 * p) * (0.5 + settings.intensity); });
+  return <Path path={path} style="stroke" strokeWidth={0.5 + i * 0.03} color={settings.colorA} opacity={opacity} start={start} end={end} />;
 }
 
 export function PathsBackground({ settings, width, height }: SkiaBackgroundProps) {
   const { w, h } = useSize(width, height);
   const clock = useClock();
-  const count = Math.round(12 + settings.density * 24);
-  const scale = Math.max(w / 696, h / 316);
+  // Original viewBox 0 0 696 316 with preserveAspectRatio xMidYMid meet.
+  const scale = Math.min(w / 696, h / 316) * (h > w ? 2.2 : 1);
+  const positions = settings.position === 0 ? [1, -1] : [settings.position];
+  const count = Math.max(6, Math.round(PATH_COUNT * (0.25 + 0.75 * settings.density)));
   return (
     <Canvas style={{ width: w, height: h }}>
       <Fill color={settings.colorBack} />
       <Layer settings={settings}>
         <Group transform={[{ translateX: (w - 696 * scale) / 2 }, { translateY: (h - 316 * scale) / 2 }, { scale }]}>
-          {[1, -1].flatMap((position) => Array.from({ length: count }, (_, i) => (
-            <FlowingPath key={`${position}:${i}`} d={kokonutPath(i, position)} index={i} count={count} clock={clock} settings={settings} />
+          {positions.flatMap((position) => Array.from({ length: count }, (_, i) => (
+            <FloatingPath key={`${position}:${i}`} i={i} position={position} clock={clock} settings={settings} />
           )))}
         </Group>
       </Layer>
+    </Canvas>
+  );
+}
+
+// ---------- Cyber particles (FluidParticlesBackground / "CyberBackground") ----------
+// Perlin-noise flow field: angle = noise(x*f, y*f, t*0.0001) * 4PI, speed 2 px/frame,
+// life fade sin(life/maxLife*PI)*0.15, wrap at edges, respawn after maxLife.
+// The original's trail (12% background fill per frame) is approximated with a short
+// stroke along the velocity. Simulation runs on the UI thread, capped at 30 fps.
+const OPACITY_BUCKETS = 4;
+
+export function CyberBackground({ settings, width, height }: SkiaBackgroundProps) {
+  const { w, h } = useSize(width, height);
+  const { particleCount, noiseIntensity, particleSizeMin, particleSizeMax, speed } = settings;
+  // [x, y, size, life, maxLife] per particle.
+  const state = useSharedValue<number[]>([]);
+  const paths = useSharedValue<SkPath[]>([]);
+  const last = useSharedValue(0);
+  React.useEffect(() => {
+    const arr: number[] = [];
+    for (let i = 0; i < particleCount; i++) arr.push(Math.random() * w, Math.random() * h, Math.random() * (particleSizeMax - particleSizeMin) + particleSizeMin, Math.random() * 100, 100 + Math.random() * 50);
+    state.value = arr;
+  }, [particleCount, particleSizeMin, particleSizeMax, w, h, state]);
+
+  useFrameCallback((frame) => {
+    'worklet';
+    if (frame.timestamp - last.value < 33) return; // ~30 fps
+    const steps = Math.min(3, Math.max(1, Math.round((frame.timestamp - last.value) / 16.7))) * speed;
+    last.value = frame.timestamp;
+    const buckets: SkPath[] = [];
+    for (let b = 0; b < OPACITY_BUCKETS; b++) buckets.push(Skia.Path.Make());
+    stepParticles(state.value, steps, frame.timestamp * 0.0001 * speed, w, h, noiseIntensity, buckets);
+    paths.value = buckets;
+  });
+
+  const p0 = useDerivedValue(() => paths.value[0] ?? Skia.Path.Make());
+  const p1 = useDerivedValue(() => paths.value[1] ?? Skia.Path.Make());
+  const p2 = useDerivedValue(() => paths.value[2] ?? Skia.Path.Make());
+  const p3 = useDerivedValue(() => paths.value[3] ?? Skia.Path.Make());
+  // Original peak alpha is 0.15; intensity scales it up to ~0.45 for small screens.
+  const peak = 0.15 * (0.5 + settings.intensity * 2.5);
+  const strokeW = (particleSizeMin + particleSizeMax) / 2;
+  return (
+    <Canvas style={{ width: w, height: h }}>
+      <Fill color={settings.colorBack} />
+      <Layer settings={settings}>
+        {[p0, p1, p2, p3].map((p, b) => (
+          <Path key={b} path={p} style="stroke" strokeWidth={strokeW} strokeCap="round" color={settings.colorA} opacity={peak * ((b + 0.5) / OPACITY_BUCKETS)} />
+        ))}
+      </Layer>
+    </Canvas>
+  );
+}
+
+// ---------- Mesh gradient ----------
+function MeshBlob({ stop, index, w, h, clock, speed }: { stop: MeshStop; index: number; w: number; h: number; clock: SharedValue<number>; speed: number }) {
+  const r = stop.radius * Math.max(w, h);
+  const cx = useDerivedValue(() => (stop.x + stop.driftX * Math.sin((clock.value / 1000) * 0.2 * stop.speed * speed + index * 1.7)) * w);
+  const cy = useDerivedValue(() => (stop.y + stop.driftY * Math.cos((clock.value / 1000) * 0.17 * stop.speed * speed + index * 2.3)) * h);
+  const center = useDerivedValue(() => vec(cx.value, cy.value));
+  return (
+    <Circle cx={cx} cy={cy} r={r}>
+      <RadialGradient c={center} r={r} colors={[stop.color, `${stop.color}00`]} />
+    </Circle>
+  );
+}
+
+export function MeshGradientBackground({ settings, width, height }: SkiaBackgroundProps) {
+  const { w, h } = useSize(width, height);
+  const clock = useClock();
+  return (
+    <Canvas style={{ width: w, height: h }}>
+      <Fill color={settings.colorBack} />
+      <Group opacity={settings.opacity} layer={settings.blur > 0 ? <Paint><Blur blur={settings.blur} /></Paint> : undefined}>
+        {settings.stops.map((stop, i) => <MeshBlob key={i} stop={stop} index={i} w={w} h={h} clock={clock} speed={settings.speed} />)}
+      </Group>
     </Canvas>
   );
 }
@@ -169,4 +247,4 @@ export function SwirlBackground({ settings, width, height }: SkiaBackgroundProps
   return <HalfResShaderCanvas effect={effect} uniforms={uniforms} w={w} h={h} settings={settings} />;
 }
 
-export const SKIA_BACKGROUNDS = { paths: PathsBackground, liquid: LiquidBackground, swirl: SwirlBackground } as const;
+export const SKIA_BACKGROUNDS = { paths: PathsBackground, liquid: LiquidBackground, swirl: SwirlBackground, cyber: CyberBackground, mesh: MeshGradientBackground } as const;
