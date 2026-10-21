@@ -16,8 +16,8 @@ The unit suite runs under Vitest 5, which requires Node `^22.12.0 || ^24.0.0 || 
 
 1. Clone the repository and install dependencies:
    ```bash
-   git clone https://github.com/alvarolorentedev/opencode-mobile.git
-   cd opencode-mobile
+   git clone https://github.com/walladanger/multiprovider-mobile-to-local-agent.git
+   cd multiprovider-mobile-to-local-agent
    npm install
    ```
 

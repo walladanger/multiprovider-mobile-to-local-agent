@@ -50,8 +50,7 @@ Cloud Link automatically chooses between two fixed trusted environments:
 editor or build-time URL override. The last resolved environment is persisted as
 non-secret metadata; unknown legacy/custom URLs are discarded during hydration.
 
-The service domain is separate from the app website, `getopencode.app`. This is
-a clean cutover: the old `api.getopencode.app` and `apistaging.getopencode.app`
+This is a clean cutover: the old `api.getopencode.app` and `apistaging.getopencode.app`
 control planes and pairing links are no longer trusted. A remembered old
 environment resets to the new production default. Old URL-scoped secure sessions
 and pending QR records are not copied into the new environments; existing saved
