@@ -71,8 +71,9 @@ export const BACKGROUND_REFERENCES: Record<BackgroundKind, BackgroundSettings> =
   // Kokonut UI FloatingPathsBackground (dark mode): white strokes (currentColor) on neutral-950, 36 paths per fan,
   // both fans (position 1 and -1), stroke opacity 0.1 + i*0.03 (intensity 0.5 = x1), 20-30 s cycles (speed 1).
   paths: { kind: 'paths', colorA: '#ffffff', colorB: '#ffffff', colorBack: '#0a0a0a', speed: 1, density: 1, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
-  // "liquid Shader" by Freedom (our approximation): blue/violet glowing blobs on deep indigo.
-  liquid: { kind: 'liquid', colorA: '#3b82f6', colorB: '#8b5cf6', colorBack: '#0b0a2a', speed: 0.6, density: 0.5, intensity: 0.7, blur: 0, opacity: 1, ...EXTRAS },
+  // "liquid Shader" by Freedom (our approximation, matched to Warwick's 21st.dev screenshot): a teal-blue
+  // glowing ring with a pink-violet rim on pure black.
+  liquid: { kind: 'liquid', colorA: '#2a8fb8', colorB: '#c58cf0', colorBack: '#000000', speed: 0.6, density: 0.5, intensity: 0.7, blur: 0, opacity: 1, ...EXTRAS },
   // Ali Imam "Swirl": DitheringShader shape=swirl type=4x4 colorBack #220011 colorFront #00ffff pxSize 4 (density 1/3) speed 0.9.
   swirl: { kind: 'swirl', colorA: '#00ffff', colorB: '#00ffff', colorBack: '#220011', speed: 0.9, density: 1 / 3, intensity: 0.5, blur: 0, opacity: 1, ...EXTRAS },
   // FluidParticlesBackground ("CyberBackground") dark mode: white particles on black, 2000 particles,
@@ -108,7 +109,7 @@ export const BACKGROUND_NUDGES: Record<BackgroundKind, BackgroundNudge> = {
   gradient: { hue: 0, speed: 1 },
   video: { hue: 0, speed: 1 },
   paths: { hue: 248, speed: 1.12, density: -0.14, intensity: 0.05, extra: { colorBack: '#0b0a2a' } }, // white -> faint lavender tint, 31 paths/fan
-  liquid: { hue: 15, speed: 1.15, density: 0.1, intensity: -0.05 },
+  liquid: { hue: 15, speed: 1.15, density: 0.1, intensity: -0.05, extra: { colorBack: '#05040f' } }, // black -> near-black indigo
   swirl: { hue: 14, speed: 0.89, density: 0.067, intensity: 0.08 },
   cyber: { hue: 250, speed: 0.9, intensity: 0.3, extra: { particleCount: 600, noiseIntensity: 0.0036, particleSizeMin: 0.6, particleSizeMax: 2.3, colorBack: '#05040f' } },
   mesh: { hue: -14, speed: 1.2, extra: { blur: 66 } },
@@ -179,10 +180,30 @@ export function normalizeSettings(input: unknown): BackgroundSettings {
   };
 }
 
+/**
+ * Upgrades a stored preset to PRESET_SCHEMA. Presets always store absolute values, so a migration never
+ * re-bases values onto the new (nudged) defaults: a user's saved look stays exactly as saved.
+ * - schema 1 (no `schema` field, before shader presets): legacy names (`colorFront`, `pxSize`) are
+ *   mapped, and fields that did not exist yet (scale, distortion, swirl, stops) take the current defaults.
+ */
+export function migratePreset(input: unknown): unknown {
+  if (!input || typeof input !== 'object') return input;
+  const p = input as Record<string, unknown>;
+  const schema = typeof p.schema === 'number' ? p.schema : 1;
+  if (schema >= PRESET_SCHEMA) return p;
+  const s = { ...((p.settings && typeof p.settings === 'object' ? p.settings : {}) as Record<string, unknown>) };
+  if (s.colorA === undefined && typeof s.colorFront === 'string') s.colorA = s.colorFront;
+  if (s.density === undefined && typeof s.pxSize === 'number') s.density = Math.min(1, Math.max(0, (s.pxSize - 1) / 9));
+  delete s.colorFront;
+  delete s.pxSize;
+  return { ...p, settings: s, schema: PRESET_SCHEMA };
+}
+
 export function normalizePresets(input: unknown): BackgroundPreset[] {
   if (!Array.isArray(input)) return [];
   return input
-    .filter((p): p is BackgroundPreset => Boolean(p) && typeof p.id === 'string' && typeof p.name === 'string')
+    .map(migratePreset)
+    .filter((p): p is BackgroundPreset => Boolean(p) && typeof (p as BackgroundPreset).id === 'string' && typeof (p as BackgroundPreset).name === 'string')
     .map((p) => ({ id: p.id, name: p.name.trim().slice(0, 60) || 'Preset', settings: normalizeSettings(p.settings), schema: PRESET_SCHEMA, ...(p.appearance ? { appearance: normalizeAppearance(p.appearance) } : {}) }));
 }
 
