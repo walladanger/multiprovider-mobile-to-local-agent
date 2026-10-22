@@ -11,6 +11,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { isValidServerUrl, type ConnectionProbeResult } from '@/lib/opencode/client';
 import { getServerHostname } from '@/lib/opencode/client/url';
 import { useConnection } from '@/providers/opencode-contexts';
+import { LoopbackWarning } from '@/components/ui/connection-error-text';
+import { isLoopbackServerUrl } from '@/lib/opencode/connection-hints';
 import { saveCloudflareAccessCredentials } from '@/lib/cloudflare-access-secrets';
 
 export type ConnectionProfileFormValues = {
@@ -102,7 +104,7 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
 
   return (
     <Modal visible animationType="slide" presentationStyle="fullScreen" onRequestClose={locked ? undefined : back}>
-      <KeyboardAvoidingView style={[styles.screen, { backgroundColor: palette.background }]} behavior="padding">
+      <KeyboardAvoidingView style={[styles.screen, { backgroundColor: palette.modalBackground }]} behavior="padding">
         <Appbar.Header statusBarHeight={0} style={{ backgroundColor: palette.surface, paddingTop: insets.top, height: 64 + insets.top }}>
           <Appbar.BackAction accessibilityLabel={t('common:actions.back')} disabled={locked} onPress={back} />
           <Appbar.Content title={title} />
@@ -115,6 +117,7 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
             <TextInput mode="outlined" label={t('settings:connection.fields.serverUrl')} testID="connection-profile-url-input" value={serverUrl}
               onChangeText={(value) => { setServerUrl(value); setProbe(undefined); setError(undefined); }} disabled={Boolean(busy)} autoFocus
               autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://opencode.example.com" />
+            <LoopbackWarning testID="connection-profile-loopback-warning" serverUrl={serverUrl} isLoopback={isLoopbackServerUrl} />
             <Text testID="connection-profile-url-hint" style={{ color: palette.muted }}>{t('settings:connection.setup.serverUrlFieldHint')}</Text>
             <Button testID="connection-profile-advanced-toggle" style={styles.left} icon={showAdvanced ? 'chevron-up' : 'chevron-down'} disabled={Boolean(busy)}
               accessibilityState={{ expanded: showAdvanced }} onPress={() => setShowAdvanced((value) => !value)}>{t('settings:connection.setup.cfAccess.title')}</Button>
@@ -132,6 +135,7 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
               <Text style={styles.address} numberOfLines={2}>{serverUrl}</Text>
               <Button testID="connection-profile-change" disabled={Boolean(busy)} onPress={back}>{t('settings:connection.setup.change')}</Button>
             </View>
+            <LoopbackWarning testID="connection-profile-loopback-warning" serverUrl={serverUrl} isLoopback={isLoopbackServerUrl} />
             <Text testID="connection-profile-detection" accessibilityLiveRegion="polite" style={{ color: v1 || v2 ? palette.tint : palette.muted }}>
               {v1 || v2 ? t('settings:connection.setup.detected', { version: v2 ? '2' : '1' }) : t('settings:connection.setup.identify')}
             </Text>

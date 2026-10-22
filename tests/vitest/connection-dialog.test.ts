@@ -9,6 +9,7 @@ function find(root: Element | Element[], testID: string): Element | undefined {
   return find(root.props?.children, testID);
 }
 async function form(onSubmit = vi.fn()) {
+  const hints = await import('@/lib/opencode/connection-hints');
   const runtime = hookRuntime();
   const probe = vi.fn(async () => ({ status: 'detected', contract: 'v2' }));
   const saveAccess = vi.fn(async () => {});
@@ -25,6 +26,8 @@ async function form(onSubmit = vi.fn()) {
     '@/hooks/use-color-scheme': { useColorScheme: () => 'light' },
     '@/lib/opencode/client': { isValidServerUrl: () => true },
     '@/lib/opencode/client/url': { getServerHostname: () => '192.168.1.10' },
+    '@/components/ui/connection-error-text': { LoopbackWarning: (props: { serverUrl: string; isLoopback: (url: string) => boolean; testID: string }) => (props.isLoopback(props.serverUrl) ? { type: 'Warning', props: { testID: props.testID } } : null) },
+    '@/lib/opencode/connection-hints': hints,
     '@/lib/cloudflare-access-secrets': { saveCloudflareAccessCredentials: saveAccess },
     '@/providers/opencode-contexts': { useConnection: () => ({ connectionProfiles: { probe } }) },
   }, { Error });
@@ -38,6 +41,19 @@ async function form(onSubmit = vi.fn()) {
 }
 
 describe('manual connection form', () => {
+  it('warns inline when the address points at the phone itself', async () => {
+    const view = await form();
+    const warning = () => {
+      const element = view.element('connection-profile-loopback-warning');
+      return (element.type as (props: unknown) => unknown)(element.props);
+    };
+    expect(warning()).toBeNull();
+    view.change('connection-profile-url-input', 'http://127.0.0.1:4096');
+    expect(warning()).toBeTruthy();
+    view.change('connection-profile-url-input', 'http://10.0.2.2:4096');
+    expect(warning()).toBeNull();
+  });
+
   it('shows field hints and keeps Cloudflare Access collapsed until requested', async () => {
     const view = await form();
     expect(view.element('connection-profile-url-input').props.placeholder).toBe('https://opencode.example.com');

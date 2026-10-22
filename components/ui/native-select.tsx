@@ -143,9 +143,9 @@ export function NativeSelect<T extends string>({
         <Modal animationType="fade" transparent statusBarTranslucent navigationBarTranslucent visible={visible} onRequestClose={close}>
           <GestureHandlerRootView style={[styles.overlay, { paddingBottom: keyboardHeight, paddingTop: sheetTopInset(insets) }]}>
             <Pressable style={StyleSheet.absoluteFill} onPress={close}>
-              <Animated.View style={[styles.backdrop, backdropStyle]} />
+              <Animated.View style={[styles.backdrop, { backgroundColor: palette.scrim }, backdropStyle]} />
             </Pressable>
-            <Animated.View onLayout={handleSheetLayout} testID="native-select-sheet" style={[styles.sheet, { backgroundColor: palette.surface, borderColor: palette.border, paddingBottom: sheetBottomInset(insets, keyboardHeight) }, sheetStyle]}>
+            <Animated.View onLayout={handleSheetLayout} testID="native-select-sheet" style={[styles.sheet, { backgroundColor: palette.sheet, borderColor: palette.border, paddingBottom: sheetBottomInset(insets, keyboardHeight) }, sheetStyle]}>
               <GestureDetector gesture={pan}>
                 <View style={[styles.sheetHeader, { borderBottomColor: palette.border }]}>
                   <Text numberOfLines={1} style={[styles.sheetTitle, { color: palette.text }]}>

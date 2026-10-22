@@ -16,7 +16,7 @@ export function DialogContent({ className, children, ...props }: DialogPrimitive
     <DialogPortal>
       <DialogPrimitive.Overlay className="absolute inset-0 items-center justify-center bg-black/60 p-4">
         <DialogPrimitive.Content {...props}>
-          <GlassPanel strong className={cn('w-full max-w-lg gap-4 p-6', className)}>{children}</GlassPanel>
+          <GlassPanel solid className={cn('w-full max-w-lg gap-4 p-6', className)}>{children}</GlassPanel>
         </DialogPrimitive.Content>
       </DialogPrimitive.Overlay>
     </DialogPortal>

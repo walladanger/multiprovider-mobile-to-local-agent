@@ -47,14 +47,14 @@ export function OverlaySheet({ visible, title, onClose, children, headerAction, 
   const content = (
       <KeyboardAvoidingView behavior="padding" style={[styles.overlay, { paddingTop: compact ? Math.max(64 + insets.top, height * 0.45) : 64 + insets.top }]} testID={testID}>
         {dismissible ? <Pressable accessibilityLabel={t('common:actions.closeWithName', { title })} onPress={onClose} style={StyleSheet.absoluteFill}>
-          <Animated.View style={[styles.backdrop, backdropStyle]} />
-        </Pressable> : null}
+          <Animated.View style={[styles.backdrop, { backgroundColor: palette.scrim }, backdropStyle]} />
+        </Pressable> : <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: palette.scrim }]} />}
         <Animated.View
           testID={fitContent ? `${testID}-sheet` : undefined}
           accessibilityLabel={title}
           accessibilityViewIsModal
           onLayout={handleSheetLayout}
-          style={[styles.sheet, !fitContent && { flex: 1 }, { backgroundColor: palette.surface, borderColor: palette.border }, sheetStyle]}>
+          style={[styles.sheet, !fitContent && { flex: 1 }, { backgroundColor: palette.sheet, borderColor: palette.border }, sheetStyle]}>
           <GestureDetector gesture={pan}>
             <Animated.View style={styles.dragZone}>
               {compact ? <View style={styles.grabberWrap}><View style={[styles.grabber, { backgroundColor: palette.muted }]} /></View> : null}
@@ -74,7 +74,7 @@ export function OverlaySheet({ visible, title, onClose, children, headerAction, 
                       {headerAction}
                       {dismissible ? <Pressable accessibilityRole="button" onPress={onClose} style={styles.closeButton}>
                         <Text style={{ color: palette.tint }}>{t('common:actions.close')}</Text>
-                      </Pressable> : null}
+                      </Pressable> : <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: palette.scrim }]} />}
                     </View>
                   </>
                 )}

@@ -42,6 +42,7 @@ async function mountTranscriptList(overrides: Overrides = {}) {
     'react-i18next': { useTranslation: () => ({ t: (key: string) => key }) },
     'react-native': { AppState: { addEventListener: () => ({ remove: () => undefined }) }, View: 'View' },
     'react-native-paper': { ActivityIndicator: 'ActivityIndicator', Button: 'Button', Card: 'Card', Text: 'Text', TouchableRipple: 'TouchableRipple' },
+    '@/components/ui/connection-error-text': { ConnectionErrorText: 'ConnectionErrorText' },
     '@/components/chat/chat-cards': { TranscriptMessage: 'TranscriptMessage' },
     '@/components/chat/cards/collapsible-detail': { CollapsibleDetail: 'CollapsibleDetail' },
     '@/components/chat/chat-view-styles': { styles: {}, slimStyles: {} },

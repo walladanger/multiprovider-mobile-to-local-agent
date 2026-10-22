@@ -1,4 +1,5 @@
 import { Icon } from '@/components/ui/icon';
+import { useFriendlyConnectionMessage } from '@/components/ui/connection-error-text';
 import { tokens } from '@/theme/tokens';
 import type { IconName } from '@/lib/backgrounds/icon-map';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
@@ -65,6 +66,7 @@ function SettingsContent() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
   const { t } = useTranslation();
+  const friendlyConnection = useFriendlyConnectionMessage();
   const { configuredProviders, currentConfig } = useCapabilities();
   const { addMcpServer, mcpOAuth, connectMcpServer, disconnectMcpServer, mcpStatuses, refreshMcpServers, setMcpServerEnabled } = useMcp();
   const { chatPreferences, updateChatPreferences } = usePreferences();
@@ -132,7 +134,7 @@ function SettingsContent() {
       id: 'connection',
       icon: 'server',
       title: t('settings:screen.categories.connection'),
-      summary: connection.status === 'connected' ? t('common:labels.connected') : connection.message,
+      summary: connection.status === 'connected' ? t('common:labels.connected') : friendlyConnection(connection.message),
       onPress: () => setOpenSection('connection'),
       render: () => <ConnectionSection connection={connection} palette={palette} />,
     },

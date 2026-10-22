@@ -224,7 +224,7 @@ export function ProviderConfigDialog({
 
   return (
     <Modal visible animationType="slide" presentationStyle="fullScreen" onRequestClose={step === 'configure' ? onBack : onDismiss}>
-      <KeyboardAvoidingView style={[styles.screen, { backgroundColor: palette.background }]} behavior="padding">
+      <KeyboardAvoidingView style={[styles.screen, { backgroundColor: palette.modalBackground }]} behavior="padding">
         <Appbar.Header statusBarHeight={0} style={{ backgroundColor: palette.surface, paddingTop: insets.top, height: 64 + insets.top }}>
           <Appbar.BackAction
             accessibilityLabel={step === 'configure' ? t('common:actions.back') : t('settings:providers.cancelSetup')}

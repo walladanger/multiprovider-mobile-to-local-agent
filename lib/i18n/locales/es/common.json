@@ -84,5 +84,18 @@
     },
     "appSettingsSummary": "Editor, ajustes generales y actualizaciones",
     "serverToolsSummary": "Servidores MCP y diagnóstico"
+  },
+  "connectionErrors": {
+    "unreachable": "No se puede conectar con tu servidor de OpenCode.",
+    "unreachableHint": "Comprueba que el servidor esté en marcha y que la dirección sea correcta. En un teléfono, localhost es el propio teléfono.",
+    "timeout": "El servidor tardó demasiado en responder.",
+    "timeoutHint": "Revisa tu red o túnel e inténtalo de nuevo.",
+    "auth": "El servidor rechazó el usuario o la contraseña.",
+    "authHint": "Revisa tus credenciales en Ajustes › Conexión.",
+    "tls": "No se pudo establecer una conexión segura (https).",
+    "tlsHint": "Revisa el certificado del túnel o prueba la dirección http de la red local.",
+    "showDetails": "Mostrar detalles",
+    "hideDetails": "Ocultar detalles",
+    "loopback": "Esto apunta al propio teléfono. Usa la URL de tu túnel, la IP de tu PC en la red local o 10.0.2.2 en el emulador de Android."
   }
 }
