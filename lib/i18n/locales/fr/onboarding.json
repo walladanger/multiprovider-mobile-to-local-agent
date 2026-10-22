@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "Connectez cette app au serveur OpenCode de votre ordinateur.",
+    "skipHint": "Pas encore prêt ? Touchez Passer. Vous pourrez ajouter une connexion plus tard dans Réglages › Connexion."
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,163 @@
     "title": "Paramètres généraux",
     "subtitle": "Adaptez OpenCode Mobile à vos préférences.",
     "defaultModel": "Modèle par défaut"
+  },
+  "help": {
+    "whatsThis": "Qu'est-ce que c'est ?",
+    "hide": "Masquer les détails",
+    "welcome": {
+      "summary": "Cette app est une télécommande pour OpenCode sur votre propre ordinateur.",
+      "details": [
+        "Votre ordinateur fait le vrai travail : il exécute le serveur OpenCode, les modèles d'IA et vos fichiers de projet.",
+        "Votre téléphone se connecte à ce serveur pour discuter avec les agents et suivre leur progression où que vous soyez.",
+        "Les étapes suivantes prennent environ une minute. Tout peut être modifié plus tard dans les Réglages."
+      ]
+    },
+    "permissions": {
+      "summary": "Facultatif : laissez l'app vous notifier et écouter votre voix.",
+      "details": [
+        "Les notifications vous préviennent quand un agent termine une tâche en arrière-plan.",
+        "La saisie vocale vous permet de dicter vos demandes au lieu de les taper.",
+        "Rien n'est demandé avant que vous touchiez Activer. Vous pouvez passer et activer plus tard dans les Réglages."
+      ]
+    },
+    "connect": {
+      "summary": "Un serveur est le serveur OpenCode qui tourne sur votre ordinateur. L'app a besoin de son adresse pour accéder à vos projets.",
+      "details": [
+        "Scanner le QR code : choisissez ceci quand votre ordinateur affiche un code d'appairage. Tout est rempli pour vous.",
+        "Manuel : choisissez ceci si vous connaissez l'URL du serveur, par exemple votre adresse de tunnel https, plus le nom d'utilisateur (souvent opencode) et le mot de passe.",
+        "Passer : continuer sans serveur. Vous pourrez ajouter une connexion plus tard dans Réglages › Connexion."
+      ]
+    },
+    "ai": {
+      "summary": "Choisissez les fournisseurs et modèles d'IA que votre serveur doit utiliser.",
+      "details": [
+        "Les fournisseurs (comme OpenAI ou Anthropic) sont configurés sur votre serveur OpenCode ; ici vous choisissez lesquels afficher.",
+        "Vous pouvez passer et garder les valeurs par défaut du serveur."
+      ]
+    },
+    "project": {
+      "summary": "Un projet est un dossier de votre ordinateur dans lequel OpenCode travaille.",
+      "details": [
+        "Choisissez le projet à ouvrir en premier. Les discussions et modifications sont conservées par projet.",
+        "Ajoutez un dossier avec son chemin sur l'ordinateur serveur, pas sur votre téléphone."
+      ]
+    },
+    "general": {
+      "summary": "Choisissez le modèle des nouvelles discussions et le sort des messages envoyés pendant que l'agent travaille.",
+      "details": [
+        "Le modèle par défaut sert aux nouvelles discussions. Vous pouvez en changer dans chaque discussion.",
+        "Orienter envoie votre message tout de suite à l'agent en cours ; File d'attente attend qu'il ait fini.",
+        "Passez pour garder les valeurs du serveur."
+      ]
+    },
+    "ready": {
+      "summary": "Voici un résumé de votre configuration. Vérifiez-le, puis lancez-vous.",
+      "details": [
+        "Touchez Commencer à coder pour ouvrir l'app.",
+        "Tout ce qui manque ou est incorrect peut être modifié plus tard dans les Réglages. Vous pouvez aussi relancer cette configuration depuis Réglages › Assistant de configuration."
+      ]
+    },
+    "transcript": {
+      "summary": "Détermine ce que le fil de discussion montre du travail de l'agent.",
+      "details": [
+        "Chaque discussion montre vos messages et les réponses de l'assistant. Les options ci-dessous ajoutent des lignes supplémentaires entre eux.",
+        "Les lignes supplémentaires sont repliées. Touchez-les pour les ouvrir.",
+        "Choisissez Simple en cas de doute. Vous pourrez changer plus tard dans Réglages › Apparence."
+      ]
+    },
+    "look": {
+      "summary": "Choisissez la langue, la police, la taille du texte et la couleur d'accent. L'aperçu ci-dessus change aussitôt.",
+      "details": [
+        "L'aperçu est une discussion d'exemple pour voir à quoi ressembleront les vraies conversations.",
+        "La taille du texte s'ajoute à celle définie sur votre téléphone.",
+        "La couleur d'accent suggère aussi des couleurs de fond pour l'étape suivante."
+      ]
+    },
+    "background": {
+      "summary": "Choisissez les couleurs derrière l'app et l'aspect des panneaux par-dessus.",
+      "details": [
+        "Les dégradés prédéfinis appliquent trois couleurs assorties d'un seul geste. La couleur de mise en avant ne change que la plus claire.",
+        "Le style de panneau change les cartes et les bulles : Verre est translucide, Plein est opaque, Net a des coins plus francs, Compact affiche plus de contenu.",
+        "Les fonds animés et les réglages fins sont dans Réglages › Apparence."
+      ]
+    }
+  },
+  "steps": {
+    "index": "Bienvenue",
+    "permissions": "Autorisations",
+    "connect": "Connexion",
+    "ai": "Fournisseurs d'IA",
+    "project": "Projet",
+    "transcript": "Fil de discussion",
+    "look": "Apparence",
+    "background": "Fond et panneaux",
+    "general": "Modèle et envoi",
+    "ready": "Prêt"
+  },
+  "stepIndicatorLabel": "Étape {{step}} sur {{totalSteps}}, {{title}}",
+  "transcript": {
+    "title": "Ce qu'affiche la discussion",
+    "subtitle": "Choisissez le niveau de détail de chaque conversation.",
+    "later": "Modifiable à tout moment dans Réglages › Apparence › Détail du fil.",
+    "options": {
+      "basic": {
+        "title": "Simple : juste la conversation",
+        "body": "Affiche seulement vos messages et les réponses de l'assistant. La vue la plus claire.",
+        "example": "Exemple : « Corrige le bug de connexion » → « C'est fait. J'ai modifié auth.ts. »"
+      },
+      "reasoning": {
+        "title": "Raisonnement : montrer la réflexion",
+        "body": "Affiche aussi le raisonnement de l'assistant, sa réflexion étape par étape avant de répondre, en lignes repliées.",
+        "example": "Exemple : une ligne « Réflexion… » à déplier pour voir pourquoi il a choisi une solution."
+      },
+      "verbose": {
+        "title": "Détaillé : montrer chaque action",
+        "body": "Affiche aussi chaque appel d'outil, comme lire des fichiers, lancer des commandes ou modifier du code, en lignes repliées. Idéal pour suivre exactement ce qui s'est passé.",
+        "example": "Exemple : « A lu auth.ts », « A lancé npm test », « A modifié 2 fichiers »."
+      }
+    }
+  },
+  "look": {
+    "title": "Apparence",
+    "subtitle": "Personnalisez l'app. Tout ce qui suit met l'aperçu à jour en direct.",
+    "previewLabel": "Aperçu en direct d'une discussion d'exemple",
+    "accent": "Couleur d'accent",
+    "later": "Affinez thèmes, polices, icônes et plus encore dans Réglages › Apparence.",
+    "sizes": {
+      "small": "Petit",
+      "medium": "Moyen",
+      "large": "Grand",
+      "xlarge": "Très grand"
+    },
+    "preview": {
+      "user1": "Peux-tu ajouter un bouton mode sombre ?",
+      "assistant1": "Bien sûr. Je l'ajoute à l'écran des réglages.",
+      "user2": "Utilise le réglage du système par défaut.",
+      "assistant2": "C'est fait. Il suit le système sauf si tu choisis autre chose.",
+      "user3": "Lance aussi les tests.",
+      "assistant3": "Les 42 tests passent."
+    }
+  },
+  "background": {
+    "title": "Fond et panneaux",
+    "subtitle": "Choisissez un dégradé de fond et un style de panneau. L'aperçu change en direct.",
+    "gradient": "Dégradé",
+    "color": "Couleur de mise en avant",
+    "panel": "Style de panneau",
+    "later": "Fonds animés, préréglages et réglages fins sont dans Réglages › Apparence.",
+    "presets": {
+      "indigo": "Nuit indigo",
+      "ocean": "Océan",
+      "aurora": "Aurore",
+      "orchid": "Orchidée",
+      "sunset": "Coucher de soleil"
+    },
+    "skinHints": {
+      "glass": "Verre : panneaux translucides et floutés qui laissent voir le fond.",
+      "solid": "Plein : panneaux opaques pour une lisibilité maximale.",
+      "crisp": "Net : coins plus francs et bordures plus marquées.",
+      "compact": "Compact : espacements réduits pour afficher plus de contenu."
+    }
   }
 }

@@ -50,13 +50,13 @@
       "step": "Step {{step}} of 2",
       "addressTitle": "Server address",
       "detailsTitle": "Connection details",
-      "addressHint": "Connect to your OpenCode server.",
+      "addressHint": "Enter the address of your OpenCode server.",
       "continue": "Continue",
       "change": "Change",
       "detected": "OpenCode {{version}} detected",
       "identify": "Enter credentials to identify the server.",
       "customUsername": "Custom username",
-      "passwordHint": "Enter your server password.",
+      "passwordHint": "The password you set for your OpenCode server.",
       "optionalName": "Name (optional)",
       "nameHint": "Leave blank to use the server IP or domain.",
       "showPassword": "Show password",
@@ -74,6 +74,17 @@
         "expired": "This pairing code expired or was already used. Run opencode pair again.",
         "unreachable": "Could not reach the server. Check that both devices are on the same network, or enter the address manually.",
         "loopback": "This code only contains a localhost address. Run opencode service set hostname 0.0.0.0, then opencode service start and opencode pair on your computer."
+      },
+      "serverUrlFieldHint": "The address of your Cloudflare tunnel (for example https://opencode.example.com) or of your computer on the local network (for example http://192.168.1.10:4096).",
+      "usernameHint": "Usually opencode, unless you changed it in your server setup.",
+      "passwordPlaceholder": "Server password",
+      "cfAccess": {
+        "title": "Advanced: Cloudflare Access",
+        "hint": "Only needed if your tunnel is protected by Cloudflare Access with a service token. Saved securely on this device; sending them to the server is coming soon.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "From Cloudflare Zero Trust › Access › Service credentials. Ends in .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Shown once when you create the service token."
       }
     }
   },
@@ -343,6 +354,69 @@
         "label": "Verbose",
         "description": "Also show tool calls as collapsed rows."
       }
+    },
+    "info": "About {{value}}",
+    "footer": "Everything here applies instantly and is saved on this device.",
+    "background": {
+      "title": "Background",
+      "info": "The animated layer behind the whole app: pick a preset or build your own look."
+    },
+    "presets": {
+      "info": "Ready-made looks.",
+      "hint": "A preset sets the style, all colors and all sliders together. Adjust anything afterwards."
+    },
+    "style": {
+      "info": "The kind of animation. Switching style loads that style's defaults with your theme's colors."
+    },
+    "colors": {
+      "title": "Colors",
+      "info": "The base color plus one color per light ball, particle layer or band.",
+      "none": "Video backgrounds use the video's own colors."
+    },
+    "sliders": {
+      "title": "Sliders",
+      "info": "Every style has the same sliders; 0 is the style's default, Reset returns there.",
+      "noEffect": "no effect on this style"
+    },
+    "saved": {
+      "info": "Save the current background and appearance under a name, and load it later."
+    },
+    "icons": {
+      "info": "The icon set used across the app."
+    },
+    "layers": {
+      "ball": "Ball {{value}}",
+      "blob": "Blob {{value}}",
+      "layer": "Layer {{value}}",
+      "band": "Band {{value}}",
+      "fan": "Fan {{value}}",
+      "arm": "Arm {{value}}",
+      "ribbon": "Ribbon {{value}}",
+      "stop": "Color {{value}}"
+    },
+    "color": {
+      "edit": "Edit {{value}}",
+      "more": "More colors",
+      "close": "Close color picker",
+      "hex": "Hex",
+      "eyedropper": "Eyedropper",
+      "eyedropperHint": "Tap the live background to pick a color from it.",
+      "done": "Done"
+    },
+    "text": {
+      "title": "Text & fonts",
+      "info": "Font, size, color and effects for app and chat text, with a live chat preview.",
+      "color": "Text color",
+      "shadow": "Shadow",
+      "shadowBlack": "Black shadow",
+      "shadowSurface": "Darker surface shade",
+      "outlineColor": "Outline color",
+      "outline": "Outline thickness",
+      "glow": "Glow",
+      "gradient": "Gradient text",
+      "emboss": "Soft emboss",
+      "effectsHint": "Shadow, outline, glow and emboss need Android 12 or later.",
+      "previewQuestion": "Can you check the settings sheet?"
     }
   },
   "connect": {
@@ -354,9 +428,11 @@
     },
     "scanHint": "Scan your computer’s QR code to connect.",
     "scanLocal": "Scan QR code",
-    "scanLocalHint": "Connect to a computer on the same network.",
+    "scanLocalHint": "Use this if your computer is showing a pairing QR code.",
     "manual": "Manual",
-    "manualHint": "Enter your server URL and credentials."
+    "manualHint": "Use this to type a server URL, username and password.",
+    "scanWhere": "Where do I find this? The code is shown on your computer by the pairing script (opencode pair) or the desktop helper.",
+    "manualWhere": "Where do I find this? The URL, username and password come from your OpenCode server setup."
   },
   "editor": {
     "title": "Editor"
@@ -411,28 +487,42 @@
       "aurora": "Aurora flow",
       "halftone": "Halftone clouds",
       "papermesh": "Paper mesh",
-      "hive": "Hive"
+      "hive": "Hive",
+      "gradient3": "3-ball gradient",
+      "bounce": "Bouncing balls",
+      "orbit": "Gravity orbit",
+      "repel": "Repel & shockwave",
+      "waves": "Silk waves",
+      "starfield": "Star field",
+      "plasma": "Plasma"
     },
     "descriptions": {
-      "gradient": "A static indigo gradient. Lightest on battery.",
-      "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
-      "paths": "Thin animated lines flowing across the screen (Kokonut UI Background Paths).",
-      "liquid": "Soft glowing liquid blobs in blue and violet.",
-      "swirl": "A dithered pixel swirl, cyan on dark plum.",
-      "cyber": "A flowing field of tiny particles driven by Perlin noise.",
-      "mesh": "Slowly drifting, blurred color blobs.",
-      "prism": "A kaleidoscopic lattice of rounded, slowly morphing cells with iridescent edges.",
-      "aurora": "A flat color field with one soft drifting glow.",
-      "halftone": "Flowing noise clouds drawn as a monochrome pixel halftone.",
-      "papermesh": "Mesh gradient from Paper Shaders with blended color blobs and grain.",
-      "hive": "A dark field with a glowing shape and rainbow edges."
+      "gradient": "A still three-color gradient. Lightest on battery.",
+      "video": "Your own looping video from assets/backgrounds/motion.mp4; falls back to the gradient if none is set.",
+      "paths": "Thin lines sweep across the screen in two mirrored fans (after Kokonut UI Background Paths).",
+      "liquid": "Up to six glowing liquid blobs that merge where they touch.",
+      "swirl": "A dithered pixel spiral with three colored arms turning around the center.",
+      "cyber": "Thousands of tiny particles drifting along a Perlin-noise flow field.",
+      "mesh": "Large blurred color blobs that slowly drift past each other.",
+      "prism": "A kaleidoscope of rounded, morphing cells with iridescent edges.",
+      "aurora": "Two soft light balls drift, collide and blend their colors where they overlap.",
+      "halftone": "Flowing noise clouds drawn as a two-tone pixel halftone.",
+      "papermesh": "Paper Shaders mesh gradient: blended color blobs with distortion, swirl and grain.",
+      "hive": "Rotating glowing hexagon outlines with three color bands on a dark field.",
+      "gradient3": "Three large light balls wander slowly and blend into one smooth gradient.",
+      "bounce": "Glowing balls bounce elastically off the edges and each other, flashing on impact.",
+      "orbit": "Balls pulled by gravity orbit a center well and merge on close passes.",
+      "repel": "Balls push each other away; hard near-misses send out a shockwave ring.",
+      "waves": "Layered glowing sine ribbons that flare where they cross.",
+      "starfield": "Stars rushing toward you in three depth layers.",
+      "plasma": "Classic flowing sine plasma through a three-color palette."
     },
     "controls": {
       "colorA": "Primary color",
       "colorB": "Secondary color",
       "colorBack": "Base color",
       "speed": "Speed",
-      "density": "Density",
+      "density": "Particle density",
       "intensity": "Intensity",
       "blur": "Blur",
       "opacity": "Opacity",
@@ -448,7 +538,10 @@
       "distortion": "Distortion",
       "swirl": "Swirl",
       "reset": "Reset",
-      "resetAll": "Reset all"
+      "resetAll": "Reset all",
+      "chaos": "Chaos",
+      "glow": "Edge & impact glow",
+      "invert": "Invert"
     },
     "presets": {
       "title": "Saved presets",

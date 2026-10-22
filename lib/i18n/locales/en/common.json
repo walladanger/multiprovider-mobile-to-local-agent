@@ -84,5 +84,18 @@
     },
     "appSettingsSummary": "Editor, general and updates",
     "serverToolsSummary": "MCP servers and diagnostics"
+  },
+  "connectionErrors": {
+    "unreachable": "Can't reach your OpenCode server.",
+    "unreachableHint": "Check that the server is running and the address is right. On a phone, localhost means the phone itself.",
+    "timeout": "The server took too long to answer.",
+    "timeoutHint": "Check your network or tunnel, then try again.",
+    "auth": "The server rejected the username or password.",
+    "authHint": "Check your credentials in Settings › Connection.",
+    "tls": "Couldn't set up a secure (https) connection.",
+    "tlsHint": "Check the tunnel's certificate, or try the http LAN address.",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "loopback": "This points at the phone itself. Use your tunnel URL, your PC's LAN IP, or 10.0.2.2 on the Android emulator."
   }
 }

@@ -5,6 +5,7 @@ import { Button, List, Text } from 'react-native-paper';
 
 import { useOnboardingNavigation } from '@/components/onboarding/use-onboarding-navigation';
 import { OnboardingStep } from '@/components/onboarding/onboarding-step';
+import { OnboardingHelp } from '@/components/onboarding/onboarding-help';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -27,6 +28,7 @@ export default function OnboardingWelcomeScreen() {
           {t('onboarding:welcome.start')}
         </Button>
       }>
+      <OnboardingHelp testID="onboarding-welcome-help" summary={t('onboarding:help.welcome.summary')} details={t('onboarding:help.welcome.details', { returnObjects: true }) as string[]} />
       <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
         <MaterialCommunityIcons name="server-network" size={28} color={palette.tint} />
         <Text variant="bodyMedium" style={{ color: palette.text }}>{t('onboarding:welcome.body')}</Text>

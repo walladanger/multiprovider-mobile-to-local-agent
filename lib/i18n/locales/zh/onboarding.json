@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "将此应用连接到你电脑上的 OpenCode 服务器。",
+    "skipHint": "还没准备好？点击跳过。之后可在 设置 › 连接 中添加连接。"
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,163 @@
     "title": "通用设置",
     "subtitle": "按你的偏好设置 OpenCode Mobile。",
     "defaultModel": "默认模型"
+  },
+  "help": {
+    "whatsThis": "这是什么？",
+    "hide": "隐藏详情",
+    "welcome": {
+      "summary": "这个应用是你电脑上 OpenCode 的遥控器。",
+      "details": [
+        "真正的工作在你的电脑上完成：它运行 OpenCode 服务器、AI 模型和你的项目文件。",
+        "手机连接到该服务器，让你随时随地与智能体聊天并跟进进度。",
+        "接下来的步骤大约需要一分钟。所有内容之后都可以在设置中更改。"
+      ]
+    },
+    "permissions": {
+      "summary": "可选：允许应用发送通知并使用语音输入。",
+      "details": [
+        "通知会在应用处于后台时告诉你智能体已完成任务。",
+        "语音输入让你可以说出提示而不用打字。",
+        "在你点击启用之前不会请求任何权限。你可以跳过，之后在设置中开启。"
+      ]
+    },
+    "connect": {
+      "summary": "服务器就是运行在你电脑上的 OpenCode 服务器。应用需要它的地址才能访问你的项目。",
+      "details": [
+        "扫描二维码：当电脑上显示配对码时选择此项，会自动填写所有信息。",
+        "手动：当你知道服务器 URL（例如你的 https 隧道地址）、用户名（通常是 opencode）和密码时选择此项。",
+        "跳过：不连接服务器继续。之后可在 设置 › 连接 中添加。"
+      ]
+    },
+    "ai": {
+      "summary": "选择服务器要使用的 AI 提供商和模型。",
+      "details": [
+        "提供商（如 OpenAI 或 Anthropic）在你的 OpenCode 服务器上配置；这里选择要显示哪些。",
+        "可以跳过并保留服务器的默认设置。"
+      ]
+    },
+    "project": {
+      "summary": "项目是 OpenCode 在你电脑上工作的文件夹。",
+      "details": [
+        "选择首先打开的项目。聊天和文件更改按项目保存。",
+        "添加文件夹时请输入它在服务器电脑上的路径，而不是手机上的路径。"
+      ]
+    },
+    "general": {
+      "summary": "选择新聊天使用的模型，以及智能体工作时你发送的消息如何处理。",
+      "details": [
+        "默认模型用于新聊天。你仍可在任何聊天中切换模型。",
+        "引导会立即把消息发给正在运行的智能体；排队则等它完成后再发送。",
+        "跳过即可保留服务器默认设置。"
+      ]
+    },
+    "ready": {
+      "summary": "这是你的设置摘要。确认后即可开始。",
+      "details": [
+        "点击开始编码打开应用。",
+        "缺少或错误的内容之后可在设置中修改。也可以在 设置 › 设置助手 中重新运行本向导。"
+      ]
+    },
+    "transcript": {
+      "summary": "控制聊天记录中显示多少智能体的工作内容。",
+      "details": [
+        "每个聊天都会显示你的消息和助手的回复。下面的选项会在它们之间加入额外的行。",
+        "额外的行默认折叠，点击即可展开。",
+        "不确定时选择基础。之后可在 设置 › 外观 中更改。"
+      ]
+    },
+    "look": {
+      "summary": "选择语言、字体、文字大小和强调色。上方预览会立即更新。",
+      "details": [
+        "预览是一段示例聊天，让你看到真实对话的样子。",
+        "文字大小会叠加在手机自身的字体大小设置上。",
+        "强调色还会为下一步推荐匹配的背景颜色。"
+      ]
+    },
+    "background": {
+      "summary": "选择应用背后的颜色以及面板在其上的样式。",
+      "details": [
+        "渐变预设一键应用三种搭配好的颜色。高亮色只改变最亮的那个颜色。",
+        "面板样式会改变卡片和聊天气泡：玻璃为半透明，实色为不透明，锐利为更尖的圆角，紧凑可在屏幕上显示更多内容。",
+        "动态背景和精细调节在 设置 › 外观 中。"
+      ]
+    }
+  },
+  "steps": {
+    "index": "欢迎",
+    "permissions": "权限",
+    "connect": "连接",
+    "ai": "AI 提供商",
+    "project": "项目",
+    "transcript": "聊天记录",
+    "look": "外观",
+    "background": "背景与面板",
+    "general": "模型与发送",
+    "ready": "完成"
+  },
+  "stepIndicatorLabel": "第 {{step}} 步，共 {{totalSteps}} 步，{{title}}",
+  "transcript": {
+    "title": "聊天中显示什么",
+    "subtitle": "选择每段对话显示多少细节。",
+    "later": "随时可在 设置 › 外观 › 记录详细程度 中更改。",
+    "options": {
+      "basic": {
+        "title": "基础：只显示对话",
+        "body": "只显示你的消息和助手的回复。最简洁的视图。",
+        "example": "例如：“修复登录 bug” → “已完成，我更新了 auth.ts。”"
+      },
+      "reasoning": {
+        "title": "推理：显示思考过程",
+        "body": "同时以折叠行显示助手的推理，即回答前的逐步思考。",
+        "example": "例如：一行“思考中…”，展开可看到它为何选择某个修复。"
+      },
+      "verbose": {
+        "title": "详细：显示每个操作",
+        "body": "同时以折叠行显示每次工具调用，例如读取文件、运行命令和编辑代码。最适合准确了解发生了什么。",
+        "example": "例如：“读取 auth.ts”“运行 npm test”“编辑了 2 个文件”。"
+      }
+    }
+  },
+  "look": {
+    "title": "外观",
+    "subtitle": "打造你的风格。下面的所有选项都会实时更新预览。",
+    "previewLabel": "示例聊天的实时预览",
+    "accent": "强调色",
+    "later": "之后可在 设置 › 外观 中细调主题、字体、图标等。",
+    "sizes": {
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "xlarge": "特大"
+    },
+    "preview": {
+      "user1": "能加一个深色模式开关吗？",
+      "assistant1": "当然，我会把它加到设置页面。",
+      "user2": "默认跟随系统设置。",
+      "assistant2": "已完成。除非你另选，否则跟随系统。",
+      "user3": "也运行一下测试。",
+      "assistant3": "42 个测试全部通过。"
+    }
+  },
+  "background": {
+    "title": "背景与面板",
+    "subtitle": "选择背景渐变和面板样式。预览会实时更新。",
+    "gradient": "渐变",
+    "color": "高亮色",
+    "panel": "面板样式",
+    "later": "动态背景、预设和精细调节在 设置 › 外观 中。",
+    "presets": {
+      "indigo": "靛蓝之夜",
+      "ocean": "海洋",
+      "aurora": "极光",
+      "orchid": "兰花",
+      "sunset": "日落"
+    },
+    "skinHints": {
+      "glass": "玻璃：半透明、带模糊的面板，可透出背景。",
+      "solid": "实色：不透明面板，可读性最好。",
+      "crisp": "锐利：更尖的圆角和更明显的边框。",
+      "compact": "紧凑：更小的间距，屏幕上显示更多内容。"
+    }
   }
 }

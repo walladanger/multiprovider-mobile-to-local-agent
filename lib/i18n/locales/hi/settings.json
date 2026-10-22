@@ -50,13 +50,13 @@
       "step": "चरण {{step}} / 2",
       "addressTitle": "सर्वर का पता",
       "detailsTitle": "कनेक्शन का विवरण",
-      "addressHint": "अपने OpenCode सर्वर से जुड़ें।",
+      "addressHint": "अपने OpenCode सर्वर का पता डालें।",
       "continue": "जारी रखें",
       "change": "बदलें",
       "detected": "OpenCode {{version}} मिला",
       "identify": "सर्वर की पहचान के लिए क्रेडेंशियल दर्ज करें।",
       "customUsername": "कस्टम उपयोगकर्ता नाम",
-      "passwordHint": "सर्वर का पासवर्ड दर्ज करें।",
+      "passwordHint": "वह पासवर्ड जो आपने अपने OpenCode सर्वर के लिए सेट किया है।",
       "optionalName": "नाम (वैकल्पिक)",
       "nameHint": "सर्वर का IP या डोमेन इस्तेमाल करने के लिए खाली छोड़ें।",
       "showPassword": "पासवर्ड दिखाएँ",
@@ -74,6 +74,17 @@
         "expired": "यह कोड समाप्त हो गया है या पहले इस्तेमाल हो चुका है। opencode pair फिर चलाएँ।",
         "unreachable": "सर्वर तक नहीं पहुँच सके। दोनों डिवाइस एक ही नेटवर्क पर हैं यह जाँचें, या पता खुद दर्ज करें।",
         "loopback": "इस कोड में केवल localhost का पता है। कंप्यूटर पर opencode service set hostname 0.0.0.0 चलाएँ, फिर opencode service start और opencode pair चलाएँ।"
+      },
+      "serverUrlFieldHint": "आपके Cloudflare टनल का पता (जैसे https://opencode.example.com) या लोकल नेटवर्क पर आपके कंप्यूटर का पता (जैसे http://192.168.1.10:4096)।",
+      "usernameHint": "आमतौर पर opencode, जब तक आपने सर्वर सेटअप में इसे बदला न हो।",
+      "passwordPlaceholder": "सर्वर पासवर्ड",
+      "cfAccess": {
+        "title": "उन्नत: Cloudflare Access",
+        "hint": "केवल तब ज़रूरी जब आपका टनल सर्विस टोकन के साथ Cloudflare Access से सुरक्षित हो। इस डिवाइस पर सुरक्षित रूप से सहेजा जाता है; सर्वर को भेजना जल्द आ रहा है।",
+        "clientId": "Access Client ID",
+        "clientIdHint": "Cloudflare Zero Trust › Access › Service credentials से। अंत में .access होता है।",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "सर्विस टोकन बनाते समय केवल एक बार दिखाया जाता है।"
       }
     }
   },
@@ -343,6 +354,69 @@
         "label": "विस्तृत",
         "description": "टूल कॉल भी सिकुड़ी हुई पंक्तियों के रूप में दिखाएँ।"
       }
+    },
+    "info": "About {{value}}",
+    "footer": "Everything here applies instantly and is saved on this device.",
+    "background": {
+      "title": "Background",
+      "info": "The animated layer behind the whole app: pick a preset or build your own look."
+    },
+    "presets": {
+      "info": "Ready-made looks.",
+      "hint": "A preset sets the style, all colors and all sliders together. Adjust anything afterwards."
+    },
+    "style": {
+      "info": "The kind of animation. Switching style loads that style's defaults with your theme's colors."
+    },
+    "colors": {
+      "title": "Colors",
+      "info": "The base color plus one color per light ball, particle layer or band.",
+      "none": "Video backgrounds use the video's own colors."
+    },
+    "sliders": {
+      "title": "Sliders",
+      "info": "Every style has the same sliders; 0 is the style's default, Reset returns there.",
+      "noEffect": "no effect on this style"
+    },
+    "saved": {
+      "info": "Save the current background and appearance under a name, and load it later."
+    },
+    "icons": {
+      "info": "The icon set used across the app."
+    },
+    "layers": {
+      "ball": "Ball {{value}}",
+      "blob": "Blob {{value}}",
+      "layer": "Layer {{value}}",
+      "band": "Band {{value}}",
+      "fan": "Fan {{value}}",
+      "arm": "Arm {{value}}",
+      "ribbon": "Ribbon {{value}}",
+      "stop": "Color {{value}}"
+    },
+    "color": {
+      "edit": "Edit {{value}}",
+      "more": "More colors",
+      "close": "Close color picker",
+      "hex": "Hex",
+      "eyedropper": "Eyedropper",
+      "eyedropperHint": "Tap the live background to pick a color from it.",
+      "done": "Done"
+    },
+    "text": {
+      "title": "Text & fonts",
+      "info": "Font, size, color and effects for app and chat text, with a live chat preview.",
+      "color": "Text color",
+      "shadow": "Shadow",
+      "shadowBlack": "Black shadow",
+      "shadowSurface": "Darker surface shade",
+      "outlineColor": "Outline color",
+      "outline": "Outline thickness",
+      "glow": "Glow",
+      "gradient": "Gradient text",
+      "emboss": "Soft emboss",
+      "effectsHint": "Shadow, outline, glow and emboss need Android 12 or later.",
+      "previewQuestion": "Can you check the settings sheet?"
     }
   },
   "connect": {
@@ -354,9 +428,11 @@
     },
     "scanHint": "कनेक्ट करने के लिए अपने कंप्यूटर का QR कोड स्कैन करें।",
     "scanLocal": "QR कोड स्कैन करें",
-    "scanLocalHint": "एक ही नेटवर्क पर कंप्यूटर से कनेक्ट करें।",
+    "scanLocalHint": "इसका उपयोग करें अगर आपका कंप्यूटर पेयरिंग QR कोड दिखा रहा है।",
     "manual": "मैन्युअल",
-    "manualHint": "अपने सर्वर का URL और क्रेडेंशियल दर्ज करें।"
+    "manualHint": "सर्वर URL, यूज़रनेम और पासवर्ड टाइप करने के लिए इसका उपयोग करें।",
+    "scanWhere": "यह कहाँ मिलेगा? कोड आपके कंप्यूटर पर पेयरिंग स्क्रिप्ट (opencode pair) या डेस्कटॉप हेल्पर द्वारा दिखाया जाता है।",
+    "manualWhere": "यह कहाँ मिलेगा? URL, यूज़रनेम और पासवर्ड आपके OpenCode सर्वर सेटअप से आते हैं।"
   },
   "editor": {
     "title": "एडिटर"
@@ -411,7 +487,14 @@
       "aurora": "Aurora flow",
       "halftone": "Halftone clouds",
       "papermesh": "Paper mesh",
-      "hive": "Hive"
+      "hive": "Hive",
+      "gradient3": "3-ball gradient",
+      "bounce": "Bouncing balls",
+      "orbit": "Gravity orbit",
+      "repel": "Repel & shockwave",
+      "waves": "Silk waves",
+      "starfield": "Star field",
+      "plasma": "Plasma"
     },
     "descriptions": {
       "gradient": "A static indigo gradient. Lightest on battery.",
@@ -422,10 +505,17 @@
       "cyber": "A flowing field of tiny particles driven by Perlin noise.",
       "mesh": "Slowly drifting, blurred color blobs.",
       "prism": "A kaleidoscopic lattice of rounded, slowly morphing cells with iridescent edges.",
-      "aurora": "A flat color field with one soft drifting glow.",
+      "aurora": "दो मुलायम रोशनी की गेंदें तैरती हैं, टकराती हैं और जहाँ मिलती हैं वहाँ अपने रंग मिला देती हैं।",
       "halftone": "Flowing noise clouds drawn as a monochrome pixel halftone.",
       "papermesh": "Mesh gradient from Paper Shaders with blended color blobs and grain.",
-      "hive": "A dark field with a glowing shape and rainbow edges."
+      "hive": "A dark field with a glowing shape and rainbow edges.",
+      "gradient3": "Three large light balls wander slowly and blend into one smooth gradient.",
+      "bounce": "Glowing balls bounce elastically off the edges and each other, flashing on impact.",
+      "orbit": "Balls pulled by gravity orbit a center well and merge on close passes.",
+      "repel": "Balls push each other away; hard near-misses send out a shockwave ring.",
+      "waves": "Layered glowing sine ribbons that flare where they cross.",
+      "starfield": "Stars rushing toward you in three depth layers.",
+      "plasma": "Classic flowing sine plasma through a three-color palette."
     },
     "controls": {
       "colorA": "Primary color",
@@ -448,7 +538,10 @@
       "distortion": "Distortion",
       "swirl": "Swirl",
       "reset": "Reset",
-      "resetAll": "Reset all"
+      "resetAll": "Reset all",
+      "chaos": "Chaos",
+      "glow": "Edge & impact glow",
+      "invert": "Invert"
     },
     "presets": {
       "title": "Saved presets",

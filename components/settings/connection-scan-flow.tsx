@@ -103,7 +103,7 @@ export function ConnectionScanFlow({ onSubmit, onDismiss, onBusyChange }: {
 
   return (
     <Modal visible animationType="slide" presentationStyle="fullScreen" onRequestClose={locked ? undefined : dismiss}>
-      <View style={[styles.screen, { backgroundColor: palette.background }]}>
+      <View style={[styles.screen, { backgroundColor: palette.modalBackground }]}>
         <View style={StyleSheet.absoluteFill}>
           <ConnectCameraGate onCancel={dismiss}>
             <ConnectScanner key={attempt} enabled={!busy && !message} hint={t('settings:connection.setup.scanAutomatic')} onScan={(code) => void pair(code)} />

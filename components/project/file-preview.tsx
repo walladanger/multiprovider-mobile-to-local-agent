@@ -39,7 +39,7 @@ export function FilePreview({ file, projectPath, branch, canSave, slim, onClose,
   }
   const close = () => leave(() => { setDraft(undefined); onClose(); });
   return <Modal visible animationType="slide" presentationStyle="fullScreen" onRequestClose={close}>
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: palette.background }} behavior="padding">
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: palette.modalBackground }} behavior="padding">
       <Appbar.Header statusBarHeight={0} style={{ backgroundColor: palette.surface, paddingTop: insets.top, height: (slim ? 52 : 64) + insets.top }}>
         <Appbar.BackAction disabled={saving} accessibilityLabel={t('project:files.close')} onPress={close} />
         <Appbar.Content title={file.path.split('/').pop() || file.path} subtitle={file.path} />

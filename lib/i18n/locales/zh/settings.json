@@ -50,13 +50,13 @@
       "step": "第 {{step}} 步，共 2 步",
       "addressTitle": "服务器地址",
       "detailsTitle": "连接详情",
-      "addressHint": "连接到你的 OpenCode 服务器。",
+      "addressHint": "输入你的 OpenCode 服务器地址。",
       "continue": "继续",
       "change": "更改",
       "detected": "已检测到 OpenCode {{version}}",
       "identify": "输入凭据以识别服务器。",
       "customUsername": "自定义用户名",
-      "passwordHint": "输入服务器密码。",
+      "passwordHint": "你为 OpenCode 服务器设置的密码。",
       "optionalName": "名称（可选）",
       "nameHint": "留空以使用服务器 IP 或域名。",
       "showPassword": "显示密码",
@@ -74,6 +74,17 @@
         "expired": "此配对码已过期或已使用。请重新运行 opencode pair。",
         "unreachable": "无法连接服务器。请确认两台设备连接到同一网络，或手动输入地址。",
         "loopback": "此配对码仅包含 localhost 地址。请在电脑上运行 opencode service set hostname 0.0.0.0，然后运行 opencode service start 和 opencode pair。"
+      },
+      "serverUrlFieldHint": "你的 Cloudflare 隧道地址（例如 https://opencode.example.com），或你电脑在局域网中的地址（例如 http://192.168.1.10:4096）。",
+      "usernameHint": "通常是 opencode，除非你在服务器设置中修改过。",
+      "passwordPlaceholder": "服务器密码",
+      "cfAccess": {
+        "title": "高级：Cloudflare Access",
+        "hint": "仅当你的隧道受带服务令牌的 Cloudflare Access 保护时才需要。安全保存在此设备上；发送到服务器的功能即将推出。",
+        "clientId": "Access Client ID",
+        "clientIdHint": "在 Cloudflare Zero Trust › Access › Service credentials 中获取，以 .access 结尾。",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "仅在创建服务令牌时显示一次。"
       }
     }
   },
@@ -343,6 +354,69 @@
         "label": "详细",
         "description": "同时以折叠行显示工具调用。"
       }
+    },
+    "info": "About {{value}}",
+    "footer": "Everything here applies instantly and is saved on this device.",
+    "background": {
+      "title": "Background",
+      "info": "The animated layer behind the whole app: pick a preset or build your own look."
+    },
+    "presets": {
+      "info": "Ready-made looks.",
+      "hint": "A preset sets the style, all colors and all sliders together. Adjust anything afterwards."
+    },
+    "style": {
+      "info": "The kind of animation. Switching style loads that style's defaults with your theme's colors."
+    },
+    "colors": {
+      "title": "Colors",
+      "info": "The base color plus one color per light ball, particle layer or band.",
+      "none": "Video backgrounds use the video's own colors."
+    },
+    "sliders": {
+      "title": "Sliders",
+      "info": "Every style has the same sliders; 0 is the style's default, Reset returns there.",
+      "noEffect": "no effect on this style"
+    },
+    "saved": {
+      "info": "Save the current background and appearance under a name, and load it later."
+    },
+    "icons": {
+      "info": "The icon set used across the app."
+    },
+    "layers": {
+      "ball": "Ball {{value}}",
+      "blob": "Blob {{value}}",
+      "layer": "Layer {{value}}",
+      "band": "Band {{value}}",
+      "fan": "Fan {{value}}",
+      "arm": "Arm {{value}}",
+      "ribbon": "Ribbon {{value}}",
+      "stop": "Color {{value}}"
+    },
+    "color": {
+      "edit": "Edit {{value}}",
+      "more": "More colors",
+      "close": "Close color picker",
+      "hex": "Hex",
+      "eyedropper": "Eyedropper",
+      "eyedropperHint": "Tap the live background to pick a color from it.",
+      "done": "Done"
+    },
+    "text": {
+      "title": "Text & fonts",
+      "info": "Font, size, color and effects for app and chat text, with a live chat preview.",
+      "color": "Text color",
+      "shadow": "Shadow",
+      "shadowBlack": "Black shadow",
+      "shadowSurface": "Darker surface shade",
+      "outlineColor": "Outline color",
+      "outline": "Outline thickness",
+      "glow": "Glow",
+      "gradient": "Gradient text",
+      "emboss": "Soft emboss",
+      "effectsHint": "Shadow, outline, glow and emboss need Android 12 or later.",
+      "previewQuestion": "Can you check the settings sheet?"
     }
   },
   "connect": {
@@ -354,9 +428,11 @@
     },
     "scanHint": "扫描电脑的二维码以连接。",
     "scanLocal": "扫描二维码",
-    "scanLocalHint": "连接到同一网络上的电脑。",
+    "scanLocalHint": "当你的电脑显示配对二维码时使用。",
     "manual": "手动",
-    "manualHint": "输入服务器网址和凭据。"
+    "manualHint": "用于输入服务器 URL、用户名和密码。",
+    "scanWhere": "在哪里找到？二维码由电脑上的配对脚本（opencode pair）或桌面助手显示。",
+    "manualWhere": "在哪里找到？URL、用户名和密码来自你的 OpenCode 服务器设置。"
   },
   "editor": {
     "title": "编辑器"
@@ -411,7 +487,14 @@
       "aurora": "Aurora flow",
       "halftone": "Halftone clouds",
       "papermesh": "Paper mesh",
-      "hive": "Hive"
+      "hive": "Hive",
+      "gradient3": "3-ball gradient",
+      "bounce": "Bouncing balls",
+      "orbit": "Gravity orbit",
+      "repel": "Repel & shockwave",
+      "waves": "Silk waves",
+      "starfield": "Star field",
+      "plasma": "Plasma"
     },
     "descriptions": {
       "gradient": "A static indigo gradient. Lightest on battery.",
@@ -422,10 +505,17 @@
       "cyber": "A flowing field of tiny particles driven by Perlin noise.",
       "mesh": "Slowly drifting, blurred color blobs.",
       "prism": "A kaleidoscopic lattice of rounded, slowly morphing cells with iridescent edges.",
-      "aurora": "A flat color field with one soft drifting glow.",
+      "aurora": "两个柔和的光球缓缓漂移、相互碰撞，并在重叠处融合颜色。",
       "halftone": "Flowing noise clouds drawn as a monochrome pixel halftone.",
       "papermesh": "Mesh gradient from Paper Shaders with blended color blobs and grain.",
-      "hive": "A dark field with a glowing shape and rainbow edges."
+      "hive": "A dark field with a glowing shape and rainbow edges.",
+      "gradient3": "Three large light balls wander slowly and blend into one smooth gradient.",
+      "bounce": "Glowing balls bounce elastically off the edges and each other, flashing on impact.",
+      "orbit": "Balls pulled by gravity orbit a center well and merge on close passes.",
+      "repel": "Balls push each other away; hard near-misses send out a shockwave ring.",
+      "waves": "Layered glowing sine ribbons that flare where they cross.",
+      "starfield": "Stars rushing toward you in three depth layers.",
+      "plasma": "Classic flowing sine plasma through a three-color palette."
     },
     "controls": {
       "colorA": "Primary color",
@@ -448,7 +538,10 @@
       "distortion": "Distortion",
       "swirl": "Swirl",
       "reset": "Reset",
-      "resetAll": "Reset all"
+      "resetAll": "Reset all",
+      "chaos": "Chaos",
+      "glow": "Edge & impact glow",
+      "invert": "Invert"
     },
     "presets": {
       "title": "Saved presets",

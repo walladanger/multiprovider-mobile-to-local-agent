@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ConnectionErrorText, useFriendlyConnectionMessage } from '@/components/ui/connection-error-text';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -16,6 +17,7 @@ import { useConnection, usePreferences, useProjects, useProjectFiles } from '@/p
 
 export default function ProjectsScreen() {
   const { t } = useTranslation();
+  const friendly = useFriendlyConnectionMessage();
   const insets = useSafeAreaInsets();
   const palette = Colors[useColorScheme() ?? 'light'];
   const { connection, serverCapabilities, settings, connect } = useConnection();
@@ -43,7 +45,7 @@ export default function ProjectsScreen() {
       <Pressable accessibilityRole="button" accessibilityLabel={t('project:picker.changeProject')} onPress={() => setPickerVisible(true)} style={styles.selector}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text numberOfLines={1} variant="titleMedium" style={{ color: palette.text, fontFamily: Fonts.display, fontWeight: '700' }}>{activeProject?.label || t('common:tabs.projects')}</Text>
-          <Text numberOfLines={1} variant="bodySmall" style={{ color: palette.muted }}>{connection.status === 'connected' ? activeProject?.path : connection.message}</Text>
+          <Text numberOfLines={1} variant="bodySmall" style={{ color: palette.muted }}>{connection.status === 'connected' ? activeProject?.path : friendly(connection.message)}</Text>
         </View>
         <MaterialCommunityIcons name="chevron-down" size={20} color={palette.muted} />
       </Pressable>
@@ -61,7 +63,7 @@ export default function ProjectsScreen() {
         keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
         <Text variant="headlineMedium" style={{ fontWeight: '700', color: palette.text }}>{t('project:screen.filesTab')}</Text>
       <View style={{ gap: 12 }}>
-        <Text style={{ color: palette.muted }}>{connection.status !== 'connected' ? connection.message : t('project:picker.empty')}</Text>
+        {connection.status !== 'connected' ? <ConnectionErrorText message={connection.message} /> : <Text style={{ color: palette.muted }}>{t('project:picker.empty')}</Text>}
         <Button mode="outlined" loading={connection.status === 'connecting'} onPress={() => {
           if (connection.status === 'connected') setPickerVisible(true);
           else void connect().catch((reason) => setError(reason instanceof Error ? reason.message : t('project:errors.refreshProject')));

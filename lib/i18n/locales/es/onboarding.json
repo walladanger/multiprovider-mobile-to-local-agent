@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "Conecta esta app al servidor de OpenCode de tu ordenador.",
+    "skipHint": "¿Aún no estás listo? Pulsa Omitir. Puedes añadir una conexión después en Ajustes › Conexión."
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,163 @@
     "title": "Ajustes generales",
     "subtitle": "Adapta OpenCode Mobile a tus preferencias.",
     "defaultModel": "Modelo predeterminado"
+  },
+  "help": {
+    "whatsThis": "¿Qué es esto?",
+    "hide": "Ocultar detalles",
+    "welcome": {
+      "summary": "Esta app es un control remoto para OpenCode en tu propio ordenador.",
+      "details": [
+        "Tu ordenador hace el trabajo real: ejecuta el servidor de OpenCode, los modelos de IA y tus archivos de proyecto.",
+        "Tu teléfono se conecta a ese servidor para que puedas chatear con agentes y seguir su progreso desde cualquier lugar.",
+        "Los siguientes pasos llevan un minuto. Todo se puede cambiar después en Ajustes."
+      ]
+    },
+    "permissions": {
+      "summary": "Opcional: deja que la app te avise y escuche tu voz.",
+      "details": [
+        "Las notificaciones te avisan cuando un agente termina una tarea con la app en segundo plano.",
+        "La entrada de voz te permite dictar instrucciones en lugar de escribirlas.",
+        "No se pide nada hasta que pulses Activar. Puedes omitir ambas y activarlas después en Ajustes."
+      ]
+    },
+    "connect": {
+      "summary": "Un servidor es el servidor de OpenCode que se ejecuta en tu ordenador. La app necesita su dirección para llegar a tus proyectos.",
+      "details": [
+        "Escanear código QR: elige esto cuando tu ordenador muestre un código de emparejamiento. Lo rellena todo por ti.",
+        "Manual: elige esto cuando conozcas la URL del servidor, por ejemplo tu dirección de túnel https, además del usuario (normalmente opencode) y la contraseña.",
+        "Omitir: continúa sin servidor. Puedes añadir una conexión después en Ajustes › Conexión."
+      ]
+    },
+    "ai": {
+      "summary": "Elige qué proveedores y modelos de IA debe usar tu servidor.",
+      "details": [
+        "Los proveedores (como OpenAI o Anthropic) se configuran en tu servidor de OpenCode; aquí eliges cuáles mostrar.",
+        "Puedes omitir esto y mantener los valores del servidor."
+      ]
+    },
+    "project": {
+      "summary": "Un proyecto es una carpeta de tu ordenador en la que trabaja OpenCode.",
+      "details": [
+        "Elige el proyecto que se abrirá primero. Los chats y cambios se guardan por proyecto.",
+        "Añade una carpeta con su ruta en el ordenador servidor, no en tu teléfono."
+      ]
+    },
+    "general": {
+      "summary": "Elige el modelo con el que empiezan los chats nuevos y qué pasa con los mensajes que envías mientras el agente trabaja.",
+      "details": [
+        "El modelo predeterminado se usa en chats nuevos. Puedes cambiarlo dentro de cualquier chat.",
+        "Dirigir envía tu mensaje al agente en marcha de inmediato; En cola espera a que termine.",
+        "Omite para mantener los valores del servidor."
+      ]
+    },
+    "ready": {
+      "summary": "Este es un resumen de lo que configuraste. Revísalo y empieza.",
+      "details": [
+        "Pulsa Empezar a programar para abrir la app.",
+        "Lo que falte o esté mal se puede cambiar después en Ajustes. También puedes repetir esta configuración desde Ajustes › Asistente de configuración."
+      ]
+    },
+    "transcript": {
+      "summary": "Controla cuánto del trabajo del agente muestra la transcripción del chat.",
+      "details": [
+        "Cada chat muestra tus mensajes y las respuestas del asistente. Las opciones de abajo añaden filas extra entre ellos.",
+        "Las filas extra aparecen contraídas. Tócalas para expandirlas.",
+        "Elige Básico si no estás seguro. Puedes cambiarlo después en Ajustes › Apariencia."
+      ]
+    },
+    "look": {
+      "summary": "Elige idioma, fuente, tamaño de texto y color de acento. La vista previa de arriba cambia al instante.",
+      "details": [
+        "La vista previa es un chat de ejemplo para que veas cómo se verán las conversaciones reales.",
+        "El tamaño de texto se suma al tamaño de fuente de tu teléfono.",
+        "El color de acento también sugiere colores de fondo para el siguiente paso."
+      ]
+    },
+    "background": {
+      "summary": "Elige los colores detrás de la app y cómo se ven los paneles encima.",
+      "details": [
+        "Los degradados predefinidos aplican tres colores a juego con un toque. El color de realce cambia solo el más brillante.",
+        "El estilo de panel cambia tarjetas y burbujas: Cristal es translúcido, Sólido es opaco, Nítido tiene esquinas más marcadas y Compacto muestra más en pantalla.",
+        "Los fondos animados y los controles finos están en Ajustes › Apariencia."
+      ]
+    }
+  },
+  "steps": {
+    "index": "Bienvenida",
+    "permissions": "Permisos",
+    "connect": "Conexión",
+    "ai": "Proveedores de IA",
+    "project": "Proyecto",
+    "transcript": "Transcripción del chat",
+    "look": "Apariencia",
+    "background": "Fondo y paneles",
+    "general": "Modelo y envío",
+    "ready": "Listo"
+  },
+  "stepIndicatorLabel": "Paso {{step}} de {{totalSteps}}, {{title}}",
+  "transcript": {
+    "title": "Qué muestra el chat",
+    "subtitle": "Elige cuánto detalle aparece en cada conversación.",
+    "later": "Cámbialo cuando quieras en Ajustes › Apariencia › Detalle de la transcripción.",
+    "options": {
+      "basic": {
+        "title": "Básico: solo la conversación",
+        "body": "Muestra solo tus mensajes y las respuestas del asistente. La vista más limpia.",
+        "example": "Ejemplo: «Arregla el error de inicio de sesión» → «Hecho. Actualicé auth.ts.»"
+      },
+      "reasoning": {
+        "title": "Razonamiento: mostrar lo que piensa",
+        "body": "Muestra también el razonamiento del asistente, su pensamiento paso a paso antes de responder, como filas contraídas.",
+        "example": "Ejemplo: una fila «Pensando…» que puedes expandir para ver por qué eligió una solución."
+      },
+      "verbose": {
+        "title": "Detallado: mostrar cada acción",
+        "body": "Muestra también cada llamada a herramientas, como leer archivos, ejecutar comandos y editar código, como filas contraídas. Ideal para seguir exactamente qué pasó.",
+        "example": "Ejemplo: «Leyó auth.ts», «Ejecutó npm test», «Editó 2 archivos»."
+      }
+    }
+  },
+  "look": {
+    "title": "Apariencia",
+    "subtitle": "Hazla tuya. Todo lo de abajo actualiza la vista previa al instante.",
+    "previewLabel": "Vista previa en vivo de un chat de ejemplo",
+    "accent": "Color de acento",
+    "later": "Ajusta temas, fuentes, iconos y más después en Ajustes › Apariencia.",
+    "sizes": {
+      "small": "Pequeño",
+      "medium": "Mediano",
+      "large": "Grande",
+      "xlarge": "Muy grande"
+    },
+    "preview": {
+      "user1": "¿Puedes añadir un interruptor de modo oscuro?",
+      "assistant1": "Claro. Lo añadiré a la pantalla de ajustes.",
+      "user2": "Usa el ajuste del sistema por defecto.",
+      "assistant2": "Hecho. Sigue al sistema salvo que elijas otro.",
+      "user3": "Ejecuta también las pruebas.",
+      "assistant3": "Las 42 pruebas pasan."
+    }
+  },
+  "background": {
+    "title": "Fondo y paneles",
+    "subtitle": "Elige un degradado de fondo y un estilo de panel. La vista previa cambia al instante.",
+    "gradient": "Degradado",
+    "color": "Color de realce",
+    "panel": "Estilo de panel",
+    "later": "Los fondos animados, ajustes predefinidos y controles finos están en Ajustes › Apariencia.",
+    "presets": {
+      "indigo": "Noche índigo",
+      "ocean": "Océano",
+      "aurora": "Aurora",
+      "orchid": "Orquídea",
+      "sunset": "Atardecer"
+    },
+    "skinHints": {
+      "glass": "Cristal: paneles translúcidos y difuminados que dejan ver el fondo.",
+      "solid": "Sólido: paneles opacos para la mejor legibilidad.",
+      "crisp": "Nítido: esquinas más marcadas y bordes más visibles.",
+      "compact": "Compacto: menos espacio entre elementos para que quepa más."
+    }
   }
 }

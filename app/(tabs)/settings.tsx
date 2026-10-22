@@ -1,4 +1,5 @@
 import { Icon } from '@/components/ui/icon';
+import { useFriendlyConnectionMessage } from '@/components/ui/connection-error-text';
 import { tokens } from '@/theme/tokens';
 import type { IconName } from '@/lib/backgrounds/icon-map';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
@@ -30,6 +31,7 @@ import {
 } from '@/components/settings/settings-sections';
 import { useNotificationSetup } from '@/components/settings/use-notification-setup';
 import { BackgroundSection } from '@/components/settings/sections/background-section';
+import { normalizeTranscriptFontSize, TRANSCRIPT_FONT_SIZE_MAX, TRANSCRIPT_FONT_SIZE_MIN } from '@/providers/opencode-preferences';
 import { useBackground } from '@/providers/background-context';
 import { AiSettingsPanel } from '@/components/settings/ai-settings-panel';
 import { useVoiceSetup } from '@/components/settings/use-voice-setup';
@@ -65,6 +67,7 @@ function SettingsContent() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
   const { t } = useTranslation();
+  const friendlyConnection = useFriendlyConnectionMessage();
   const { configuredProviders, currentConfig } = useCapabilities();
   const { addMcpServer, mcpOAuth, connectMcpServer, disconnectMcpServer, mcpStatuses, refreshMcpServers, setMcpServerEnabled } = useMcp();
   const { chatPreferences, updateChatPreferences } = usePreferences();
@@ -132,7 +135,7 @@ function SettingsContent() {
       id: 'connection',
       icon: 'server',
       title: t('settings:screen.categories.connection'),
-      summary: connection.status === 'connected' ? t('common:labels.connected') : connection.message,
+      summary: connection.status === 'connected' ? t('common:labels.connected') : friendlyConnection(connection.message),
       onPress: () => setOpenSection('connection'),
       render: () => <ConnectionSection connection={connection} palette={palette} />,
     },
@@ -166,7 +169,10 @@ function SettingsContent() {
       title: t('settings:screen.categories.appearance'),
       summary: t('settings:backgrounds.summary', { value: t(`settings:backgrounds.kinds.${background.settings.kind}`) }),
       onPress: () => setOpenSection('appearance'),
-      render: () => <BackgroundSection palette={palette} />,
+      render: () => <BackgroundSection palette={palette} chatTextSize={{
+        value: normalizeTranscriptFontSize(chatPreferences.transcriptFontSize), min: TRANSCRIPT_FONT_SIZE_MIN, max: TRANSCRIPT_FONT_SIZE_MAX,
+        onChange: (transcriptFontSize) => updateChatPreferences({ transcriptFontSize }),
+      }} />,
     },
     {
       id: 'general', icon: 'settings', title: t('common:servers.appSettings'), summary: t('common:servers.appSettingsSummary'),

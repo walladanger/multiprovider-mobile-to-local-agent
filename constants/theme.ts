@@ -14,6 +14,11 @@ function buildColors() {
     surface: glass.panel,
     surfaceAlt: glass.panelAlt,
     surfaceSolid: palette.bgRaised,
+    // Sheets, dialogs and full-screen modals are always opaque so the screen
+    // behind never shows through, whatever the skin (Glass stays for in-page cards).
+    sheet: palette.bgRaised,
+    modalBackground: palette.bg,
+    scrim: 'rgba(0, 0, 0, 0.6)',
     card: glass.panel,
     tint: palette.primarySoft,
     accent: palette.accent,
