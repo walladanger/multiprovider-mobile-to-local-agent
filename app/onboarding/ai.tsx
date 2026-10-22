@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from 'react-native-paper';
 
 import { OnboardingStep } from '@/components/onboarding/onboarding-step';
+import { OnboardingHelp } from '@/components/onboarding/onboarding-help';
 import { useOnboardingNavigation } from '@/components/onboarding/use-onboarding-navigation';
 import { AiSettingsPanel } from '@/components/settings/ai-settings-panel';
 
@@ -15,6 +16,7 @@ export default function OnboardingAiScreen() {
         <Button mode="contained" testID="onboarding-ai-continue" onPress={navigation.next}>{t('onboarding:permissions.continue')}</Button>
       </>
     }>
+      <OnboardingHelp testID="onboarding-ai-help" summary={t('onboarding:help.ai.summary')} details={t('onboarding:help.ai.details', { returnObjects: true }) as string[]} />
       <AiSettingsPanel />
     </OnboardingStep>
   );

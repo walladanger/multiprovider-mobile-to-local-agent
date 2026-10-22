@@ -50,13 +50,13 @@
       "step": "Schritt {{step}} von 2",
       "addressTitle": "Serveradresse",
       "detailsTitle": "Verbindungsdetails",
-      "addressHint": "Verbinde dich mit deinem OpenCode-Server.",
+      "addressHint": "Gib die Adresse deines OpenCode-Servers ein.",
       "continue": "Weiter",
       "change": "Ändern",
       "detected": "OpenCode {{version}} erkannt",
       "identify": "Gib die Zugangsdaten ein, um den Server zu erkennen.",
       "customUsername": "Eigener Benutzername",
-      "passwordHint": "Gib das Serverpasswort ein.",
+      "passwordHint": "Das Passwort, das du für deinen OpenCode-Server festgelegt hast.",
       "optionalName": "Name (optional)",
       "nameHint": "Leer lassen, um die Server-IP oder Domain zu verwenden.",
       "showPassword": "Passwort anzeigen",
@@ -74,6 +74,17 @@
         "expired": "Dieser Code ist abgelaufen oder wurde bereits verwendet. Führe opencode pair erneut aus.",
         "unreachable": "Server nicht erreichbar. Prüfe, ob beide Geräte im selben Netzwerk sind, oder gib die Adresse manuell ein.",
         "loopback": "Dieser Code enthält nur eine localhost-Adresse. Führe opencode service set hostname 0.0.0.0, dann opencode service start und opencode pair auf deinem Computer aus."
+      },
+      "serverUrlFieldHint": "Die Adresse deines Cloudflare-Tunnels (z. B. https://opencode.example.com) oder deines Computers im lokalen Netzwerk (z. B. http://192.168.1.10:4096).",
+      "usernameHint": "Meist opencode, außer du hast ihn in der Server-Einrichtung geändert.",
+      "passwordPlaceholder": "Server-Passwort",
+      "cfAccess": {
+        "title": "Erweitert: Cloudflare Access",
+        "hint": "Nur nötig, wenn dein Tunnel durch Cloudflare Access mit einem Service-Token geschützt ist. Wird sicher auf diesem Gerät gespeichert; das Senden an den Server folgt bald.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "Aus Cloudflare Zero Trust › Access › Service-Anmeldedaten. Endet auf .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Wird beim Erstellen des Service-Tokens einmalig angezeigt."
       }
     }
   },
@@ -354,9 +365,11 @@
     },
     "scanHint": "Scanne den QR-Code deines Computers, um dich zu verbinden.",
     "scanLocal": "QR-Code scannen",
-    "scanLocalHint": "Mit einem Computer im selben Netzwerk verbinden.",
+    "scanLocalHint": "Nutze dies, wenn dein Computer einen Kopplungs-QR-Code anzeigt.",
     "manual": "Manuell",
-    "manualHint": "Gib deine Server-URL und Zugangsdaten ein."
+    "manualHint": "Nutze dies, um Server-URL, Benutzername und Passwort einzugeben.",
+    "scanWhere": "Wo finde ich das? Der Code wird auf deinem Computer vom Kopplungsskript (opencode pair) oder vom Desktop-Helfer angezeigt.",
+    "manualWhere": "Wo finde ich das? URL, Benutzername und Passwort stammen aus der Einrichtung deines OpenCode-Servers."
   },
   "editor": {
     "title": "Editor"

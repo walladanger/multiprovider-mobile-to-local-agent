@@ -5,6 +5,7 @@ import { Button, HelperText, Text } from 'react-native-paper';
 
 import { useOnboardingNavigation } from '@/components/onboarding/use-onboarding-navigation';
 import { OnboardingStep } from '@/components/onboarding/onboarding-step';
+import { OnboardingHelp } from '@/components/onboarding/onboarding-help';
 import { useNotificationSetup } from '@/components/settings/use-notification-setup';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -65,6 +66,7 @@ export default function OnboardingPermissionsScreen() {
           </Button>
         </>
       }>
+      <OnboardingHelp testID="onboarding-permissions-help" summary={t('onboarding:help.permissions.summary')} details={t('onboarding:help.permissions.details', { returnObjects: true }) as string[]} />
       <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
         <View style={styles.cardHeader}>
           <Text variant="titleSmall" style={{ color: palette.text }}>{t('onboarding:permissions.notifications.title')}</Text>

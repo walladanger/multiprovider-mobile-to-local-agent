@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "将此应用连接到你电脑上的 OpenCode 服务器。",
+    "skipHint": "还没准备好？点击跳过。之后可在 设置 › 连接 中添加连接。"
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,60 @@
     "title": "通用设置",
     "subtitle": "按你的偏好设置 OpenCode Mobile。",
     "defaultModel": "默认模型"
+  },
+  "help": {
+    "whatsThis": "这是什么？",
+    "hide": "隐藏详情",
+    "welcome": {
+      "summary": "这个应用是你电脑上 OpenCode 的遥控器。",
+      "details": [
+        "真正的工作在你的电脑上完成：它运行 OpenCode 服务器、AI 模型和你的项目文件。",
+        "手机连接到该服务器，让你随时随地与智能体聊天并跟进进度。",
+        "接下来的步骤大约需要一分钟。所有内容之后都可以在设置中更改。"
+      ]
+    },
+    "permissions": {
+      "summary": "可选：允许应用发送通知并使用语音输入。",
+      "details": [
+        "通知会在应用处于后台时告诉你智能体已完成任务。",
+        "语音输入让你可以说出提示而不用打字。",
+        "在你点击启用之前不会请求任何权限。你可以跳过，之后在设置中开启。"
+      ]
+    },
+    "connect": {
+      "summary": "服务器就是运行在你电脑上的 OpenCode 服务器。应用需要它的地址才能访问你的项目。",
+      "details": [
+        "扫描二维码：当电脑上显示配对码时选择此项，会自动填写所有信息。",
+        "手动：当你知道服务器 URL（例如你的 https 隧道地址）、用户名（通常是 opencode）和密码时选择此项。",
+        "跳过：不连接服务器继续。之后可在 设置 › 连接 中添加。"
+      ]
+    },
+    "ai": {
+      "summary": "选择服务器要使用的 AI 提供商和模型。",
+      "details": [
+        "提供商（如 OpenAI 或 Anthropic）在你的 OpenCode 服务器上配置；这里选择要显示哪些。",
+        "可以跳过并保留服务器的默认设置。"
+      ]
+    },
+    "project": {
+      "summary": "项目是 OpenCode 在你电脑上工作的文件夹。",
+      "details": [
+        "选择首先打开的项目。聊天和文件更改按项目保存。",
+        "添加文件夹时请输入它在服务器电脑上的路径，而不是手机上的路径。"
+      ]
+    },
+    "general": {
+      "summary": "语言、主题和默认模型等基本偏好。",
+      "details": [
+        "这些只会改变应用在这部手机上的外观和行为。",
+        "跳过即可保留默认值。"
+      ]
+    },
+    "ready": {
+      "summary": "这是你的设置摘要。",
+      "details": [
+        "点击开始编码打开应用。缺少的内容之后可在设置中添加。"
+      ]
+    }
   }
 }

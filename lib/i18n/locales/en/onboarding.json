@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "Connect this app to the OpenCode server on your computer.",
+    "skipHint": "Not ready yet? Tap Skip. You can add a connection later in Settings › Connection."
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,60 @@
     "title": "General Settings",
     "subtitle": "Make OpenCode Mobile feel right for you.",
     "defaultModel": "Default model"
+  },
+  "help": {
+    "whatsThis": "What's this?",
+    "hide": "Hide details",
+    "welcome": {
+      "summary": "This app is a remote control for OpenCode running on your own computer.",
+      "details": [
+        "Your computer does the real work: it runs the OpenCode server, the AI models and your project files.",
+        "Your phone connects to that server so you can chat with agents and follow their progress from anywhere.",
+        "The next steps take about a minute. Everything can be changed later in Settings."
+      ]
+    },
+    "permissions": {
+      "summary": "Optional: let the app notify you and listen to your voice.",
+      "details": [
+        "Notifications tell you when an agent finishes a task while the app is in the background.",
+        "Voice input lets you speak prompts instead of typing them.",
+        "Nothing is requested until you tap Enable. You can skip both and turn them on later in Settings."
+      ]
+    },
+    "connect": {
+      "summary": "A server is the OpenCode server running on your computer. The app needs its address to reach your projects.",
+      "details": [
+        "Scan QR code: pick this when your computer is showing a pairing code. It fills in everything for you.",
+        "Manual: pick this when you know the server URL, for example your https tunnel address, plus the username (usually opencode) and password.",
+        "Skip: continue without a server. You can add a connection later in Settings › Connection."
+      ]
+    },
+    "ai": {
+      "summary": "Choose which AI providers and models your server should use.",
+      "details": [
+        "Providers (such as OpenAI or Anthropic) are configured on your OpenCode server; here you pick which ones to show.",
+        "You can skip this and keep the server's defaults."
+      ]
+    },
+    "project": {
+      "summary": "A project is a folder on your computer that OpenCode works in.",
+      "details": [
+        "Pick the project to open first. Chats and file changes are kept per project.",
+        "Add a folder by entering its path on the server computer, not on your phone."
+      ]
+    },
+    "general": {
+      "summary": "Basic preferences such as language, theme and the default model.",
+      "details": [
+        "These only change how the app looks and behaves on this phone.",
+        "Skip to keep the defaults."
+      ]
+    },
+    "ready": {
+      "summary": "Here is a summary of what you set up.",
+      "details": [
+        "Tap Start coding to open the app. Anything missing can be added later in Settings."
+      ]
+    }
   }
 }

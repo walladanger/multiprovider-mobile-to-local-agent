@@ -11,6 +11,7 @@ function find(root: Element | Element[], testID: string): Element | undefined {
 async function form(onSubmit = vi.fn()) {
   const runtime = hookRuntime();
   const probe = vi.fn(async () => ({ status: 'detected', contract: 'v2' }));
+  const saveAccess = vi.fn(async () => {});
   const { ConnectionProfileDialog } = await loadTs('components/settings/connection-profile-dialog.tsx', {
     react: runtime.react,
     'react/jsx-runtime': { jsx: (type: unknown, props: Record<string, unknown>) => ({ type, props }), jsxs: (type: unknown, props: Record<string, unknown>) => ({ type, props }), Fragment: 'Fragment' },
@@ -24,6 +25,7 @@ async function form(onSubmit = vi.fn()) {
     '@/hooks/use-color-scheme': { useColorScheme: () => 'light' },
     '@/lib/opencode/client': { isValidServerUrl: () => true },
     '@/lib/opencode/client/url': { getServerHostname: () => '192.168.1.10' },
+    '@/lib/cloudflare-access-secrets': { saveCloudflareAccessCredentials: saveAccess },
     '@/providers/opencode-contexts': { useConnection: () => ({ connectionProfiles: { probe } }) },
   }, { Error });
   const onDismiss = vi.fn();
@@ -32,10 +34,27 @@ async function form(onSubmit = vi.fn()) {
   const element = (id: string) => { const value = find(runtime.value, id); if (!value) throw new Error(`Missing ${id}`); return value; };
   const change = (id: string, value: string) => { element(id).props.onChangeText(value); runtime.flush(); };
   const press = async (id: string) => { element(id).props.onPress(); await runtime.settle(); };
-  return { runtime, probe, onSubmit, onDismiss, onBusyChange, element, change, press };
+  return { runtime, saveAccess, probe, onSubmit, onDismiss, onBusyChange, element, change, press };
 }
 
 describe('manual connection form', () => {
+  it('shows field hints and keeps Cloudflare Access collapsed until requested', async () => {
+    const view = await form();
+    expect(view.element('connection-profile-url-input').props.placeholder).toBe('https://opencode.example.com');
+    expect(view.element('connection-profile-url-hint').props.children).toBe('settings:connection.setup.serverUrlFieldHint');
+    expect(find(view.runtime.value, 'connection-profile-advanced')).toBeUndefined();
+    await view.press('connection-profile-advanced-toggle');
+    view.change('connection-profile-cf-client-id-input', 'id.access');
+    view.change('connection-profile-cf-client-secret-input', 'cf-secret');
+    expect(view.element('connection-profile-cf-client-secret-input').props.secureTextEntry).toBe(true);
+    view.change('connection-profile-url-input', 'https://opencode.example.com');
+    await view.press('connection-profile-continue');
+    view.change('connection-profile-password-input', 'secret');
+    await view.press('connection-profile-save-confirm');
+    expect(view.saveAccess).toHaveBeenCalledWith({ clientId: 'id.access', clientSecret: 'cf-secret' });
+    expect(view.onSubmit).toHaveBeenCalled();
+  });
+
   it('shows V2 details without a username and preserves values when changing the address', async () => {
     const view = await form();
     view.change('connection-profile-url-input', 'http://192.168.1.10:49374');

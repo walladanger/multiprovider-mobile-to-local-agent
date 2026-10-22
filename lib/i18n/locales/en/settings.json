@@ -50,13 +50,13 @@
       "step": "Step {{step}} of 2",
       "addressTitle": "Server address",
       "detailsTitle": "Connection details",
-      "addressHint": "Connect to your OpenCode server.",
+      "addressHint": "Enter the address of your OpenCode server.",
       "continue": "Continue",
       "change": "Change",
       "detected": "OpenCode {{version}} detected",
       "identify": "Enter credentials to identify the server.",
       "customUsername": "Custom username",
-      "passwordHint": "Enter your server password.",
+      "passwordHint": "The password you set for your OpenCode server.",
       "optionalName": "Name (optional)",
       "nameHint": "Leave blank to use the server IP or domain.",
       "showPassword": "Show password",
@@ -74,6 +74,17 @@
         "expired": "This pairing code expired or was already used. Run opencode pair again.",
         "unreachable": "Could not reach the server. Check that both devices are on the same network, or enter the address manually.",
         "loopback": "This code only contains a localhost address. Run opencode service set hostname 0.0.0.0, then opencode service start and opencode pair on your computer."
+      },
+      "serverUrlFieldHint": "The address of your Cloudflare tunnel (for example https://opencode.example.com) or of your computer on the local network (for example http://192.168.1.10:4096).",
+      "usernameHint": "Usually opencode, unless you changed it in your server setup.",
+      "passwordPlaceholder": "Server password",
+      "cfAccess": {
+        "title": "Advanced: Cloudflare Access",
+        "hint": "Only needed if your tunnel is protected by Cloudflare Access with a service token. Saved securely on this device; sending them to the server is coming soon.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "From Cloudflare Zero Trust › Access › Service credentials. Ends in .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Shown once when you create the service token."
       }
     }
   },
@@ -354,9 +365,11 @@
     },
     "scanHint": "Scan your computer’s QR code to connect.",
     "scanLocal": "Scan QR code",
-    "scanLocalHint": "Connect to a computer on the same network.",
+    "scanLocalHint": "Use this if your computer is showing a pairing QR code.",
     "manual": "Manual",
-    "manualHint": "Enter your server URL and credentials."
+    "manualHint": "Use this to type a server URL, username and password.",
+    "scanWhere": "Where do I find this? The code is shown on your computer by the pairing script (opencode pair) or the desktop helper.",
+    "manualWhere": "Where do I find this? The URL, username and password come from your OpenCode server setup."
   },
   "editor": {
     "title": "Editor"

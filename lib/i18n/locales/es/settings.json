@@ -50,13 +50,13 @@
       "step": "Paso {{step}} de 2",
       "addressTitle": "Dirección del servidor",
       "detailsTitle": "Detalles de conexión",
-      "addressHint": "Conéctate a tu servidor OpenCode.",
+      "addressHint": "Introduce la dirección de tu servidor de OpenCode.",
       "continue": "Continuar",
       "change": "Cambiar",
       "detected": "OpenCode {{version}} detectado",
       "identify": "Introduce las credenciales para identificar el servidor.",
       "customUsername": "Usuario personalizado",
-      "passwordHint": "Introduce la contraseña del servidor.",
+      "passwordHint": "La contraseña que configuraste para tu servidor de OpenCode.",
       "optionalName": "Nombre (opcional)",
       "nameHint": "Déjalo vacío para usar la IP o el dominio del servidor.",
       "showPassword": "Mostrar contraseña",
@@ -74,6 +74,17 @@
         "expired": "Este código ha caducado o ya se ha usado. Ejecuta opencode pair de nuevo.",
         "unreachable": "No se pudo acceder al servidor. Comprueba que ambos dispositivos estén en la misma red o introduce la dirección manualmente.",
         "loopback": "Este código solo contiene una dirección localhost. Ejecuta opencode service set hostname 0.0.0.0, después opencode service start y opencode pair en tu ordenador."
+      },
+      "serverUrlFieldHint": "La dirección de tu túnel de Cloudflare (por ejemplo https://opencode.example.com) o de tu ordenador en la red local (por ejemplo http://192.168.1.10:4096).",
+      "usernameHint": "Normalmente opencode, salvo que lo cambiaras en la configuración del servidor.",
+      "passwordPlaceholder": "Contraseña del servidor",
+      "cfAccess": {
+        "title": "Avanzado: Cloudflare Access",
+        "hint": "Solo es necesario si tu túnel está protegido por Cloudflare Access con un token de servicio. Se guarda de forma segura en este dispositivo; el envío al servidor llegará pronto.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "En Cloudflare Zero Trust › Access › Credenciales de servicio. Termina en .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Se muestra una sola vez al crear el token de servicio."
       }
     }
   },
@@ -354,9 +365,11 @@
     },
     "scanHint": "Escanea el código QR de tu ordenador para conectarte.",
     "scanLocal": "Escanear código QR",
-    "scanLocalHint": "Conéctate a un ordenador en la misma red.",
+    "scanLocalHint": "Usa esto si tu ordenador muestra un código QR de emparejamiento.",
     "manual": "Manual",
-    "manualHint": "Introduce la URL del servidor y tus credenciales."
+    "manualHint": "Usa esto para escribir la URL del servidor, el usuario y la contraseña.",
+    "scanWhere": "¿Dónde lo encuentro? El código lo muestra tu ordenador mediante el script de emparejamiento (opencode pair) o el asistente de escritorio.",
+    "manualWhere": "¿Dónde lo encuentro? La URL, el usuario y la contraseña vienen de la configuración de tu servidor de OpenCode."
   },
   "editor": {
     "title": "Editor"
