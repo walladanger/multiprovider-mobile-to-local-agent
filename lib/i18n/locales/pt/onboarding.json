@@ -125,17 +125,120 @@
       ]
     },
     "general": {
-      "summary": "Preferências básicas como idioma, tema e modelo padrão.",
+      "summary": "Escolha o modelo usado em chats novos e o que acontece com mensagens enviadas enquanto o agente trabalha.",
       "details": [
-        "Elas só mudam a aparência e o comportamento do app neste celular.",
-        "Pule para manter os padrões."
+        "O modelo padrão é usado em chats novos. Você ainda pode trocar dentro de qualquer chat.",
+        "Direcionar envia sua mensagem ao agente na hora; Fila espera ele terminar.",
+        "Pule para manter os padrões do servidor."
       ]
     },
     "ready": {
-      "summary": "Aqui está um resumo do que você configurou.",
+      "summary": "Aqui está um resumo do que você configurou. Confira e comece.",
       "details": [
-        "Toque em Começar a programar para abrir o app. O que faltar pode ser adicionado depois em Configurações."
+        "Toque em Começar a programar para abrir o app.",
+        "O que faltar ou estiver errado pode ser mudado depois em Configurações. Você também pode refazer esta configuração em Configurações › Assistente de configuração."
       ]
+    },
+    "transcript": {
+      "summary": "Controla quanto do trabalho do agente o histórico do chat mostra.",
+      "details": [
+        "Todo chat mostra suas mensagens e as respostas do assistente. As opções abaixo adicionam linhas extras entre elas.",
+        "As linhas extras começam recolhidas. Toque para expandir.",
+        "Escolha Básico se não tiver certeza. Você pode mudar depois em Configurações › Aparência."
+      ]
+    },
+    "look": {
+      "summary": "Escolha idioma, fonte, tamanho do texto e cor de destaque. A prévia acima muda na hora.",
+      "details": [
+        "A prévia é um chat de exemplo para você ver como as conversas reais vão ficar.",
+        "O tamanho do texto se soma ao tamanho de fonte do seu celular.",
+        "A cor de destaque também sugere cores de fundo para a próxima etapa."
+      ]
+    },
+    "background": {
+      "summary": "Escolha as cores atrás do app e a aparência dos painéis por cima.",
+      "details": [
+        "Os gradientes prontos aplicam três cores combinando com um toque. A cor de realce muda só a mais clara.",
+        "O estilo de painel muda cartões e balões: Vidro é translúcido, Sólido é opaco, Nítido tem cantos mais retos e Compacto mostra mais na tela.",
+        "Fundos animados e ajustes finos ficam em Configurações › Aparência."
+      ]
+    }
+  },
+  "steps": {
+    "index": "Boas-vindas",
+    "permissions": "Permissões",
+    "connect": "Conexão",
+    "ai": "Provedores de IA",
+    "project": "Projeto",
+    "transcript": "Histórico do chat",
+    "look": "Aparência",
+    "background": "Fundo e painéis",
+    "general": "Modelo e envio",
+    "ready": "Pronto"
+  },
+  "stepIndicatorLabel": "Etapa {{step}} de {{totalSteps}}, {{title}}",
+  "transcript": {
+    "title": "O que o chat mostra",
+    "subtitle": "Escolha quanto detalhe aparece em cada conversa.",
+    "later": "Mude quando quiser em Configurações › Aparência › Detalhe do histórico.",
+    "options": {
+      "basic": {
+        "title": "Básico: só a conversa",
+        "body": "Mostra apenas suas mensagens e as respostas do assistente. A visualização mais limpa.",
+        "example": "Exemplo: “Corrija o bug de login” → “Pronto. Atualizei auth.ts.”"
+      },
+      "reasoning": {
+        "title": "Raciocínio: mostrar o pensamento",
+        "body": "Mostra também o raciocínio do assistente, o pensamento passo a passo antes de responder, como linhas recolhidas.",
+        "example": "Exemplo: uma linha “Pensando…” que você expande para ver por que ele escolheu uma solução."
+      },
+      "verbose": {
+        "title": "Detalhado: mostrar cada ação",
+        "body": "Mostra também cada chamada de ferramenta, como ler arquivos, executar comandos e editar código, como linhas recolhidas. Ideal para acompanhar exatamente o que aconteceu.",
+        "example": "Exemplo: “Leu auth.ts”, “Executou npm test”, “Editou 2 arquivos”."
+      }
+    }
+  },
+  "look": {
+    "title": "Aparência",
+    "subtitle": "Deixe o app do seu jeito. Tudo abaixo atualiza a prévia ao vivo.",
+    "previewLabel": "Prévia ao vivo de um chat de exemplo",
+    "accent": "Cor de destaque",
+    "later": "Ajuste temas, fontes, ícones e mais depois em Configurações › Aparência.",
+    "sizes": {
+      "small": "Pequeno",
+      "medium": "Médio",
+      "large": "Grande",
+      "xlarge": "Muito grande"
+    },
+    "preview": {
+      "user1": "Pode adicionar um botão de modo escuro?",
+      "assistant1": "Claro. Vou colocar na tela de configurações.",
+      "user2": "Use a configuração do sistema por padrão.",
+      "assistant2": "Pronto. Segue o sistema, a menos que você escolha outro.",
+      "user3": "Rode os testes também.",
+      "assistant3": "Todos os 42 testes passaram."
+    }
+  },
+  "background": {
+    "title": "Fundo e painéis",
+    "subtitle": "Escolha um gradiente de fundo e um estilo de painel. A prévia muda ao vivo.",
+    "gradient": "Gradiente",
+    "color": "Cor de realce",
+    "panel": "Estilo de painel",
+    "later": "Fundos animados, predefinições e ajustes finos ficam em Configurações › Aparência.",
+    "presets": {
+      "indigo": "Noite índigo",
+      "ocean": "Oceano",
+      "aurora": "Aurora",
+      "orchid": "Orquídea",
+      "sunset": "Pôr do sol"
+    },
+    "skinHints": {
+      "glass": "Vidro: painéis translúcidos e desfocados que deixam o fundo aparecer.",
+      "solid": "Sólido: painéis opacos para a melhor leitura.",
+      "crisp": "Nítido: cantos mais retos e bordas mais fortes.",
+      "compact": "Compacto: espaçamento menor para caber mais na tela."
     }
   }
 }

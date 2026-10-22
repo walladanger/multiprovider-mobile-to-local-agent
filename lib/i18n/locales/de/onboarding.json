@@ -125,17 +125,120 @@
       ]
     },
     "general": {
-      "summary": "Grundeinstellungen wie Sprache, Design und Standardmodell.",
+      "summary": "Wähle das Modell für neue Chats und wie Nachrichten behandelt werden, die du während der Arbeit des Agenten sendest.",
       "details": [
-        "Diese ändern nur, wie die App auf diesem Handy aussieht und sich verhält.",
-        "Überspringe, um die Standardwerte zu behalten."
+        "Das Standardmodell gilt für neue Chats. Du kannst in jedem Chat wechseln.",
+        "Lenken schickt deine Nachricht sofort an den laufenden Agenten; Warteschlange wartet, bis er fertig ist.",
+        "Überspringe, um die Standardwerte des Servers zu behalten."
       ]
     },
     "ready": {
-      "summary": "Hier ist eine Zusammenfassung deiner Einrichtung.",
+      "summary": "Hier ist eine Zusammenfassung deiner Einrichtung. Prüfe sie und leg los.",
       "details": [
-        "Tippe auf Loslegen, um die App zu öffnen. Fehlendes kannst du später in den Einstellungen ergänzen."
+        "Tippe auf Loslegen, um die App zu öffnen.",
+        "Fehlendes oder Falsches kannst du später in den Einstellungen ändern. Diese Einrichtung lässt sich unter Einstellungen › Einrichtungsassistent erneut starten."
       ]
+    },
+    "transcript": {
+      "summary": "Legt fest, wie viel von der Arbeit des Agenten der Chatverlauf zeigt.",
+      "details": [
+        "Jeder Chat zeigt deine Nachrichten und die Antworten des Assistenten. Die Optionen unten fügen zusätzliche Zeilen dazwischen ein.",
+        "Zusätzliche Zeilen sind eingeklappt. Tippe darauf, um sie zu öffnen.",
+        "Wähle Einfach, wenn du unsicher bist. Du kannst es später unter Einstellungen › Darstellung ändern."
+      ]
+    },
+    "look": {
+      "summary": "Wähle Sprache, Schrift, Textgröße und Akzentfarbe. Die Vorschau oben ändert sich sofort.",
+      "details": [
+        "Die Vorschau ist ein Beispielchat, damit du siehst, wie echte Unterhaltungen aussehen.",
+        "Die Textgröße kommt zur Schriftgröße deines Handys hinzu.",
+        "Die Akzentfarbe schlägt auch passende Hintergrundfarben für den nächsten Schritt vor."
+      ]
+    },
+    "background": {
+      "summary": "Wähle die Farben hinter der App und wie Panels darauf aussehen.",
+      "details": [
+        "Verlaufsvorlagen setzen drei passende Farben mit einem Tipp. Die Hervorhebungsfarbe ändert nur die hellste.",
+        "Der Panel-Stil ändert Karten und Chatblasen: Glas ist durchscheinend, Solide ist deckend, Klar hat schärfere Ecken, Kompakt zeigt mehr auf dem Bildschirm.",
+        "Animierte Hintergründe und Feineinstellungen findest du unter Einstellungen › Darstellung."
+      ]
+    }
+  },
+  "steps": {
+    "index": "Willkommen",
+    "permissions": "Berechtigungen",
+    "connect": "Verbindung",
+    "ai": "KI-Anbieter",
+    "project": "Projekt",
+    "transcript": "Chatverlauf",
+    "look": "Aussehen",
+    "background": "Hintergrund & Panels",
+    "general": "Modell & Zustellung",
+    "ready": "Fertig"
+  },
+  "stepIndicatorLabel": "Schritt {{step}} von {{totalSteps}}, {{title}}",
+  "transcript": {
+    "title": "Was der Chat zeigt",
+    "subtitle": "Wähle, wie viele Details in jeder Unterhaltung erscheinen.",
+    "later": "Jederzeit änderbar unter Einstellungen › Darstellung › Verlaufsdetails.",
+    "options": {
+      "basic": {
+        "title": "Einfach: nur die Unterhaltung",
+        "body": "Zeigt nur deine Nachrichten und die Antworten des Assistenten. Die übersichtlichste Ansicht.",
+        "example": "Beispiel: „Behebe den Login-Fehler“ → „Erledigt. Ich habe auth.ts angepasst.“"
+      },
+      "reasoning": {
+        "title": "Überlegungen: das Denken zeigen",
+        "body": "Zeigt zusätzlich die Überlegungen des Assistenten, also sein schrittweises Nachdenken vor der Antwort, als eingeklappte Zeilen.",
+        "example": "Beispiel: eine Zeile „Denkt nach…“, die zeigt, warum er eine Lösung gewählt hat."
+      },
+      "verbose": {
+        "title": "Ausführlich: jede Aktion zeigen",
+        "body": "Zeigt zusätzlich jeden Werkzeugaufruf, etwa Dateien lesen, Befehle ausführen und Code bearbeiten, als eingeklappte Zeilen. Ideal, um genau nachzuvollziehen, was passiert ist.",
+        "example": "Beispiel: „auth.ts gelesen“, „npm test ausgeführt“, „2 Dateien bearbeitet“."
+      }
+    }
+  },
+  "look": {
+    "title": "Aussehen",
+    "subtitle": "Gestalte die App nach deinem Geschmack. Alles unten ändert die Vorschau sofort.",
+    "previewLabel": "Live-Vorschau eines Beispielchats",
+    "accent": "Akzentfarbe",
+    "later": "Designs, Schriften, Symbole und mehr später unter Einstellungen › Darstellung anpassen.",
+    "sizes": {
+      "small": "Klein",
+      "medium": "Mittel",
+      "large": "Groß",
+      "xlarge": "Sehr groß"
+    },
+    "preview": {
+      "user1": "Kannst du einen Dunkelmodus-Schalter hinzufügen?",
+      "assistant1": "Klar. Ich füge ihn zu den Einstellungen hinzu.",
+      "user2": "Standardmäßig die Systemeinstellung nutzen.",
+      "assistant2": "Erledigt. Er folgt dem System, außer du wählst etwas anderes.",
+      "user3": "Führ auch die Tests aus.",
+      "assistant3": "Alle 42 Tests bestanden."
+    }
+  },
+  "background": {
+    "title": "Hintergrund & Panels",
+    "subtitle": "Wähle einen Hintergrundverlauf und einen Panel-Stil. Die Vorschau ändert sich sofort.",
+    "gradient": "Verlauf",
+    "color": "Hervorhebungsfarbe",
+    "panel": "Panel-Stil",
+    "later": "Animierte Hintergründe, Vorlagen und Feineinstellungen findest du unter Einstellungen › Darstellung.",
+    "presets": {
+      "indigo": "Indigo-Nacht",
+      "ocean": "Ozean",
+      "aurora": "Polarlicht",
+      "orchid": "Orchidee",
+      "sunset": "Sonnenuntergang"
+    },
+    "skinHints": {
+      "glass": "Glas: durchscheinende, weichgezeichnete Panels, durch die der Hintergrund sichtbar bleibt.",
+      "solid": "Solide: deckende Panels für beste Lesbarkeit.",
+      "crisp": "Klar: schärfere Ecken und deutlichere Ränder.",
+      "compact": "Kompakt: engere Abstände, damit mehr auf den Bildschirm passt."
     }
   }
 }

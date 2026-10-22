@@ -13,6 +13,7 @@ export function useOnboardingNavigation(name: OnboardingStepName) {
   const next = steps[index + 1];
 
   return {
+    steps,
     step: index + 1,
     totalSteps: steps.length,
     available: index !== -1,
