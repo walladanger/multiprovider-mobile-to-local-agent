@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDismissOnBack } from '@/hooks/use-dismiss-on-back';
 import { useOnboardingNavigation } from './use-onboarding-navigation';
 import type { OnboardingStepName } from './navigation';
+import { OnboardingStepper } from './onboarding-stepper';
 import { useOnboarding } from '@/providers/opencode-contexts';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -44,13 +45,12 @@ export function OnboardingStep({
   const onBack = backDisabled ? undefined : navigation.back;
   useDismissOnBack(Platform.OS === 'android' && focused && Boolean(onBack), () => onBack?.());
   useFocusEffect(useCallback(() => {
-    if (!navigation.available) router.replace('/onboarding/general');
+    if (!navigation.available) router.replace('/onboarding/transcript');
   }, [navigation.available, router]));
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const palette = Colors[useColorScheme() ?? 'light'];
   const { onboardingActive } = useOnboarding();
-  const progress = Math.max(0, Math.min(1, navigation.step / navigation.totalSteps));
 
   return (
     <View style={[styles.screen, { backgroundColor: palette.background }]} testID={testID}>
@@ -60,13 +60,13 @@ export function OnboardingStep({
         elevated>
         {onBack ? <Appbar.BackAction accessibilityLabel={t('common:actions.back')} onPress={onBack} /> : null}
         <Appbar.Content
-          title={`${onboardingActive ? `${t('onboarding:reviewSetup')} · ` : ''}${t('onboarding:stepIndicator', { step: navigation.step, totalSteps: navigation.totalSteps })}`}
+          title={onboardingActive ? t('onboarding:reviewSetup') : t('onboarding:welcome.title')}
           titleStyle={{ color: palette.muted, fontSize: 14 }}
         />
       </Appbar.Header>
 
-      <View style={[styles.progressTrack, { backgroundColor: palette.border }]}>
-        <View style={[styles.progressValue, { backgroundColor: palette.tint, width: `${progress * 100}%` }]} />
+      <View style={{ backgroundColor: palette.surface }}>
+        <OnboardingStepper steps={navigation.steps} current={step} />
       </View>
 
       <ScrollView
@@ -91,8 +91,6 @@ export function OnboardingStep({
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   header: { elevation: 0 },
-  progressTrack: { height: 3, width: '100%' },
-  progressValue: { height: 3 },
   body: { flex: 1, width: '100%', maxWidth: 800, alignSelf: 'center' },
   content: { gap: 14, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
   heading: { gap: 8 },

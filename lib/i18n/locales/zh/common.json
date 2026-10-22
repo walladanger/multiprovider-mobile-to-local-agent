@@ -84,5 +84,18 @@
     },
     "appSettingsSummary": "编辑器、通用设置和更新",
     "serverToolsSummary": "MCP 服务器和诊断"
+  },
+  "connectionErrors": {
+    "unreachable": "无法连接到你的 OpenCode 服务器。",
+    "unreachableHint": "请确认服务器正在运行且地址正确。在手机上，localhost 指的是手机本身。",
+    "timeout": "服务器响应时间过长。",
+    "timeoutHint": "请检查网络或隧道后重试。",
+    "auth": "服务器拒绝了用户名或密码。",
+    "authHint": "请在 设置 › 连接 中检查凭据。",
+    "tls": "无法建立安全 (https) 连接。",
+    "tlsHint": "请检查隧道证书，或尝试局域网 http 地址。",
+    "showDetails": "显示详情",
+    "hideDetails": "隐藏详情",
+    "loopback": "这个地址指向手机本身。请使用你的隧道 URL、电脑的局域网 IP，或在 Android 模拟器上使用 10.0.2.2。"
   }
 }

@@ -84,5 +84,18 @@
     },
     "appSettingsSummary": "エディター、一般設定、更新",
     "serverToolsSummary": "MCPサーバーと診断"
+  },
+  "connectionErrors": {
+    "unreachable": "OpenCode サーバーに接続できません。",
+    "unreachableHint": "サーバーが起動していてアドレスが正しいか確認してください。スマホでは localhost はスマホ自身を指します。",
+    "timeout": "サーバーの応答に時間がかかりすぎました。",
+    "timeoutHint": "ネットワークまたはトンネルを確認して、もう一度お試しください。",
+    "auth": "サーバーがユーザー名またはパスワードを拒否しました。",
+    "authHint": "設定 › 接続 で認証情報を確認してください。",
+    "tls": "安全な (https) 接続を確立できませんでした。",
+    "tlsHint": "トンネルの証明書を確認するか、LAN の http アドレスを試してください。",
+    "showDetails": "詳細を表示",
+    "hideDetails": "詳細を隠す",
+    "loopback": "このアドレスはスマホ自身を指しています。トンネルの URL、PC の LAN IP、または Android エミュレーターでは 10.0.2.2 を使ってください。"
   }
 }

@@ -11,6 +11,9 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { isValidServerUrl, type ConnectionProbeResult } from '@/lib/opencode/client';
 import { getServerHostname } from '@/lib/opencode/client/url';
 import { useConnection } from '@/providers/opencode-contexts';
+import { LoopbackWarning } from '@/components/ui/connection-error-text';
+import { isLoopbackServerUrl } from '@/lib/opencode/connection-hints';
+import { saveCloudflareAccessCredentials } from '@/lib/cloudflare-access-secrets';
 
 export type ConnectionProfileFormValues = {
   name: string;
@@ -44,6 +47,9 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
   const [probe, setProbe] = useState<ConnectionProbeResult>();
   const [customUsername, setCustomUsername] = useState(Boolean(initial?.username));
   const [showPassword, setShowPassword] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [accessClientId, setAccessClientId] = useState('');
+  const [accessClientSecret, setAccessClientSecret] = useState('');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState<'probe' | 'save'>();
   const working = useRef(false);
@@ -85,6 +91,8 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
       if (result.status === 'unreachable') throw new Error(t('settings:connection.setup.unreachable'));
       if (operation === 'probe') { setStep('details'); return; }
       if (result.status === 'authentication-required') throw new Error(t('settings:connection.setup.credentialsRejected'));
+      // Values are kept only in secure storage and never logged.
+      if (accessClientId.trim() || accessClientSecret) await saveCloudflareAccessCredentials({ clientId: accessClientId, clientSecret: accessClientSecret });
       await onSubmit(values);
     } catch (reason) {
       if (current !== request.current) return;
@@ -96,7 +104,7 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
 
   return (
     <Modal visible animationType="slide" presentationStyle="fullScreen" onRequestClose={locked ? undefined : back}>
-      <KeyboardAvoidingView style={[styles.screen, { backgroundColor: palette.background }]} behavior="padding">
+      <KeyboardAvoidingView style={[styles.screen, { backgroundColor: palette.modalBackground }]} behavior="padding">
         <Appbar.Header statusBarHeight={0} style={{ backgroundColor: palette.surface, paddingTop: insets.top, height: 64 + insets.top }}>
           <Appbar.BackAction accessibilityLabel={t('common:actions.back')} disabled={locked} onPress={back} />
           <Appbar.Content title={title} />
@@ -108,20 +116,35 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
             <Text style={{ color: palette.muted }}>{t('settings:connection.setup.addressHint')}</Text>
             <TextInput mode="outlined" label={t('settings:connection.fields.serverUrl')} testID="connection-profile-url-input" value={serverUrl}
               onChangeText={(value) => { setServerUrl(value); setProbe(undefined); setError(undefined); }} disabled={Boolean(busy)} autoFocus
-              autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://192.168.1.10:49374" />
+              autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://opencode.example.com" />
+            <LoopbackWarning testID="connection-profile-loopback-warning" serverUrl={serverUrl} isLoopback={isLoopbackServerUrl} />
+            <Text testID="connection-profile-url-hint" style={{ color: palette.muted }}>{t('settings:connection.setup.serverUrlFieldHint')}</Text>
+            <Button testID="connection-profile-advanced-toggle" style={styles.left} icon={showAdvanced ? 'chevron-up' : 'chevron-down'} disabled={Boolean(busy)}
+              accessibilityState={{ expanded: showAdvanced }} onPress={() => setShowAdvanced((value) => !value)}>{t('settings:connection.setup.cfAccess.title')}</Button>
+            {showAdvanced ? <View testID="connection-profile-advanced" style={styles.advanced}>
+              <Text style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.hint')}</Text>
+              <TextInput mode="outlined" label={t('settings:connection.setup.cfAccess.clientId')} testID="connection-profile-cf-client-id-input" value={accessClientId}
+                onChangeText={setAccessClientId} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false} placeholder="0123abcd….access" />
+              <Text style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.clientIdHint')}</Text>
+              <TextInput mode="outlined" label={t('settings:connection.setup.cfAccess.clientSecret')} testID="connection-profile-cf-client-secret-input" value={accessClientSecret}
+                onChangeText={setAccessClientSecret} secureTextEntry disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false} />
+              <Text style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.clientSecretHint')}</Text>
+            </View> : null}
           </> : <>
             <View style={styles.addressRow}>
               <Text style={styles.address} numberOfLines={2}>{serverUrl}</Text>
               <Button testID="connection-profile-change" disabled={Boolean(busy)} onPress={back}>{t('settings:connection.setup.change')}</Button>
             </View>
+            <LoopbackWarning testID="connection-profile-loopback-warning" serverUrl={serverUrl} isLoopback={isLoopbackServerUrl} />
             <Text testID="connection-profile-detection" accessibilityLiveRegion="polite" style={{ color: v1 || v2 ? palette.tint : palette.muted }}>
               {v1 || v2 ? t('settings:connection.setup.detected', { version: v2 ? '2' : '1' }) : t('settings:connection.setup.identify')}
             </Text>
             {!v2 && !v1 ? <Button testID="connection-profile-custom-username" style={styles.left} disabled={Boolean(busy)} onPress={() => setCustomUsername((value) => !value)}>{t('settings:connection.setup.customUsername')}</Button> : null}
             {!v2 && (v1 || customUsername) ? <TextInput mode="outlined" label={t('settings:connection.fields.username')} testID="connection-profile-username-input"
               value={username} onChangeText={setUsername} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false} placeholder="opencode" /> : null}
+            {!v2 && (v1 || customUsername) ? <Text testID="connection-profile-username-hint" style={{ color: palette.muted }}>{t('settings:connection.setup.usernameHint')}</Text> : null}
             <TextInput mode="outlined" label={t('settings:connection.fields.password')} testID="connection-profile-password-input" value={password}
-              onChangeText={setPassword} secureTextEntry={!showPassword} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false}
+              onChangeText={setPassword} placeholder={t('settings:connection.setup.passwordPlaceholder')} secureTextEntry={!showPassword} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false}
               right={<PaperInput.Icon icon={showPassword ? 'eye-off' : 'eye'} onPress={() => setShowPassword((value) => !value)} accessibilityLabel={t(showPassword ? 'settings:connection.setup.hidePassword' : 'settings:connection.setup.showPassword')} />} />
             <Text style={{ color: palette.muted }}>{t('settings:connection.setup.passwordHint')}</Text>
             {showName ? <>
@@ -148,5 +171,6 @@ const styles = StyleSheet.create({
   addressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   address: { flex: 1 },
   left: { alignSelf: 'flex-start' },
+  advanced: { gap: 12 },
   actions: { borderTopWidth: 1, flexDirection: 'row', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 24, paddingTop: 16 },
 });

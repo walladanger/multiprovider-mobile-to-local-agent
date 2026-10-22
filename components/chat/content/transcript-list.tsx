@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ConnectionErrorText } from '@/components/ui/connection-error-text';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useIsFocused } from 'expo-router';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -247,7 +248,7 @@ export function TranscriptList({
             <Card mode="contained" style={[styles.noticeCard, styles.transcriptItem, { backgroundColor: palette.surface }]}>
               <Card.Content>
                 <Text variant="titleMedium" style={{ color: palette.text }}>{t('chat:content.connectionIssue')}</Text>
-                <Text variant="bodyMedium" style={{ color: palette.muted }}>{connection.message}</Text>
+                <ConnectionErrorText message={connection.message} />
               </Card.Content>
             </Card>
           ) : null}

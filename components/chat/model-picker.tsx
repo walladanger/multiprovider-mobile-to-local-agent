@@ -158,9 +158,9 @@ export function ModelPicker({ disabled = false, models, onSelect, recentModelIds
       <Modal animationType="slide" transparent visible={visible} onRequestClose={close}>
         <GestureHandlerRootView style={[styles.overlay, { paddingBottom: keyboardHeight }]}>
           <Pressable accessible={false} style={StyleSheet.absoluteFill} onPress={close}>
-            <Animated.View style={[styles.backdrop, backdropStyle]} />
+            <Animated.View style={[styles.backdrop, { backgroundColor: palette.scrim }, backdropStyle]} />
           </Pressable>
-          <Animated.View testID="chat-model-picker" onLayout={handleSheetLayout} style={[styles.sheet, { backgroundColor: palette.surface, borderColor: palette.border }, sheetStyle]}>
+          <Animated.View testID="chat-model-picker" onLayout={handleSheetLayout} style={[styles.sheet, { backgroundColor: palette.sheet, borderColor: palette.border }, sheetStyle]}>
               <GestureDetector gesture={pan}>
                 <View style={[styles.header, { borderBottomColor: palette.border }]}>
                   <Text style={[styles.title, { color: palette.text }]}>{t('chat:modelPicker.chooseModel')}</Text>

@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "Connect this app to the OpenCode server on your computer.",
+    "skipHint": "Not ready yet? Tap Skip. You can add a connection later in Settings › Connection."
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,163 @@
     "title": "General Settings",
     "subtitle": "Make OpenCode Mobile feel right for you.",
     "defaultModel": "Default model"
+  },
+  "help": {
+    "whatsThis": "What's this?",
+    "hide": "Hide details",
+    "welcome": {
+      "summary": "This app is a remote control for OpenCode running on your own computer.",
+      "details": [
+        "Your computer does the real work: it runs the OpenCode server, the AI models and your project files.",
+        "Your phone connects to that server so you can chat with agents and follow their progress from anywhere.",
+        "The next steps take about a minute. Everything can be changed later in Settings."
+      ]
+    },
+    "permissions": {
+      "summary": "Optional: let the app notify you and listen to your voice.",
+      "details": [
+        "Notifications tell you when an agent finishes a task while the app is in the background.",
+        "Voice input lets you speak prompts instead of typing them.",
+        "Nothing is requested until you tap Enable. You can skip both and turn them on later in Settings."
+      ]
+    },
+    "connect": {
+      "summary": "A server is the OpenCode server running on your computer. The app needs its address to reach your projects.",
+      "details": [
+        "Scan QR code: pick this when your computer is showing a pairing code. It fills in everything for you.",
+        "Manual: pick this when you know the server URL, for example your https tunnel address, plus the username (usually opencode) and password.",
+        "Skip: continue without a server. You can add a connection later in Settings › Connection."
+      ]
+    },
+    "ai": {
+      "summary": "Choose which AI providers and models your server should use.",
+      "details": [
+        "Providers (such as OpenAI or Anthropic) are configured on your OpenCode server; here you pick which ones to show.",
+        "You can skip this and keep the server's defaults."
+      ]
+    },
+    "project": {
+      "summary": "A project is a folder on your computer that OpenCode works in.",
+      "details": [
+        "Pick the project to open first. Chats and file changes are kept per project.",
+        "Add a folder by entering its path on the server computer, not on your phone."
+      ]
+    },
+    "general": {
+      "summary": "Choose the model new chats start with and how messages you send while the agent works are handled.",
+      "details": [
+        "The default model is used for new chats. You can still switch models inside any chat.",
+        "Steer sends your message to the running agent right away; Queue waits until it finishes.",
+        "Skip to keep the server's defaults."
+      ]
+    },
+    "ready": {
+      "summary": "Here is a summary of what you set up. Check it, then start.",
+      "details": [
+        "Tap Start coding to open the app.",
+        "Anything missing or wrong can be changed later in Settings. You can also rerun this setup from Settings › Setup assistant."
+      ]
+    },
+    "transcript": {
+      "summary": "This controls how much of the agent's work the chat transcript shows.",
+      "details": [
+        "Every chat shows your messages and the assistant's replies. The options below add extra rows in between.",
+        "Extra rows start collapsed. Tap one to expand it.",
+        "Pick Basic if you're not sure. You can change it later in Settings › Appearance."
+      ]
+    },
+    "look": {
+      "summary": "Choose a language, font, text size and accent color. The preview above updates as you tap.",
+      "details": [
+        "The preview is a sample chat, so you can see how real conversations will look.",
+        "Text size adds to your phone's own font size setting.",
+        "The accent color also suggests matching background colors for the next step."
+      ]
+    },
+    "background": {
+      "summary": "Pick the colors behind the app and how panels look on top of them.",
+      "details": [
+        "Gradient presets set three matching colors in one tap. The highlight color changes only the brightest one.",
+        "Panel style changes cards and chat bubbles: Glass is see-through, Solid is opaque, Crisp has sharper corners, Compact fits more on screen.",
+        "Animated backgrounds and fine controls are in Settings › Appearance."
+      ]
+    }
+  },
+  "steps": {
+    "index": "Welcome",
+    "permissions": "Permissions",
+    "connect": "Connection",
+    "ai": "AI providers",
+    "project": "Project",
+    "transcript": "Chat transcript",
+    "look": "Look & feel",
+    "background": "Background & panels",
+    "general": "Model & delivery",
+    "ready": "Ready"
+  },
+  "stepIndicatorLabel": "Step {{step}} of {{totalSteps}}, {{title}}",
+  "transcript": {
+    "title": "What the chat shows",
+    "subtitle": "Choose how much detail appears in each conversation.",
+    "later": "Change this anytime in Settings › Appearance › Transcript detail.",
+    "options": {
+      "basic": {
+        "title": "Basic: just the conversation",
+        "body": "Shows only your messages and the assistant's replies. The cleanest view.",
+        "example": "Example: “Fix the login bug” → “Done. I updated auth.ts.”"
+      },
+      "reasoning": {
+        "title": "Reasoning: show the thinking",
+        "body": "Also shows the assistant's reasoning, its step-by-step thinking before it answers, as collapsed rows.",
+        "example": "Example: a “Thinking…” row you can expand to see why it chose a fix."
+      },
+      "verbose": {
+        "title": "Verbose: show every action",
+        "body": "Also shows each tool call, such as reading files, running commands and editing code, as collapsed rows. Best for following exactly what happened.",
+        "example": "Example: “Read auth.ts”, “Ran npm test”, “Edited 2 files”."
+      }
+    }
+  },
+  "look": {
+    "title": "Look & feel",
+    "subtitle": "Make the app yours. Everything below updates the preview live.",
+    "previewLabel": "Live preview of a sample chat",
+    "accent": "Accent color",
+    "later": "Fine-tune themes, fonts, icons and more later in Settings › Appearance.",
+    "sizes": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "xlarge": "Extra large"
+    },
+    "preview": {
+      "user1": "Can you add a dark mode toggle?",
+      "assistant1": "Sure. I'll add it to the settings screen.",
+      "user2": "Use the system setting by default.",
+      "assistant2": "Done. It follows the system unless you pick one.",
+      "user3": "Run the tests too.",
+      "assistant3": "All 42 tests pass."
+    }
+  },
+  "background": {
+    "title": "Background & panels",
+    "subtitle": "Pick a background gradient and a panel style. The preview updates live.",
+    "gradient": "Gradient",
+    "color": "Highlight color",
+    "panel": "Panel style",
+    "later": "Animated backgrounds, presets and fine controls are in Settings › Appearance.",
+    "presets": {
+      "indigo": "Indigo night",
+      "ocean": "Ocean",
+      "aurora": "Aurora",
+      "orchid": "Orchid",
+      "sunset": "Sunset"
+    },
+    "skinHints": {
+      "glass": "Glass: see-through, blurred panels that let the background show.",
+      "solid": "Solid: opaque panels for the best readability.",
+      "crisp": "Crisp: sharper corners and stronger borders.",
+      "compact": "Compact: tighter spacing so more fits on screen."
+    }
   }
 }

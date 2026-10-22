@@ -84,5 +84,18 @@
     },
     "appSettingsSummary": "Éditeur, paramètres généraux et mises à jour",
     "serverToolsSummary": "Serveurs MCP et diagnostic"
+  },
+  "connectionErrors": {
+    "unreachable": "Impossible de joindre votre serveur OpenCode.",
+    "unreachableHint": "Vérifiez que le serveur tourne et que l'adresse est correcte. Sur un téléphone, localhost désigne le téléphone lui-même.",
+    "timeout": "Le serveur a mis trop de temps à répondre.",
+    "timeoutHint": "Vérifiez votre réseau ou votre tunnel, puis réessayez.",
+    "auth": "Le serveur a refusé le nom d'utilisateur ou le mot de passe.",
+    "authHint": "Vérifiez vos identifiants dans Réglages › Connexion.",
+    "tls": "Impossible d'établir une connexion sécurisée (https).",
+    "tlsHint": "Vérifiez le certificat du tunnel ou essayez l'adresse http du réseau local.",
+    "showDetails": "Afficher les détails",
+    "hideDetails": "Masquer les détails",
+    "loopback": "Cette adresse désigne le téléphone lui-même. Utilisez l'URL de votre tunnel, l'IP locale de votre PC ou 10.0.2.2 sur l'émulateur Android."
   }
 }

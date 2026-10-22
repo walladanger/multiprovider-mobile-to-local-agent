@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { HelperText } from 'react-native-paper';
 
-import { PromptDeliveryField, TranscriptDetailField } from '@/components/settings/sections/chat-preference-fields';
-import { LanguageSection } from '@/components/settings/sections/language-section';
+import { PromptDeliveryField } from '@/components/settings/sections/chat-preference-fields';
 import { SettingSelectField } from '@/components/settings/sections/setting-rows';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -21,8 +20,6 @@ export function OnboardingGeneralSettings() {
 
   return (
     <>
-      <LanguageSection showDescription={false} chatPreferences={chatPreferences} palette={palette} updateChatPreferences={updateChatPreferences} />
-      <TranscriptDetailField chatPreferences={chatPreferences} palette={palette} updateChatPreferences={updateChatPreferences} />
       {connected ? <>
         <SettingSelectField
           searchable
