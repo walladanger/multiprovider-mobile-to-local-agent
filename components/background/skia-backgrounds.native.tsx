@@ -1,27 +1,25 @@
 /**
- * Animated Skia backgrounds, ported from 21st.dev web components:
+ * Animated Skia backgrounds, ported from 21st.dev web components plus our own styles:
  *  - PathsBackground: Kokonut UI FloatingPathsBackground (faithful port of the supplied source)
  *  - CyberBackground: FluidParticlesBackground / CyberBackground (Perlin particle field, supplied source)
  *  - MeshGradientBackground: drifting color blobs from N stops (data presets in lib/backgrounds/mesh-presets.ts)
- *  - LiquidBackground: "liquid Shader" by Freedom (soft blue/violet glowing liquid blobs)
- *  - SwirlBackground: Ali Imam "Swirl" (4x4 Bayer-dithered pixel swirl, cyan on dark plum)
+ *  - Shader styles (lib/backgrounds/shader-sources.ts): liquid, swirl, prism, halftone, papermesh, hive, waves, starfield, plasma
+ *  - BallsBackground: aurora, 3-ball gradient, bounce, orbit, repel; physics in lib/backgrounds/ball-physics.ts
  * Shaders are drawn at half resolution and scaled up to keep fill cost low on mid-range Android.
+ * Every style reads the unified parameters (see lib/backgrounds/params.ts).
  */
-import { Blur, Canvas, Circle, Fill, Group, Paint, Path, RadialGradient, Shader, Skia, useClock, vec, type SkPath, type Uniforms } from '@shopify/react-native-skia';
+import { Blur, BlurMask, Canvas, Circle, Fill, Group, Paint, Path, RadialGradient, Shader, Skia, useClock, vec, type SkPath, type Uniforms } from '@shopify/react-native-skia';
 import * as React from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
 
 import { kokonutPath, stepParticles } from '@/lib/backgrounds/background-math';
-import { SHADER_KINDS, SHADER_SOURCES, shaderUniforms, type ShaderKind } from '@/lib/backgrounds/shader-sources';
+import { ballCount, ballUniforms, initBalls, stepBalls, type BallMode } from '@/lib/backgrounds/ball-physics';
+import { invertHex } from '@/lib/backgrounds/color-math';
+import { BALL_KINDS, BALLS_SOURCE, ballStaticUniforms, SHADER_KINDS, SHADER_SOURCES, shaderUniforms, type ShaderKind } from '@/lib/backgrounds/shader-sources';
 import type { BackgroundSettings, MeshStop } from '@/lib/backgrounds/settings';
 
 export type SkiaBackgroundProps = { settings: BackgroundSettings; width?: number; height?: number };
-
-function rgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-}
 
 function useSize(width?: number, height?: number) {
   const win = useWindowDimensions();
@@ -48,32 +46,49 @@ function pathDurationMs(i: number, position: number) {
   return (20 + r * 10) * 1000;
 }
 
-function FloatingPath({ i, position, clock, settings }: { i: number; position: number; clock: SharedValue<number>; settings: BackgroundSettings }) {
+function FloatingPath({ i, position, clock, settings, color }: { i: number; position: number; clock: SharedValue<number>; settings: BackgroundSettings; color: string }) {
   const path = React.useMemo(() => Skia.Path.MakeFromSVGString(kokonutPath(i, position)) ?? Skia.Path.Make(), [i, position]);
-  const duration = pathDurationMs(i, position) / Math.max(0.05, settings.speed);
+  // Chaos spreads the cycle lengths and adds a sideways wobble; 0 = the original timing.
+  const jitter = 1 + settings.chaos * (Math.abs(Math.sin((i + 3) * 7.13 + position)) - 0.5);
+  const duration = (pathDurationMs(i, position) * jitter) / Math.max(0.05, settings.speed);
   const progress = useDerivedValue(() => (clock.value % duration) / duration);
   // pathOffset [0, 1, 0] and pathLength 0.3 -> 1 over one cycle.
   const start = useDerivedValue(() => { const p = progress.value; return Math.min(1, p < 0.5 ? p * 2 : 2 - p * 2); });
   const end = useDerivedValue(() => { const p = progress.value; return Math.min(1, start.value + 0.3 + 0.7 * p); });
   const strokeOpacity = Math.min(1, 0.1 + i * 0.03);
-  const opacity = useDerivedValue(() => { const p = progress.value; return strokeOpacity * (p < 0.5 ? 0.3 + 0.6 * p : 0.9 - 0.6 * p) * (0.5 + settings.intensity); });
-  return <Path path={path} style="stroke" strokeWidth={0.5 + i * 0.03} color={settings.colorA} opacity={opacity} start={start} end={end} />;
+  const { glow, chaos, intensity } = settings;
+  // Glow: strokes shimmer as they sweep across neighbors (brightest mid-cycle, where the fans cross).
+  const opacity = useDerivedValue(() => {
+    const p = progress.value;
+    const base = strokeOpacity * (p < 0.5 ? 0.3 + 0.6 * p : 0.9 - 0.6 * p) * (0.5 + intensity);
+    const shimmer = glow > 0 ? 1 + glow * 1.6 * Math.max(0, Math.sin(p * Math.PI * 6 + i)) * Math.sin(p * Math.PI) : 1;
+    return Math.min(1, base * shimmer);
+  });
+  const transform = useDerivedValue(() => [{ translateX: chaos * 14 * Math.sin(clock.value / 900 + i * 1.3) }, { translateY: chaos * 10 * Math.cos(clock.value / 1100 + i * 0.7) }]);
+  return (
+    <Group transform={transform}>
+      <Path path={path} style="stroke" strokeWidth={0.5 + i * 0.03} color={color} opacity={opacity} start={start} end={end}>
+        {glow > 0.05 && i % 3 === 0 ? <BlurMask blur={glow * 4} style="solid" /> : null}
+      </Path>
+    </Group>
+  );
 }
 
 export function PathsBackground({ settings, width, height }: SkiaBackgroundProps) {
   const { w, h } = useSize(width, height);
   const clock = useClock();
   // Original viewBox 0 0 696 316 with preserveAspectRatio xMidYMid meet.
-  const scale = Math.min(w / 696, h / 316) * (h > w ? 2.2 : 1);
+  const scale = Math.min(w / 696, h / 316) * (h > w ? 2.2 : 1) * (0.75 + 0.5 * settings.scale);
   const positions = settings.position === 0 ? [1, -1] : [settings.position];
   const count = Math.max(6, Math.round(PATH_COUNT * (0.25 + 0.75 * settings.density)));
+  const fanColor = (position: number) => invertHex(settings.layerColors[position === -1 ? 1 : 0] ?? settings.colorA, settings.invert);
   return (
     <Canvas style={{ width: w, height: h }}>
-      <Fill color={settings.colorBack} />
+      <Fill color={invertHex(settings.colorBack, settings.invert)} />
       <Layer settings={settings}>
         <Group transform={[{ translateX: (w - 696 * scale) / 2 }, { translateY: (h - 316 * scale) / 2 }, { scale }]}>
           {positions.flatMap((position) => Array.from({ length: count }, (_, i) => (
-            <FloatingPath key={`${position}:${i}`} i={i} position={position} clock={clock} settings={settings} />
+            <FloatingPath key={`${position}:${i}`} i={i} position={position} clock={clock} settings={settings} color={fanColor(position)} />
           )))}
         </Group>
       </Layer>
@@ -90,7 +105,12 @@ const OPACITY_BUCKETS = 4;
 
 export function CyberBackground({ settings, width, height }: SkiaBackgroundProps) {
   const { w, h } = useSize(width, height);
-  const { particleCount, noiseIntensity, particleSizeMin, particleSizeMax, speed } = settings;
+  const { noiseIntensity, speed, chaos, glow } = settings;
+  // Density scales the configured count (x1 at the default 0.5); scale scales particle size.
+  const particleCount = Math.min(1200, Math.max(50, Math.round(settings.particleCount * (0.25 + 1.5 * settings.density))));
+  const sizeK = 0.5 + settings.scale;
+  const particleSizeMin = settings.particleSizeMin * sizeK;
+  const particleSizeMax = settings.particleSizeMax * sizeK;
   // [x, y, size, life, maxLife] per particle.
   const state = useSharedValue<number[]>([]);
   const paths = useSharedValue<SkPath[]>([]);
@@ -108,7 +128,7 @@ export function CyberBackground({ settings, width, height }: SkiaBackgroundProps
     last.value = frame.timestamp;
     const buckets: SkPath[] = [];
     for (let b = 0; b < OPACITY_BUCKETS; b++) buckets.push(Skia.Path.Make());
-    stepParticles(state.value, steps, frame.timestamp * 0.0001 * speed, w, h, noiseIntensity, buckets);
+    stepParticles(state.value, steps, frame.timestamp * 0.0001 * speed, w, h, noiseIntensity, buckets, chaos);
     paths.value = buckets;
   });
 
@@ -119,27 +139,38 @@ export function CyberBackground({ settings, width, height }: SkiaBackgroundProps
   // Original peak alpha is 0.15; intensity scales it up to ~0.45 for small screens.
   const peak = 0.15 * (0.5 + settings.intensity * 2.5);
   const strokeW = (particleSizeMin + particleSizeMax) / 2;
+  const colors = [0, 1, 2, 3].map((b) => invertHex(settings.layerColors[b] ?? settings.colorA, settings.invert));
+  // Glow: the brightest layer shimmers with a soft halo (one extra blurred pass, only when glow is on).
+  const shimmer = useDerivedValue(() => (glow > 0 ? glow * (0.55 + 0.45 * Math.sin(last.value / 140)) : 0));
   return (
     <Canvas style={{ width: w, height: h }}>
-      <Fill color={settings.colorBack} />
+      <Fill color={invertHex(settings.colorBack, settings.invert)} />
       <Layer settings={settings}>
         {[p0, p1, p2, p3].map((p, b) => (
-          <Path key={b} path={p} style="stroke" strokeWidth={strokeW} strokeCap="round" color={settings.colorA} opacity={peak * ((b + 0.5) / OPACITY_BUCKETS)} />
+          <Path key={b} path={p} style="stroke" strokeWidth={strokeW} strokeCap="round" color={colors[b]} opacity={peak * ((b + 0.5) / OPACITY_BUCKETS)} />
         ))}
+        {glow > 0.02 ? (
+          <Path path={p3} style="stroke" strokeWidth={strokeW * 3} strokeCap="round" color={colors[3]} opacity={shimmer}>
+            <BlurMask blur={2 + glow * 6} style="normal" />
+          </Path>
+        ) : null}
       </Layer>
     </Canvas>
   );
 }
 
 // ---------- Mesh gradient ----------
-function MeshBlob({ stop, index, w, h, clock, speed }: { stop: MeshStop; index: number; w: number; h: number; clock: SharedValue<number>; speed: number }) {
-  const r = stop.radius * Math.max(w, h);
-  const cx = useDerivedValue(() => (stop.x + stop.driftX * Math.sin((clock.value / 1000) * 0.2 * stop.speed * speed + index * 1.7)) * w);
-  const cy = useDerivedValue(() => (stop.y + stop.driftY * Math.cos((clock.value / 1000) * 0.17 * stop.speed * speed + index * 2.3)) * h);
+function MeshBlob({ stop, index, w, h, clock, settings }: { stop: MeshStop; index: number; w: number; h: number; clock: SharedValue<number>; settings: BackgroundSettings }) {
+  const { speed, chaos } = settings;
+  const r = stop.radius * Math.max(w, h) * (0.6 + 0.8 * settings.scale);
+  const color = invertHex(stop.color, settings.invert);
+  // Chaos adds a faster, uncorrelated second drift on top of the calm original drift.
+  const cx = useDerivedValue(() => { const t = (clock.value / 1000) * speed; return (stop.x + stop.driftX * Math.sin(t * 0.2 * stop.speed + index * 1.7) + chaos * 0.12 * Math.sin(t * 0.93 + index * 4.1)) * w; });
+  const cy = useDerivedValue(() => { const t = (clock.value / 1000) * speed; return (stop.y + stop.driftY * Math.cos(t * 0.17 * stop.speed + index * 2.3) + chaos * 0.12 * Math.cos(t * 0.71 + index * 3.3)) * h; });
   const center = useDerivedValue(() => vec(cx.value, cy.value));
   return (
     <Circle cx={cx} cy={cy} r={r}>
-      <RadialGradient c={center} r={r} colors={[stop.color, `${stop.color}00`]} />
+      <RadialGradient c={center} r={r} colors={[color, `${color}00`]} />
     </Circle>
   );
 }
@@ -149,9 +180,9 @@ export function MeshGradientBackground({ settings, width, height }: SkiaBackgrou
   const clock = useClock();
   return (
     <Canvas style={{ width: w, height: h }}>
-      <Fill color={settings.colorBack} />
+      <Fill color={invertHex(settings.colorBack, settings.invert)} />
       <Group opacity={settings.opacity} layer={settings.blur > 0 ? <Paint><Blur blur={settings.blur} /></Paint> : undefined}>
-        {settings.stops.map((stop, i) => <MeshBlob key={i} stop={stop} index={i} w={w} h={h} clock={clock} speed={settings.speed} />)}
+        {settings.stops.map((stop, i) => <MeshBlob key={i} stop={stop} index={i} w={w} h={h} clock={clock} settings={settings} />)}
       </Group>
     </Canvas>
   );
@@ -177,78 +208,7 @@ function HalfResShaderCanvas({ effect, uniforms, w, h, settings }: {
   );
 }
 
-// ---------- Liquid ----------
-const LIQUID_SKSL = `
-uniform float2 res; uniform float time; uniform float3 colA; uniform float3 colB; uniform float3 colBack;
-uniform float intensity; uniform float blobs;
-half4 main(float2 pos) {
-  float2 uv = (pos - 0.5 * res) / min(res.x, res.y);
-  float field = 0.0; float mixv = 0.0;
-  for (int i = 0; i < 6; i++) {
-    float fi = float(i);
-    if (fi >= blobs) break;
-    float2 c = 0.42 * float2(sin(time * (0.31 + 0.07 * fi) + fi * 1.7), cos(time * (0.27 + 0.05 * fi) + fi * 2.3));
-    float r = 0.18 + 0.05 * sin(time * 0.5 + fi);
-    float f = r * r / (dot(uv - c, uv - c) + 1e-3);
-    field += f; mixv += f * (0.5 + 0.5 * sin(fi * 1.3));
-  }
-  float t = mixv / max(field, 1e-3);
-  float3 blob = mix(colA, colB, t);
-  float core = smoothstep(0.9, 1.6, field);
-  float glow = clamp(field * 0.35, 0.0, 1.0) * (0.4 + intensity);
-  float3 col = colBack + blob * glow * 0.6 + blob * core * (0.5 + 0.5 * intensity);
-  return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
-}`;
-
-export function LiquidBackground({ settings, width, height }: SkiaBackgroundProps) {
-  const { w, h } = useSize(width, height);
-  const effect = React.useMemo(() => Skia.RuntimeEffect.Make(LIQUID_SKSL), []);
-  const clock = useClock();
-  const a = rgb(settings.colorA); const b = rgb(settings.colorB); const back = rgb(settings.colorBack);
-  const { speed, intensity, density } = settings;
-  const uniforms = useDerivedValue<Uniforms>(() => ({
-    res: [Math.ceil(w / 2), Math.ceil(h / 2)], time: (clock.value / 1000) * speed,
-    colA: a, colB: b, colBack: back, intensity, blobs: 2 + Math.round(density * 4),
-  }));
-  return <HalfResShaderCanvas effect={effect} uniforms={uniforms} w={w} h={h} settings={settings} />;
-}
-
-// ---------- Swirl (dithered) ----------
-const SWIRL_SKSL = `
-uniform float2 res; uniform float time; uniform float3 colFront; uniform float3 colBack;
-uniform float pxSize; uniform float intensity;
-float bayer2(float2 a) { a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
-float bayer4(float2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
-half4 main(float2 pos) {
-  float2 cell = floor(pos / pxSize);
-  float2 p = cell * pxSize + 0.5 * pxSize;
-  float2 uv = (p - 0.5 * res) / min(res.x, res.y);
-  float l = length(uv);
-  float a = atan(uv.y, uv.x);
-  float swirl = sin(a * 3.0 + 10.0 * pow(l, 0.6) - time * 2.0);
-  float shape = 0.5 + 0.5 * swirl;
-  shape *= smoothstep(1.1, 0.05, l);
-  shape = pow(shape, 1.6 - intensity);
-  float threshold = bayer4(cell) - 0.5;
-  float on = step(0.5, shape + threshold);
-  return half4(half3(mix(colBack, colFront, on)), 1.0);
-}`;
-
-export function SwirlBackground({ settings, width, height }: SkiaBackgroundProps) {
-  const { w, h } = useSize(width, height);
-  const effect = React.useMemo(() => Skia.RuntimeEffect.Make(SWIRL_SKSL), []);
-  const clock = useClock();
-  const front = rgb(settings.colorA); const back = rgb(settings.colorBack);
-  const { speed, intensity, density } = settings;
-  // Full-res pxSize 2..8 -> half-res canvas units 1..4.
-  const pxSize = 1 + Math.round(density * 3);
-  const uniforms = useDerivedValue<Uniforms>(() => ({
-    res: [Math.ceil(w / 2), Math.ceil(h / 2)], time: (clock.value / 1000) * speed, colFront: front, colBack: back, pxSize, intensity,
-  }));
-  return <HalfResShaderCanvas effect={effect} uniforms={uniforms} w={w} h={h} settings={settings} />;
-}
-
-// ---------- Code-only shader presets (lib/backgrounds/shader-sources.ts) ----------
+// ---------- Shader styles (lib/backgrounds/shader-sources.ts) ----------
 function makeShaderBackground(kind: ShaderKind) {
   return function ShaderBackground({ settings, width, height }: SkiaBackgroundProps) {
     const { w, h } = useSize(width, height);
@@ -263,5 +223,42 @@ function makeShaderBackground(kind: ShaderKind) {
   };
 }
 
+// ---------- Light balls (aurora, 3-ball gradient, bounce, orbit, repel) ----------
+// The simulation (a handful of balls) steps on the UI thread every frame; only uniforms cross to Skia.
+let ballsEffect: ReturnType<typeof Skia.RuntimeEffect.Make> | undefined;
+function makeBallsBackground(mode: BallMode) {
+  return function BallsBackground({ settings, width, height }: SkiaBackgroundProps) {
+    const { w, h } = useSize(width, height);
+    const effect = React.useMemo(() => {
+      ballsEffect ??= Skia.RuntimeEffect.Make(BALLS_SOURCE) ?? undefined;
+      return ballsEffect ?? null;
+    }, []);
+    const hw = Math.ceil(w / 2);
+    const hh = Math.ceil(h / 2);
+    const m = Math.min(hw, hh);
+    const ax = (0.5 * hw) / m;
+    const ay = (0.5 * hh) / m;
+    const n = ballCount(mode, settings.density);
+    const { speed, scale, chaos } = settings;
+    const base = React.useMemo(() => ballStaticUniforms(mode, settings, hw, hh, n), [settings, hw, hh, n]);
+    const sim = useSharedValue(initBalls(mode, ax, ay));
+    const frameU = useSharedValue(ballUniforms(sim.value, mode, n, scale));
+    const time = useSharedValue(0);
+    useFrameCallback((frame) => {
+      'worklet';
+      const dt = Math.min(0.05, (frame.timeSincePreviousFrame ?? 16) / 1000) * speed;
+      time.value += dt;
+      const s = sim.value;
+      stepBalls(s, mode, n, dt, ax, ay, scale, chaos);
+      frameU.value = ballUniforms(s, mode, n, scale);
+    });
+    const uniforms = useDerivedValue<Uniforms>(() => ({ ...base, ...frameU.value, time: time.value }));
+    return <HalfResShaderCanvas effect={effect} uniforms={uniforms} w={w} h={h} settings={settings} />;
+  };
+}
+
 export const SKIA_BACKGROUNDS = {
-  ...Object.fromEntries(SHADER_KINDS.map((k) => [k, makeShaderBackground(k)])) as Record<ShaderKind, ReturnType<typeof makeShaderBackground>>, paths: PathsBackground, liquid: LiquidBackground, swirl: SwirlBackground, cyber: CyberBackground, mesh: MeshGradientBackground } as const;
+  ...Object.fromEntries(SHADER_KINDS.map((k) => [k, makeShaderBackground(k)])) as Record<ShaderKind, ReturnType<typeof makeShaderBackground>>,
+  ...Object.fromEntries(BALL_KINDS.map((k) => [k, makeBallsBackground(k)])) as Record<BallMode, ReturnType<typeof makeBallsBackground>>,
+  paths: PathsBackground, cyber: CyberBackground, mesh: MeshGradientBackground,
+} as const;

@@ -1,10 +1,11 @@
 /**
- * Appearance = color theme + skin + fonts + text scale + icon pack.
+ * Appearance = color theme + skin + fonts + text scale + icon pack + text effects.
  * Pure model; `resolveThemeTokens` produces the patch applied to theme/tokens.ts.
  */
 import { COLOR_THEMES, DEFAULT_COLOR_THEME, isColorThemeId, type ColorThemeId } from './color-themes';
 import { isCodeFontId, isUiFontId, TEXT_SCALE_MAX, TEXT_SCALE_MIN, type CodeFontId, type UiFontId } from './fonts';
 import { DEFAULT_SKIN, isSkinId, SKINS, type SkinId } from './skins';
+import { DEFAULT_TEXT_EFFECTS, normalizeTextEffects, type TextEffects } from './text-effects';
 
 export const ICON_PACKS = ['material', 'lucide', 'phosphor', 'tabler'] as const;
 export type IconPack = (typeof ICON_PACKS)[number];
@@ -17,10 +18,12 @@ export type AppearanceSettings = {
   codeFont: CodeFontId;
   textScale: number;
   iconPack: IconPack;
+  /** Text & fonts effects (color, shadow, outline, glow, gradient, emboss). */
+  text: TextEffects;
 };
 
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
-  themeId: DEFAULT_COLOR_THEME, skinId: DEFAULT_SKIN, uiFont: 'system', codeFont: 'system', textScale: 1, iconPack: 'material',
+  themeId: DEFAULT_COLOR_THEME, skinId: DEFAULT_SKIN, uiFont: 'system', codeFont: 'system', textScale: 1, iconPack: 'material', text: DEFAULT_TEXT_EFFECTS,
 };
 
 export function normalizeAppearance(input: unknown): AppearanceSettings {
@@ -33,6 +36,7 @@ export function normalizeAppearance(input: unknown): AppearanceSettings {
     codeFont: isCodeFontId(raw.codeFont) ? raw.codeFont : 'system',
     textScale: Math.round(scale * 100) / 100,
     iconPack: isIconPack(raw.iconPack) ? raw.iconPack : 'material',
+    text: normalizeTextEffects(raw.text),
   };
 }
 

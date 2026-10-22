@@ -2,8 +2,8 @@
 // falls back to the static gradient there. Native implementation lives in
 // skia-backgrounds.native.tsx.
 import type { ComponentType } from 'react';
-import type { BackgroundSettings } from '@/lib/backgrounds/settings';
+import type { BackgroundKind, BackgroundSettings } from '@/lib/backgrounds/settings';
 
-export type SkiaKind = 'paths' | 'liquid' | 'swirl' | 'cyber' | 'mesh' | 'prism' | 'aurora' | 'halftone' | 'papermesh' | 'hive';
+export type SkiaKind = Exclude<BackgroundKind, 'gradient' | 'video'>;
 export type SkiaBackgroundProps = { settings: BackgroundSettings; width?: number; height?: number };
 export const SKIA_BACKGROUNDS: Partial<Record<SkiaKind, ComponentType<SkiaBackgroundProps>>> = {};

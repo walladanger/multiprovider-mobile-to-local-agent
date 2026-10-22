@@ -4,164 +4,153 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 
 import { BackgroundLayer } from '@/components/background/motion-background';
+import { CollapsiblePanel } from '@/components/settings/appearance/collapsible-panel';
+import { ColorRow, QUICK_SWATCHES } from '@/components/settings/appearance/color-picker';
+import { TextFontsPanel, type ChatTextSize } from '@/components/settings/appearance/text-fonts-panel';
 import { Icon } from '@/components/ui/icon';
 import { NumericSlider } from '@/components/ui/numeric-slider';
 import { ICON_PACKS } from '@/lib/backgrounds/appearance';
-import { COLOR_THEME_IDS, COLOR_THEMES } from '@/lib/backgrounds/color-themes';
-import { CODE_FONT_IDS, FONT_FAMILIES, TEXT_SCALE_MAX, TEXT_SCALE_MIN, UI_FONT_IDS } from '@/lib/backgrounds/fonts';
-import { SKIN_IDS } from '@/lib/backgrounds/skins';
 import { BUILTIN_PRESETS, presetThumbnail } from '@/lib/backgrounds/builtin-presets';
+import { COLOR_THEME_IDS, COLOR_THEMES } from '@/lib/backgrounds/color-themes';
 import { MESH_PRESETS } from '@/lib/backgrounds/mesh-presets';
-import { fromOffset, SLIDER_RANGES, toOffset, type SliderKey } from '@/lib/backgrounds/offsets';
-import { BACKGROUND_DEFAULTS, BACKGROUND_KINDS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
+import { fromOffset, sliderRange, toOffset, type SliderKey } from '@/lib/backgrounds/offsets';
+import { LAYER_NOUNS, paramSchema, STYLE_EXTRAS } from '@/lib/backgrounds/params';
+import { BACKGROUND_DEFAULTS, BACKGROUND_KINDS, type BackgroundSettings } from '@/lib/backgrounds/settings';
+import { SKIN_IDS } from '@/lib/backgrounds/skins';
 import { useBackground } from '@/providers/background-context';
 import type { Palette } from './setting-rows';
 
-const SWATCHES = ['#6d5cff', '#8b5cf6', '#3b82f6', '#00ffff', '#c9c2ff', '#f0abfc', '#5ee0b0', '#ffffff', '#1a1446', '#0b0a2a', '#220011', '#09090b'];
+const valueText = (key: SliderKey, v: number) =>
+  key === 'blur' ? `${v}px` : key === 'particleCount' ? String(v) : key === 'noiseIntensity' ? v.toFixed(4) : key === 'invert' ? `${v > 0 ? '+' : ''}${v.toFixed(2)}` : v.toFixed(2);
 
-type ColorKey = 'colorA' | 'colorB' | 'colorBack';
-// Which controls make sense for each background.
-const CONTROLS: Record<BackgroundKind, { colors: ColorKey[]; sliders: SliderKey[] }> = {
-  gradient: { colors: ['colorA', 'colorB', 'colorBack'], sliders: [] },
-  video: { colors: [], sliders: ['intensity'] },
-  paths: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
-  liquid: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
-  swirl: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'density', 'intensity', 'blur', 'opacity'] },
-  cyber: { colors: ['colorA', 'colorBack'], sliders: ['particleCount', 'noiseIntensity', 'particleSizeMin', 'particleSizeMax', 'speed', 'intensity', 'blur', 'opacity'] },
-  mesh: { colors: ['colorBack'], sliders: ['speed', 'blur', 'opacity'] },
-  prism: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
-  aurora: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
-  halftone: { colors: ['colorA', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'density', 'opacity'] },
-  papermesh: { colors: ['colorBack'], sliders: ['speed', 'distortion', 'swirl', 'density', 'scale', 'intensity', 'opacity'] },
-  hive: { colors: ['colorA', 'colorB', 'colorBack'], sliders: ['speed', 'intensity', 'scale', 'blur', 'opacity'] },
-};
-const RANGES = SLIDER_RANGES;
-const valueText = (key: SliderKey, v: number) => key === 'blur' ? `${v}px` : key === 'particleCount' ? String(v) : key === 'noiseIntensity' ? v.toFixed(4) : v.toFixed(2);
+/** Settings > Appearance: Background, Theme, Icons and Text & fonts panels, each collapsible. */
+export function BackgroundSection({ palette, chatTextSize }: { palette: Palette; chatTextSize?: ChatTextSize }) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.section}>
+      <BackgroundPanel palette={palette} />
+      <ThemePanel palette={palette} />
+      <IconsPanel palette={palette} />
+      <TextFontsPanel palette={palette} chatTextSize={chatTextSize} />
+      <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:appearance.footer')}</Text>
+    </View>
+  );
+}
 
-export function BackgroundSection({ palette }: { palette: Palette }) {
+function BackgroundPanel({ palette }: { palette: Palette }) {
   const { t } = useTranslation();
   const bg = useBackground();
   const { settings } = bg;
-  const [name, setName] = useState('');
-  const [renaming, setRenaming] = useState<string>();
-  const controls = CONTROLS[settings.kind];
+  const def = BACKGROUND_DEFAULTS[settings.kind];
+  const sample = <BackgroundLayer settings={settings} />;
 
   return (
-    <View style={styles.section}>
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.preview')}</Text>
+    <CollapsiblePanel title={t('settings:appearance.background.title')} info={t('settings:appearance.background.info')} palette={palette} defaultOpen testID="appearance-background">
       <View style={[styles.preview, { borderColor: palette.border }]} testID="background-preview">
         <BackgroundLayer settings={settings} width={PREVIEW_W} height={PREVIEW_H} />
       </View>
 
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.theme.title')}</Text>
-      <View style={styles.chips}>
-        {COLOR_THEME_IDS.map((id) => {
-          const th = COLOR_THEMES[id];
-          const selected = bg.appearance.themeId === id;
-          return (
-            <Pressable key={id} accessibilityRole="button" accessibilityState={{ selected }} onPress={() => bg.selectTheme(id)} testID={`color-theme-${id}`}
-              style={[styles.themeChip, { backgroundColor: th.bg, borderColor: selected ? th.primarySoft : palette.border }]}>
-              <View style={[styles.themeDot, { backgroundColor: th.primary }]} />
-              <View style={[styles.themeDot, { backgroundColor: th.accent }]} />
-              <Text style={{ color: th.text }}>{t(`settings:backgrounds.theme.names.${id}`)}</Text>
+      <CollapsiblePanel title={t('settings:backgrounds.builtin')} info={t('settings:appearance.presets.info')} palette={palette} defaultOpen testID="appearance-presets">
+        <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:appearance.presets.hint')}</Text>
+        <View style={styles.chips}>
+          {BUILTIN_PRESETS.map((p) => (
+            <Pressable key={p.id} accessibilityRole="button" testID={`builtin-preset-${p.id}`} onPress={() => bg.applySettings(p.settings)}
+              style={[styles.chip, styles.thumbChip, { borderColor: palette.border, backgroundColor: palette.surface }]}>
+              <View style={styles.thumb}>{presetThumbnail(p).map((c, i) => <View key={i} style={{ backgroundColor: c, flex: 1 }} />)}</View>
+              <Text style={{ color: palette.text }}>{p.name}</Text>
             </Pressable>
+          ))}
+        </View>
+      </CollapsiblePanel>
+
+      <CollapsiblePanel title={t('settings:backgrounds.style')} info={t('settings:appearance.style.info')} palette={palette} defaultOpen testID="appearance-style">
+        <View style={styles.chips}>
+          {BACKGROUND_KINDS.map((kind) => (
+            <Pressable key={kind} accessibilityRole="button" accessibilityState={{ selected: settings.kind === kind }} onPress={() => bg.selectKind(kind)} testID={`background-kind-${kind}`}
+              style={[styles.chip, { borderColor: settings.kind === kind ? palette.tint : palette.border, backgroundColor: settings.kind === kind ? palette.surfaceAlt : palette.surface }]}>
+              <Text style={{ color: palette.text }}>{t(`settings:backgrounds.kinds.${kind}`)}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text variant="bodySmall" style={{ color: palette.muted }} testID="background-description">{t(`settings:backgrounds.descriptions.${settings.kind}`)}</Text>
+        {settings.kind === 'paths' ? (
+          <ChipRow palette={palette} options={[{ id: '0', label: t('settings:backgrounds.controls.positionBoth') }, { id: '1', label: t('settings:backgrounds.controls.positionRight') }, { id: '-1', label: t('settings:backgrounds.controls.positionLeft') }]}
+            value={String(settings.position) as '0' | '1' | '-1'} onChange={(id) => bg.update({ position: Number(id) })} />
+        ) : null}
+        {settings.kind === 'mesh' ? (
+          <ChipRow palette={palette} options={MESH_PRESETS.map((m) => ({ id: m.id, label: m.name }))} value={MESH_PRESETS.find((m) => JSON.stringify(m.stops) === JSON.stringify(settings.stops))?.id ?? ''}
+            onChange={(id) => { const m = MESH_PRESETS.find((x) => x.id === id); if (m) bg.update({ stops: m.stops, colorBack: m.colorBack, blur: m.blur }); }} />
+        ) : null}
+      </CollapsiblePanel>
+
+      <CollapsiblePanel title={t('settings:appearance.colors.title')} info={t('settings:appearance.colors.info')} palette={palette} testID="appearance-colors">
+        <ColorsBlock settings={settings} palette={palette} sample={sample} />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel title={t('settings:appearance.sliders.title')} info={t('settings:appearance.sliders.info')} palette={palette} testID="appearance-sliders">
+        {[...paramSchema(settings.kind), ...(STYLE_EXTRAS[settings.kind] ?? []).map((key) => ({ key, supported: true }))].map(({ key, supported }) => {
+          // Sliders show an offset (-100..+100) from OUR default; 0 = our variant. Values stay absolute.
+          const [min, max] = sliderRange(settings.kind, key);
+          const d = def[key];
+          const offset = toOffset(settings[key], d, min, max);
+          const label = supported ? t(`settings:backgrounds.controls.${key}`) : `${t(`settings:backgrounds.controls.${key}`)} · ${t('settings:appearance.sliders.noEffect')}`;
+          return (
+            <View key={key} style={[styles.sliderRow, !supported && styles.dim]} testID={`background-slider-${key}`}>
+              <View style={styles.flex}>
+                <NumericSlider label={label} minimum={-100} maximum={100} step={5} palette={palette}
+                  value={offset} valueLabel={`${offset > 0 ? '+' : ''}${offset} (${valueText(key, settings[key])})`}
+                  onValueChange={(o) => bg.update({ [key]: key === 'particleCount' ? Math.round(fromOffset(o, d, min, max)) : fromOffset(o, d, min, max) })} />
+              </View>
+              <Button compact disabled={settings[key] === d} onPress={() => bg.update({ [key]: d })}>{t('settings:backgrounds.controls.reset')}</Button>
+            </View>
           );
         })}
-      </View>
-      <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:backgrounds.theme.hint')}</Text>
+        <Button mode="outlined" onPress={() => bg.applySettings(BACKGROUND_DEFAULTS[settings.kind])}>{t('settings:backgrounds.controls.resetAll')}</Button>
+      </CollapsiblePanel>
 
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.skin.title')}</Text>
-      <ChipRow palette={palette} options={SKIN_IDS.map((id) => ({ id, label: t(`settings:backgrounds.skin.names.${id}`) }))} value={bg.appearance.skinId} onChange={(id) => bg.updateAppearance({ skinId: id })} />
+      <SavedLooks palette={palette} />
+    </CollapsiblePanel>
+  );
+}
 
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.fonts.ui')}</Text>
-      <ChipRow palette={palette} options={UI_FONT_IDS.map((id) => ({ id, label: id === 'system' ? t('settings:backgrounds.fonts.system') : FONT_FAMILIES[id].label, fontFamily: id === 'system' || !bg.fontsLoaded ? undefined : FONT_FAMILIES[id].regular }))} value={bg.appearance.uiFont} onChange={(id) => bg.updateAppearance({ uiFont: id })} />
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.fonts.code')}</Text>
-      <ChipRow palette={palette} options={CODE_FONT_IDS.map((id) => ({ id, label: id === 'system' ? t('settings:backgrounds.fonts.system') : FONT_FAMILIES[id].label, fontFamily: id === 'system' || !bg.fontsLoaded ? undefined : FONT_FAMILIES[id].regular }))} value={bg.appearance.codeFont} onChange={(id) => bg.updateAppearance({ codeFont: id })} />
-      <NumericSlider label={t('settings:backgrounds.fonts.textSize')} minimum={TEXT_SCALE_MIN} maximum={TEXT_SCALE_MAX} step={0.05} palette={palette}
-        value={bg.appearance.textScale} valueLabel={`${Math.round(bg.appearance.textScale * 100)}%`} onValueChange={(v) => bg.updateAppearance({ textScale: v })} />
-      <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:backgrounds.fonts.textSizeHint')}</Text>
+function ColorsBlock({ settings, palette, sample }: { settings: BackgroundSettings; palette: Palette; sample: React.ReactNode }) {
+  const { t } = useTranslation();
+  const bg = useBackground();
+  const def = BACKGROUND_DEFAULTS[settings.kind];
+  const quick = (d?: string) => (d ? [d, ...QUICK_SWATCHES.slice(0, 3)] : QUICK_SWATCHES);
+  if (settings.kind === 'video') return <Text variant="bodySmall" style={{ color: palette.muted }}>{t('settings:appearance.colors.none')}</Text>;
+  const noun = LAYER_NOUNS[settings.kind];
+  const rows: React.ReactNode[] = [
+    <ColorRow key="back" label={t('settings:backgrounds.controls.colorBack')} value={settings.colorBack} palette={palette} quick={quick(def.colorBack)} sampleSource={sample}
+      onChange={(hex) => bg.update({ colorBack: hex })} testID="color-row-colorBack" />,
+  ];
+  if (settings.kind === 'gradient') {
+    rows.push(
+      <ColorRow key="a" label={t('settings:backgrounds.controls.colorA')} value={settings.colorA} palette={palette} quick={quick(def.colorA)} sampleSource={sample} onChange={(hex) => bg.update({ colorA: hex })} testID="color-row-colorA" />,
+      <ColorRow key="b" label={t('settings:backgrounds.controls.colorB')} value={settings.colorB} palette={palette} quick={quick(def.colorB)} sampleSource={sample} onChange={(hex) => bg.update({ colorB: hex })} testID="color-row-colorB" />,
+    );
+  } else if (settings.kind === 'mesh' || settings.kind === 'papermesh') {
+    const stops = settings.kind === 'papermesh' ? settings.stops.slice(0, 6) : settings.stops;
+    stops.forEach((stop, index) => rows.push(
+      <ColorRow key={`s${index}`} label={t(`settings:appearance.layers.${noun}`, { value: index + 1 })} value={stop.color} palette={palette} quick={quick(def.stops[index]?.color)} sampleSource={sample}
+        onChange={(hex) => bg.update({ stops: settings.stops.map((x, j) => (j === index ? { ...x, color: hex } : x)) })} testID={`color-row-stop-${index}`} />,
+    ));
+  } else {
+    settings.layerColors.forEach((color, index) => rows.push(
+      <ColorRow key={`l${index}`} label={t(`settings:appearance.layers.${noun}`, { value: index + 1 })} value={color} palette={palette} quick={quick(def.layerColors[index])} sampleSource={sample}
+        onChange={(hex) => bg.update({ layerColors: settings.layerColors.map((x, j) => (j === index ? hex : x)) })} testID={`color-row-layer-${index}`} />,
+    ));
+  }
+  return <>{rows}</>;
+}
 
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.icons.title')}</Text>
-      <ChipRow palette={palette} options={ICON_PACKS.map((id) => ({ id, label: t(`settings:backgrounds.icons.packs.${id}`) }))} value={bg.appearance.iconPack} onChange={(id) => bg.updateAppearance({ iconPack: id })} />
-      <View style={styles.chips}>
-        {(['chat', 'terminal', 'folder', 'settings', 'palette', 'bell'] as const).map((n) => <Icon key={n} name={n} size={22} color={palette.tint} />)}
-      </View>
-
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.builtin')}</Text>
-      <View style={styles.chips}>
-        {BUILTIN_PRESETS.map((p) => (
-          <Pressable key={p.id} accessibilityRole="button" testID={`builtin-preset-${p.id}`} onPress={() => bg.applySettings(p.settings)}
-            style={[styles.chip, styles.thumbChip, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-            <View style={styles.thumb}>{presetThumbnail(p).map((c, i) => <View key={i} style={{ backgroundColor: c, flex: 1 }} />)}</View>
-            <Text style={{ color: palette.text }}>{p.name}</Text>
-          </Pressable>
-        ))}
-      </View>
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.style')}</Text>
-      <View style={styles.chips}>
-        {BACKGROUND_KINDS.map((kind) => (
-          <Pressable key={kind} accessibilityRole="button" accessibilityState={{ selected: settings.kind === kind }} onPress={() => bg.selectKind(kind)}
-            style={[styles.chip, { borderColor: settings.kind === kind ? palette.tint : palette.border, backgroundColor: settings.kind === kind ? palette.surfaceAlt : palette.surface }]}>
-            <Text style={{ color: palette.text }}>{t(`settings:backgrounds.kinds.${kind}`)}</Text>
-          </Pressable>
-        ))}
-      </View>
-      <Text variant="bodySmall" style={{ color: palette.muted }}>{t(`settings:backgrounds.descriptions.${settings.kind}`)}</Text>
-
-      {settings.kind === 'paths' ? (
-        <ChipRow palette={palette} options={[{ id: '0', label: t('settings:backgrounds.controls.positionBoth') }, { id: '1', label: t('settings:backgrounds.controls.positionRight') }, { id: '-1', label: t('settings:backgrounds.controls.positionLeft') }]}
-          value={String(settings.position) as '0' | '1' | '-1'} onChange={(id) => bg.update({ position: Number(id) })} />
-      ) : null}
-      {settings.kind === 'mesh' || settings.kind === 'papermesh' ? (
-        <>
-          {settings.kind === 'mesh' ? <ChipRow palette={palette} options={MESH_PRESETS.map((m) => ({ id: m.id, label: m.name }))} value={MESH_PRESETS.find((m) => JSON.stringify(m.stops) === JSON.stringify(settings.stops))?.id ?? ''}
-            onChange={(id) => { const m = MESH_PRESETS.find((x) => x.id === id); if (m) bg.update({ stops: m.stops, colorBack: m.colorBack, blur: m.blur }); }} /> : null}
-          {settings.stops.map((stop, index) => (
-            <View key={index} style={styles.colorRow}>
-              <Text variant="bodyMedium" style={{ color: palette.text }}>{t('settings:backgrounds.controls.stop', { value: index + 1 })}</Text>
-              <View style={styles.chips}>
-                {SWATCHES.map((hex) => (
-                  <Pressable key={hex} accessibilityRole="button" accessibilityLabel={`${t('settings:backgrounds.controls.stop', { value: index + 1 })} ${hex}`}
-                    onPress={() => bg.update({ stops: settings.stops.map((x, j) => (j === index ? { ...x, color: hex } : x)) })}
-                    style={[styles.swatch, { backgroundColor: hex, borderColor: stop.color === hex ? palette.text : palette.border, borderWidth: stop.color === hex ? 2 : 1 }]} />
-                ))}
-              </View>
-            </View>
-          ))}
-        </>
-      ) : null}
-      {controls.colors.map((key) => (
-        <View key={key} style={styles.colorRow}>
-          <Text variant="bodyMedium" style={{ color: palette.text }}>{t(`settings:backgrounds.controls.${key}`)}</Text>
-          <View style={styles.chips}>
-            {SWATCHES.map((hex) => (
-              <Pressable key={hex} accessibilityRole="button" accessibilityLabel={`${t(`settings:backgrounds.controls.${key}`)} ${hex}`} onPress={() => bg.update({ [key]: hex } as Partial<BackgroundSettings>)}
-                style={[styles.swatch, { backgroundColor: hex, borderColor: settings[key] === hex ? palette.text : palette.border, borderWidth: settings[key] === hex ? 2 : 1 }]} />
-            ))}
-          </View>
-        </View>
-      ))}
-
-      {controls.sliders.map((key) => {
-        // Sliders show an offset (-100..+100) from OUR default; 0 = our variant. Values stay absolute.
-        const [min, rawMax] = RANGES[key];
-        const max = key === 'blur' && settings.kind === 'mesh' ? 120 : rawMax;
-        const def = BACKGROUND_DEFAULTS[settings.kind][key];
-        const offset = toOffset(settings[key], def, min, max);
-        return (
-          <View key={key} style={styles.sliderRow}>
-            <View style={styles.flex}>
-              <NumericSlider label={t(`settings:backgrounds.controls.${key}`)} minimum={-100} maximum={100} step={5} palette={palette}
-                value={offset} valueLabel={`${offset > 0 ? '+' : ''}${offset} (${valueText(key, settings[key])})`}
-                onValueChange={(o) => bg.update({ [key]: key === 'particleCount' ? Math.round(fromOffset(o, def, min, max)) : fromOffset(o, def, min, max) })} />
-            </View>
-            <Button compact disabled={offset === 0 && settings[key] === def} onPress={() => bg.update({ [key]: def })}>{t('settings:backgrounds.controls.reset')}</Button>
-          </View>
-        );
-      })}
-      <Button mode="outlined" onPress={() => bg.applySettings(BACKGROUND_DEFAULTS[settings.kind])}>{t('settings:backgrounds.controls.resetAll')}</Button>
-
-      <Text variant="titleSmall" style={{ color: palette.text }}>{t('settings:backgrounds.presets.title')}</Text>
+function SavedLooks({ palette }: { palette: Palette }) {
+  const { t } = useTranslation();
+  const bg = useBackground();
+  const [name, setName] = useState('');
+  const [renaming, setRenaming] = useState<string>();
+  return (
+    <CollapsiblePanel title={t('settings:backgrounds.presets.title')} info={t('settings:appearance.saved.info')} palette={palette} testID="appearance-saved">
       <View style={styles.saveRow}>
         <TextInput mode="outlined" dense style={styles.flex} value={name} onChangeText={setName}
           label={renaming ? t('settings:backgrounds.presets.newName') : t('settings:backgrounds.presets.name')} />
@@ -182,11 +171,49 @@ export function BackgroundSection({ palette }: { palette: Palette }) {
           <Button compact textColor={palette.danger} onPress={() => bg.deletePreset(preset.id)}>{t('settings:backgrounds.presets.delete')}</Button>
         </View>
       ))}
-    </View>
+    </CollapsiblePanel>
   );
 }
 
-function ChipRow<T extends string>({ options, value, onChange, palette }: { options: { id: T; label: string; fontFamily?: string }[]; value: T; onChange: (id: T) => void; palette: Palette }) {
+function ThemePanel({ palette }: { palette: Palette }) {
+  const { t } = useTranslation();
+  const bg = useBackground();
+  return (
+    <CollapsiblePanel title={t('settings:backgrounds.theme.title')} info={t('settings:backgrounds.theme.hint')} palette={palette} testID="appearance-theme">
+      <View style={styles.chips}>
+        {COLOR_THEME_IDS.map((id) => {
+          const th = COLOR_THEMES[id];
+          const selected = bg.appearance.themeId === id;
+          return (
+            <Pressable key={id} accessibilityRole="button" accessibilityState={{ selected }} onPress={() => bg.selectTheme(id)} testID={`color-theme-${id}`}
+              style={[styles.themeChip, { backgroundColor: th.bg, borderColor: selected ? th.primarySoft : palette.border }]}>
+              <View style={[styles.themeDot, { backgroundColor: th.primary }]} />
+              <View style={[styles.themeDot, { backgroundColor: th.accent }]} />
+              <Text style={{ color: th.text }}>{t(`settings:backgrounds.theme.names.${id}`)}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Text variant="labelLarge" style={{ color: palette.text }}>{t('settings:backgrounds.skin.title')}</Text>
+      <ChipRow palette={palette} options={SKIN_IDS.map((id) => ({ id, label: t(`settings:backgrounds.skin.names.${id}`) }))} value={bg.appearance.skinId} onChange={(id) => bg.updateAppearance({ skinId: id })} />
+    </CollapsiblePanel>
+  );
+}
+
+function IconsPanel({ palette }: { palette: Palette }) {
+  const { t } = useTranslation();
+  const bg = useBackground();
+  return (
+    <CollapsiblePanel title={t('settings:backgrounds.icons.title')} info={t('settings:appearance.icons.info')} palette={palette} testID="appearance-icons">
+      <ChipRow palette={palette} options={ICON_PACKS.map((id) => ({ id, label: t(`settings:backgrounds.icons.packs.${id}`) }))} value={bg.appearance.iconPack} onChange={(id) => bg.updateAppearance({ iconPack: id })} />
+      <View style={styles.chips}>
+        {(['chat', 'terminal', 'folder', 'settings', 'palette', 'bell'] as const).map((n) => <Icon key={n} name={n} size={22} color={palette.tint} />)}
+      </View>
+    </CollapsiblePanel>
+  );
+}
+
+export function ChipRow<T extends string>({ options, value, onChange, palette }: { options: { id: T; label: string; fontFamily?: string }[]; value: T; onChange: (id: T) => void; palette: Palette }) {
   return (
     <View style={styles.chips}>
       {options.map((o) => (
@@ -199,21 +226,21 @@ function ChipRow<T extends string>({ options, value, onChange, palette }: { opti
   );
 }
 
-const PREVIEW_W = 300;
-const PREVIEW_H = 170;
+// The mini preview is small on purpose: it renders the live background a second time.
+const PREVIEW_W = 240;
+const PREVIEW_H = 130;
 
 const styles = StyleSheet.create({
   section: { gap: 12, paddingBottom: 8 },
-  preview: { alignSelf: 'center', borderRadius: 16, borderWidth: 1, height: PREVIEW_H, overflow: 'hidden', width: PREVIEW_W },
+  preview: { alignSelf: 'center', borderRadius: 14, borderWidth: 1, height: PREVIEW_H, overflow: 'hidden', width: PREVIEW_W },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
-  colorRow: { gap: 6 },
+  chip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
   themeChip: { alignItems: 'center', borderRadius: 999, borderWidth: 1, flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 8 },
   sliderRow: { alignItems: 'center', flexDirection: 'row', gap: 4 },
+  dim: { opacity: 0.55 },
   thumbChip: { alignItems: 'center', flexDirection: 'row', gap: 8 },
   thumb: { borderRadius: 6, flexDirection: 'row', height: 18, overflow: 'hidden', width: 28 },
   themeDot: { borderRadius: 6, height: 12, width: 12 },
-  swatch: { borderRadius: 14, height: 28, width: 28 },
   saveRow: { alignItems: 'center', flexDirection: 'row', gap: 8 },
   presetRow: { alignItems: 'center', borderRadius: 12, borderWidth: 1, flexDirection: 'row', gap: 4, paddingLeft: 12 },
   flex: { flex: 1 },

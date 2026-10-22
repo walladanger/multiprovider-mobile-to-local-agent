@@ -31,6 +31,7 @@ import {
 } from '@/components/settings/settings-sections';
 import { useNotificationSetup } from '@/components/settings/use-notification-setup';
 import { BackgroundSection } from '@/components/settings/sections/background-section';
+import { normalizeTranscriptFontSize, TRANSCRIPT_FONT_SIZE_MAX, TRANSCRIPT_FONT_SIZE_MIN } from '@/providers/opencode-preferences';
 import { useBackground } from '@/providers/background-context';
 import { AiSettingsPanel } from '@/components/settings/ai-settings-panel';
 import { useVoiceSetup } from '@/components/settings/use-voice-setup';
@@ -168,7 +169,10 @@ function SettingsContent() {
       title: t('settings:screen.categories.appearance'),
       summary: t('settings:backgrounds.summary', { value: t(`settings:backgrounds.kinds.${background.settings.kind}`) }),
       onPress: () => setOpenSection('appearance'),
-      render: () => <BackgroundSection palette={palette} />,
+      render: () => <BackgroundSection palette={palette} chatTextSize={{
+        value: normalizeTranscriptFontSize(chatPreferences.transcriptFontSize), min: TRANSCRIPT_FONT_SIZE_MIN, max: TRANSCRIPT_FONT_SIZE_MAX,
+        onChange: (transcriptFontSize) => updateChatPreferences({ transcriptFontSize }),
+      }} />,
     },
     {
       id: 'general', icon: 'settings', title: t('common:servers.appSettings'), summary: t('common:servers.appSettingsSummary'),
