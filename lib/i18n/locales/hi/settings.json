@@ -50,13 +50,13 @@
       "step": "चरण {{step}} / 2",
       "addressTitle": "सर्वर का पता",
       "detailsTitle": "कनेक्शन का विवरण",
-      "addressHint": "अपने OpenCode सर्वर से जुड़ें।",
+      "addressHint": "अपने OpenCode सर्वर का पता डालें।",
       "continue": "जारी रखें",
       "change": "बदलें",
       "detected": "OpenCode {{version}} मिला",
       "identify": "सर्वर की पहचान के लिए क्रेडेंशियल दर्ज करें।",
       "customUsername": "कस्टम उपयोगकर्ता नाम",
-      "passwordHint": "सर्वर का पासवर्ड दर्ज करें।",
+      "passwordHint": "वह पासवर्ड जो आपने अपने OpenCode सर्वर के लिए सेट किया है।",
       "optionalName": "नाम (वैकल्पिक)",
       "nameHint": "सर्वर का IP या डोमेन इस्तेमाल करने के लिए खाली छोड़ें।",
       "showPassword": "पासवर्ड दिखाएँ",
@@ -74,6 +74,17 @@
         "expired": "यह कोड समाप्त हो गया है या पहले इस्तेमाल हो चुका है। opencode pair फिर चलाएँ।",
         "unreachable": "सर्वर तक नहीं पहुँच सके। दोनों डिवाइस एक ही नेटवर्क पर हैं यह जाँचें, या पता खुद दर्ज करें।",
         "loopback": "इस कोड में केवल localhost का पता है। कंप्यूटर पर opencode service set hostname 0.0.0.0 चलाएँ, फिर opencode service start और opencode pair चलाएँ।"
+      },
+      "serverUrlFieldHint": "आपके Cloudflare टनल का पता (जैसे https://opencode.example.com) या लोकल नेटवर्क पर आपके कंप्यूटर का पता (जैसे http://192.168.1.10:4096)।",
+      "usernameHint": "आमतौर पर opencode, जब तक आपने सर्वर सेटअप में इसे बदला न हो।",
+      "passwordPlaceholder": "सर्वर पासवर्ड",
+      "cfAccess": {
+        "title": "उन्नत: Cloudflare Access",
+        "hint": "केवल तब ज़रूरी जब आपका टनल सर्विस टोकन के साथ Cloudflare Access से सुरक्षित हो। इस डिवाइस पर सुरक्षित रूप से सहेजा जाता है; सर्वर को भेजना जल्द आ रहा है।",
+        "clientId": "Access Client ID",
+        "clientIdHint": "Cloudflare Zero Trust › Access › Service credentials से। अंत में .access होता है।",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "सर्विस टोकन बनाते समय केवल एक बार दिखाया जाता है।"
       }
     }
   },
@@ -354,9 +365,11 @@
     },
     "scanHint": "कनेक्ट करने के लिए अपने कंप्यूटर का QR कोड स्कैन करें।",
     "scanLocal": "QR कोड स्कैन करें",
-    "scanLocalHint": "एक ही नेटवर्क पर कंप्यूटर से कनेक्ट करें।",
+    "scanLocalHint": "इसका उपयोग करें अगर आपका कंप्यूटर पेयरिंग QR कोड दिखा रहा है।",
     "manual": "मैन्युअल",
-    "manualHint": "अपने सर्वर का URL और क्रेडेंशियल दर्ज करें।"
+    "manualHint": "सर्वर URL, यूज़रनेम और पासवर्ड टाइप करने के लिए इसका उपयोग करें।",
+    "scanWhere": "यह कहाँ मिलेगा? कोड आपके कंप्यूटर पर पेयरिंग स्क्रिप्ट (opencode pair) या डेस्कटॉप हेल्पर द्वारा दिखाया जाता है।",
+    "manualWhere": "यह कहाँ मिलेगा? URL, यूज़रनेम और पासवर्ड आपके OpenCode सर्वर सेटअप से आते हैं।"
   },
   "editor": {
     "title": "एडिटर"

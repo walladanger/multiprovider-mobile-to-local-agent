@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "Verbinde diese App mit dem OpenCode-Server auf deinem Computer.",
+    "skipHint": "Noch nicht bereit? Tippe auf Überspringen. Du kannst später unter Einstellungen › Verbindung eine Verbindung hinzufügen."
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,60 @@
     "title": "Allgemeine Einstellungen",
     "subtitle": "Passe OpenCode Mobile an deine Wünsche an.",
     "defaultModel": "Standardmodell"
+  },
+  "help": {
+    "whatsThis": "Was ist das?",
+    "hide": "Details ausblenden",
+    "welcome": {
+      "summary": "Diese App ist eine Fernbedienung für OpenCode auf deinem eigenen Computer.",
+      "details": [
+        "Dein Computer erledigt die eigentliche Arbeit: Er betreibt den OpenCode-Server, die KI-Modelle und deine Projektdateien.",
+        "Dein Handy verbindet sich mit diesem Server, damit du von überall mit Agenten chatten und ihren Fortschritt verfolgen kannst.",
+        "Die nächsten Schritte dauern etwa eine Minute. Alles lässt sich später in den Einstellungen ändern."
+      ]
+    },
+    "permissions": {
+      "summary": "Optional: Lass die App dich benachrichtigen und auf deine Stimme hören.",
+      "details": [
+        "Benachrichtigungen melden, wenn ein Agent eine Aufgabe im Hintergrund abgeschlossen hat.",
+        "Spracheingabe lässt dich Prompts sprechen statt tippen.",
+        "Nichts wird angefragt, bevor du auf Aktivieren tippst. Du kannst beides überspringen und später in den Einstellungen einschalten."
+      ]
+    },
+    "connect": {
+      "summary": "Ein Server ist der OpenCode-Server auf deinem Computer. Die App braucht seine Adresse, um deine Projekte zu erreichen.",
+      "details": [
+        "QR-Code scannen: Wähle dies, wenn dein Computer einen Kopplungscode anzeigt. Alles wird automatisch ausgefüllt.",
+        "Manuell: Wähle dies, wenn du die Server-URL kennst, z. B. deine https-Tunneladresse, dazu den Benutzernamen (meist opencode) und das Passwort.",
+        "Überspringen: Ohne Server fortfahren. Du kannst später unter Einstellungen › Verbindung eine Verbindung hinzufügen."
+      ]
+    },
+    "ai": {
+      "summary": "Wähle, welche KI-Anbieter und Modelle dein Server verwenden soll.",
+      "details": [
+        "Anbieter (z. B. OpenAI oder Anthropic) werden auf deinem OpenCode-Server eingerichtet; hier wählst du, welche angezeigt werden.",
+        "Du kannst dies überspringen und die Standardwerte des Servers behalten."
+      ]
+    },
+    "project": {
+      "summary": "Ein Projekt ist ein Ordner auf deinem Computer, in dem OpenCode arbeitet.",
+      "details": [
+        "Wähle das Projekt, das zuerst geöffnet werden soll. Chats und Dateiänderungen werden pro Projekt gespeichert.",
+        "Füge einen Ordner mit seinem Pfad auf dem Server-Computer hinzu, nicht auf deinem Handy."
+      ]
+    },
+    "general": {
+      "summary": "Grundeinstellungen wie Sprache, Design und Standardmodell.",
+      "details": [
+        "Diese ändern nur, wie die App auf diesem Handy aussieht und sich verhält.",
+        "Überspringe, um die Standardwerte zu behalten."
+      ]
+    },
+    "ready": {
+      "summary": "Hier ist eine Zusammenfassung deiner Einrichtung.",
+      "details": [
+        "Tippe auf Loslegen, um die App zu öffnen. Fehlendes kannst du später in den Einstellungen ergänzen."
+      ]
+    }
   }
 }

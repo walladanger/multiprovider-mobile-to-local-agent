@@ -27,7 +27,9 @@
     "skip": "Skip",
     "testSuccess": "Connection succeeded.",
     "failed": "Could not connect to the server.",
-    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api."
+    "hint": "Example: http://192.168.1.10:4096. If you open a web UI at this address, use its API base URL instead, usually ending in /api.",
+    "guidance": "Conecta esta app al servidor de OpenCode de tu ordenador.",
+    "skipHint": "¿Aún no estás listo? Pulsa Omitir. Puedes añadir una conexión después en Ajustes › Conexión."
   },
   "project": {
     "title": "Choose a project",
@@ -80,5 +82,60 @@
     "title": "Ajustes generales",
     "subtitle": "Adapta OpenCode Mobile a tus preferencias.",
     "defaultModel": "Modelo predeterminado"
+  },
+  "help": {
+    "whatsThis": "¿Qué es esto?",
+    "hide": "Ocultar detalles",
+    "welcome": {
+      "summary": "Esta app es un control remoto para OpenCode en tu propio ordenador.",
+      "details": [
+        "Tu ordenador hace el trabajo real: ejecuta el servidor de OpenCode, los modelos de IA y tus archivos de proyecto.",
+        "Tu teléfono se conecta a ese servidor para que puedas chatear con agentes y seguir su progreso desde cualquier lugar.",
+        "Los siguientes pasos llevan un minuto. Todo se puede cambiar después en Ajustes."
+      ]
+    },
+    "permissions": {
+      "summary": "Opcional: deja que la app te avise y escuche tu voz.",
+      "details": [
+        "Las notificaciones te avisan cuando un agente termina una tarea con la app en segundo plano.",
+        "La entrada de voz te permite dictar instrucciones en lugar de escribirlas.",
+        "No se pide nada hasta que pulses Activar. Puedes omitir ambas y activarlas después en Ajustes."
+      ]
+    },
+    "connect": {
+      "summary": "Un servidor es el servidor de OpenCode que se ejecuta en tu ordenador. La app necesita su dirección para llegar a tus proyectos.",
+      "details": [
+        "Escanear código QR: elige esto cuando tu ordenador muestre un código de emparejamiento. Lo rellena todo por ti.",
+        "Manual: elige esto cuando conozcas la URL del servidor, por ejemplo tu dirección de túnel https, además del usuario (normalmente opencode) y la contraseña.",
+        "Omitir: continúa sin servidor. Puedes añadir una conexión después en Ajustes › Conexión."
+      ]
+    },
+    "ai": {
+      "summary": "Elige qué proveedores y modelos de IA debe usar tu servidor.",
+      "details": [
+        "Los proveedores (como OpenAI o Anthropic) se configuran en tu servidor de OpenCode; aquí eliges cuáles mostrar.",
+        "Puedes omitir esto y mantener los valores del servidor."
+      ]
+    },
+    "project": {
+      "summary": "Un proyecto es una carpeta de tu ordenador en la que trabaja OpenCode.",
+      "details": [
+        "Elige el proyecto que se abrirá primero. Los chats y cambios se guardan por proyecto.",
+        "Añade una carpeta con su ruta en el ordenador servidor, no en tu teléfono."
+      ]
+    },
+    "general": {
+      "summary": "Preferencias básicas como idioma, tema y modelo predeterminado.",
+      "details": [
+        "Solo cambian cómo se ve y se comporta la app en este teléfono.",
+        "Omite para mantener los valores predeterminados."
+      ]
+    },
+    "ready": {
+      "summary": "Este es un resumen de lo que configuraste.",
+      "details": [
+        "Pulsa Empezar a programar para abrir la app. Lo que falte se puede añadir después en Ajustes."
+      ]
+    }
   }
 }

@@ -50,13 +50,13 @@
       "step": "Étape {{step}} sur 2",
       "addressTitle": "Adresse du serveur",
       "detailsTitle": "Détails de connexion",
-      "addressHint": "Connectez-vous à votre serveur OpenCode.",
+      "addressHint": "Saisissez l'adresse de votre serveur OpenCode.",
       "continue": "Continuer",
       "change": "Modifier",
       "detected": "OpenCode {{version}} détecté",
       "identify": "Saisissez les identifiants pour identifier le serveur.",
       "customUsername": "Nom d’utilisateur personnalisé",
-      "passwordHint": "Saisissez le mot de passe du serveur.",
+      "passwordHint": "Le mot de passe défini pour votre serveur OpenCode.",
       "optionalName": "Nom (facultatif)",
       "nameHint": "Laissez vide pour utiliser l’IP ou le domaine du serveur.",
       "showPassword": "Afficher le mot de passe",
@@ -74,6 +74,17 @@
         "expired": "Ce code a expiré ou a déjà été utilisé. Exécutez à nouveau opencode pair.",
         "unreachable": "Serveur inaccessible. Vérifiez que les appareils sont sur le même réseau ou saisissez l’adresse manuellement.",
         "loopback": "Ce code contient uniquement une adresse localhost. Exécutez opencode service set hostname 0.0.0.0, puis opencode service start et opencode pair sur votre ordinateur."
+      },
+      "serverUrlFieldHint": "L'adresse de votre tunnel Cloudflare (par exemple https://opencode.example.com) ou de votre ordinateur sur le réseau local (par exemple http://192.168.1.10:4096).",
+      "usernameHint": "Généralement opencode, sauf si vous l'avez modifié dans la configuration du serveur.",
+      "passwordPlaceholder": "Mot de passe du serveur",
+      "cfAccess": {
+        "title": "Avancé : Cloudflare Access",
+        "hint": "Nécessaire uniquement si votre tunnel est protégé par Cloudflare Access avec un jeton de service. Enregistré de façon sécurisée sur cet appareil ; l'envoi au serveur arrive bientôt.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "Dans Cloudflare Zero Trust › Access › Identifiants de service. Se termine par .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Affiché une seule fois lors de la création du jeton de service."
       }
     }
   },
@@ -354,9 +365,11 @@
     },
     "scanHint": "Scannez le code QR de votre ordinateur pour vous connecter.",
     "scanLocal": "Scanner le code QR",
-    "scanLocalHint": "Se connecter à un ordinateur sur le même réseau.",
+    "scanLocalHint": "Utilisez ceci si votre ordinateur affiche un QR code d'appairage.",
     "manual": "Manuel",
-    "manualHint": "Saisissez l’URL de votre serveur et vos identifiants."
+    "manualHint": "Utilisez ceci pour saisir l'URL du serveur, le nom d'utilisateur et le mot de passe.",
+    "scanWhere": "Où le trouver ? Le code est affiché sur votre ordinateur par le script d'appairage (opencode pair) ou l'assistant de bureau.",
+    "manualWhere": "Où le trouver ? L'URL, le nom d'utilisateur et le mot de passe proviennent de la configuration de votre serveur OpenCode."
   },
   "editor": {
     "title": "Éditeur"

@@ -50,13 +50,13 @@
       "step": "Passo {{step}} de 2",
       "addressTitle": "Endereço do servidor",
       "detailsTitle": "Detalhes da conexão",
-      "addressHint": "Conecte-se ao seu servidor OpenCode.",
+      "addressHint": "Digite o endereço do seu servidor OpenCode.",
       "continue": "Continuar",
       "change": "Alterar",
       "detected": "OpenCode {{version}} detectado",
       "identify": "Insira as credenciais para identificar o servidor.",
       "customUsername": "Nome de usuário personalizado",
-      "passwordHint": "Insira a senha do servidor.",
+      "passwordHint": "A senha que você definiu para o servidor OpenCode.",
       "optionalName": "Nome (opcional)",
       "nameHint": "Deixe em branco para usar o IP ou domínio do servidor.",
       "showPassword": "Mostrar senha",
@@ -74,6 +74,17 @@
         "expired": "Este código expirou ou já foi usado. Execute opencode pair novamente.",
         "unreachable": "Servidor inacessível. Confira se os dispositivos estão na mesma rede ou insira o endereço manualmente.",
         "loopback": "Este código contém apenas um endereço localhost. Execute opencode service set hostname 0.0.0.0, depois opencode service start e opencode pair no computador."
+      },
+      "serverUrlFieldHint": "O endereço do seu túnel Cloudflare (por exemplo https://opencode.example.com) ou do seu computador na rede local (por exemplo http://192.168.1.10:4096).",
+      "usernameHint": "Geralmente opencode, a menos que você tenha mudado na configuração do servidor.",
+      "passwordPlaceholder": "Senha do servidor",
+      "cfAccess": {
+        "title": "Avançado: Cloudflare Access",
+        "hint": "Só é necessário se seu túnel estiver protegido pelo Cloudflare Access com um token de serviço. Salvo com segurança neste dispositivo; o envio ao servidor chega em breve.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "Em Cloudflare Zero Trust › Access › Credenciais de serviço. Termina em .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Exibido uma única vez ao criar o token de serviço."
       }
     }
   },
@@ -354,9 +365,11 @@
     },
     "scanHint": "Leia o código QR do seu computador para conectar.",
     "scanLocal": "Escanear código QR",
-    "scanLocalHint": "Conecte-se a um computador na mesma rede.",
+    "scanLocalHint": "Use se seu computador estiver mostrando um QR code de pareamento.",
     "manual": "Manual",
-    "manualHint": "Informe a URL do servidor e suas credenciais."
+    "manualHint": "Use para digitar a URL do servidor, o usuário e a senha.",
+    "scanWhere": "Onde encontro isto? O código aparece no seu computador pelo script de pareamento (opencode pair) ou pelo assistente de desktop.",
+    "manualWhere": "Onde encontro isto? A URL, o usuário e a senha vêm da configuração do seu servidor OpenCode."
   },
   "editor": {
     "title": "Editor"
