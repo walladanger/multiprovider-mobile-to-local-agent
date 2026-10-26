@@ -1,5 +1,6 @@
 const path = require('node:path');
 const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 const pkg = require('./package.json');
 
 const config = getDefaultConfig(__dirname);
@@ -25,4 +26,4 @@ if (isFossBuild) {
   };
 }
 
-module.exports = config;
+module.exports = withNativeWind(config, { input: './global.css' });
