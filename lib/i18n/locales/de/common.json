@@ -96,6 +96,8 @@
     "tlsHint": "Prüfe das Zertifikat des Tunnels oder nutze die http-Adresse im LAN.",
     "showDetails": "Details anzeigen",
     "hideDetails": "Details ausblenden",
-    "loopback": "Das zeigt auf das Handy selbst. Nutze deine Tunnel-URL, die LAN-IP deines PCs oder 10.0.2.2 im Android-Emulator."
+    "loopback": "Das zeigt auf das Handy selbst. Nutze deine Tunnel-URL, die LAN-IP deines PCs oder 10.0.2.2 im Android-Emulator.",
+    "access": "Cloudflare-Access-Token fehlt oder ist falsch",
+    "accessHint": "Trage die Access Client ID und das Secret unter Einstellungen › Verbindung ein oder korrigiere sie."
   }
 }

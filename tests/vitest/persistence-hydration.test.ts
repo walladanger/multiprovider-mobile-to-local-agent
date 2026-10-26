@@ -129,6 +129,7 @@ describe('persistence hydration and write-back', () => {
         withoutConnectionPassword: ({ password: _, ...metadata }) => metadata,
       },
       '@/lib/storage-keys': keys,
+      '@/lib/cloudflare-access-secrets': { loadCloudflareAccessCredentials: async () => ({ clientId: '', clientSecret: '' }) },
       '@/lib/opencode/client/url': profileUrls,
       '@/providers/persisted-preferences': { parseConnectionSettings, parseChatPreferences },
       '@/providers/persistence-hydration': { loadPersistedValue, createPersistenceWriter },

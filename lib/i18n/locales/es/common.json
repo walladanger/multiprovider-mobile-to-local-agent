@@ -96,6 +96,8 @@
     "tlsHint": "Revisa el certificado del túnel o prueba la dirección http de la red local.",
     "showDetails": "Mostrar detalles",
     "hideDetails": "Ocultar detalles",
-    "loopback": "Esto apunta al propio teléfono. Usa la URL de tu túnel, la IP de tu PC en la red local o 10.0.2.2 en el emulador de Android."
+    "loopback": "Esto apunta al propio teléfono. Usa la URL de tu túnel, la IP de tu PC en la red local o 10.0.2.2 en el emulador de Android.",
+    "access": "Falta el token de Cloudflare Access o es incorrecto",
+    "accessHint": "Añade o corrige el Access Client ID y el Secret en Ajustes › Conexión."
   }
 }

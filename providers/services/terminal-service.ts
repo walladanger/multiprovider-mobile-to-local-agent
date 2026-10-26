@@ -1,5 +1,6 @@
 import type { ScopedOpencodeClient } from '@/lib/opencode/client';
 import { Platform } from 'react-native';
+import { withAccessHeaderRecord } from '@/lib/opencode/client/access';
 import { buildPtyWebSocketUrl, type OpencodeConnectionSettings, type ServerContract } from '@/lib/opencode/client';
 import { toShellView } from '@/lib/opencode/v2/shared';
 import * as v1 from '@/lib/opencode/compat/v1/terminal';
@@ -26,5 +27,5 @@ export function getTerminalWebSocketUrl(settings: Pick<OpencodeConnectionSetting
 export function openTerminalWebSocket(url: string, authorization?: string) {
   if (Platform.OS === 'web') return new WebSocket(url);
   const NativeSocket = WebSocket as unknown as { new(url: string, protocols: undefined, options: { headers: Record<string, string> }): WebSocket };
-  return new NativeSocket(url, undefined, { headers: authorization ? { Authorization: authorization } : {} });
+  return new NativeSocket(url, undefined, { headers: withAccessHeaderRecord(authorization ? { Authorization: authorization } : {}) });
 }

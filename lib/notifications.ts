@@ -17,6 +17,7 @@ import {
   type PendingNotificationSession,
 } from '@/lib/notification-pending';
 import { PENDING_NOTIFICATION_SESSIONS_STORAGE_KEY } from '@/lib/storage-keys';
+import { loadCloudflareAccessCredentials } from '@/lib/cloudflare-access-secrets';
 
 const TASK_FINISHED_CHANNEL_ID = 'task-finished-silent';
 const TASK_ATTENTION_CHANNEL_ID = 'task-attention';
@@ -195,6 +196,8 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(CHAT_COMPLETION_TASK_NAM
       if (pendingSessions.length === 0) {
         return BackgroundTask.BackgroundTaskResult.Success;
       }
+      // A cold background launch has no hydrated Access header cache yet.
+      await loadCloudflareAccessCredentials();
 
       for (const [key, pending] of pendingSessions) {
         if (!pending.projectPath) {

@@ -14,11 +14,12 @@ export function isLoopbackServerUrl(value: string) {
   return host === 'localhost' || host.endsWith('.localhost') || /^127(\.\d{1,3}){3}$/.test(host) || host === '::1' || host === '0.0.0.0';
 }
 
-export type ConnectionErrorKind = 'unreachable' | 'timeout' | 'auth' | 'tls' | 'other';
+export type ConnectionErrorKind = 'access' | 'unreachable' | 'timeout' | 'auth' | 'tls' | 'other';
 
 /** Classifies a raw transport message (e.g. "fetch failed: ConnectException …"). */
 export function classifyConnectionError(message: string): ConnectionErrorKind {
   const text = message.toLowerCase();
+  if (/cloudflare access token missing or wrong|cloudflareaccess\.com/.test(text)) return 'access';
   if (/\b(401|403)\b|unauthori[sz]ed|forbidden|credentials rejected/.test(text)) return 'auth';
   if (/timed? ?out|timeout|deadline/.test(text)) return 'timeout';
   if (/ssl|tls|certificate|handshake/.test(text)) return 'tls';

@@ -73,19 +73,23 @@
         "invalid": "OpenCode のペアリングコードではありません。opencode pair を実行して再スキャンしてください。",
         "expired": "このコードは期限切れか使用済みです。opencode pair を再実行してください。",
         "unreachable": "サーバーに接続できません。両方のデバイスが同じネットワークにあるか確認するか、アドレスを手動で入力してください。",
-        "loopback": "このコードには localhost のアドレスしかありません。コンピューターで opencode service set hostname 0.0.0.0 を実行し、続けて opencode service start と opencode pair を実行してください。"
+        "loopback": "このコードには localhost のアドレスしかありません。コンピューターで opencode service set hostname 0.0.0.0 を実行し、続けて opencode service start と opencode pair を実行してください。",
+        "access": "Cloudflare Access トークンがないか、間違っています."
       },
       "serverUrlFieldHint": "Cloudflare トンネルのアドレス（例：https://opencode.example.com）、またはローカルネットワーク上のコンピューターのアドレス（例：http://192.168.1.10:4096）。",
       "usernameHint": "サーバー設定で変更していなければ、通常は opencode です。",
       "passwordPlaceholder": "サーバーのパスワード",
       "cfAccess": {
         "title": "詳細：Cloudflare Access",
-        "hint": "トンネルがサービストークン付きの Cloudflare Access で保護されている場合のみ必要です。この端末に安全に保存されます。サーバーへの送信は近日対応予定です。",
+        "hint": "サーバーが Cloudflare Access の背後にある場合のみ必要です。",
         "clientId": "Access Client ID",
         "clientIdHint": "Cloudflare Zero Trust › Access › Service credentials で確認できます。末尾は .access です。",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "サービストークン作成時に一度だけ表示されます。"
-      }
+        "clientSecretHint": "サービストークン作成時に一度だけ表示されます。",
+        "showSecret": "シークレットを表示",
+        "hideSecret": "シークレットを隠す"
+      },
+      "accessBlocked": "Cloudflare Access トークンがないか、間違っています"
     }
   },
   "providers": {

@@ -73,19 +73,23 @@
         "invalid": "Este no es un código de emparejamiento de OpenCode. Ejecuta opencode pair y vuelve a escanear.",
         "expired": "Este código ha caducado o ya se ha usado. Ejecuta opencode pair de nuevo.",
         "unreachable": "No se pudo acceder al servidor. Comprueba que ambos dispositivos estén en la misma red o introduce la dirección manualmente.",
-        "loopback": "Este código solo contiene una dirección localhost. Ejecuta opencode service set hostname 0.0.0.0, después opencode service start y opencode pair en tu ordenador."
+        "loopback": "Este código solo contiene una dirección localhost. Ejecuta opencode service set hostname 0.0.0.0, después opencode service start y opencode pair en tu ordenador.",
+        "access": "Falta el token de Cloudflare Access o es incorrecto."
       },
       "serverUrlFieldHint": "La dirección de tu túnel de Cloudflare (por ejemplo https://opencode.example.com) o de tu ordenador en la red local (por ejemplo http://192.168.1.10:4096).",
       "usernameHint": "Normalmente opencode, salvo que lo cambiaras en la configuración del servidor.",
       "passwordPlaceholder": "Contraseña del servidor",
       "cfAccess": {
         "title": "Avanzado: Cloudflare Access",
-        "hint": "Solo es necesario si tu túnel está protegido por Cloudflare Access con un token de servicio. Se guarda de forma segura en este dispositivo; el envío al servidor llegará pronto.",
+        "hint": "Solo es necesario si tu servidor está detrás de Cloudflare Access.",
         "clientId": "Access Client ID",
         "clientIdHint": "En Cloudflare Zero Trust › Access › Credenciales de servicio. Termina en .access.",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "Se muestra una sola vez al crear el token de servicio."
-      }
+        "clientSecretHint": "Se muestra una sola vez al crear el token de servicio.",
+        "showSecret": "Mostrar secreto",
+        "hideSecret": "Ocultar secreto"
+      },
+      "accessBlocked": "Falta el token de Cloudflare Access o es incorrecto"
     }
   },
   "providers": {

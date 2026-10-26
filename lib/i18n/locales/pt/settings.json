@@ -73,19 +73,23 @@
         "invalid": "Este não é um código de pareamento OpenCode. Execute opencode pair e escaneie novamente.",
         "expired": "Este código expirou ou já foi usado. Execute opencode pair novamente.",
         "unreachable": "Servidor inacessível. Confira se os dispositivos estão na mesma rede ou insira o endereço manualmente.",
-        "loopback": "Este código contém apenas um endereço localhost. Execute opencode service set hostname 0.0.0.0, depois opencode service start e opencode pair no computador."
+        "loopback": "Este código contém apenas um endereço localhost. Execute opencode service set hostname 0.0.0.0, depois opencode service start e opencode pair no computador.",
+        "access": "Token do Cloudflare Access ausente ou incorreto."
       },
       "serverUrlFieldHint": "O endereço do seu túnel Cloudflare (por exemplo https://opencode.example.com) ou do seu computador na rede local (por exemplo http://192.168.1.10:4096).",
       "usernameHint": "Geralmente opencode, a menos que você tenha mudado na configuração do servidor.",
       "passwordPlaceholder": "Senha do servidor",
       "cfAccess": {
         "title": "Avançado: Cloudflare Access",
-        "hint": "Só é necessário se seu túnel estiver protegido pelo Cloudflare Access com um token de serviço. Salvo com segurança neste dispositivo; o envio ao servidor chega em breve.",
+        "hint": "Só é necessário se o seu servidor estiver atrás do Cloudflare Access.",
         "clientId": "Access Client ID",
         "clientIdHint": "Em Cloudflare Zero Trust › Access › Credenciais de serviço. Termina em .access.",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "Exibido uma única vez ao criar o token de serviço."
-      }
+        "clientSecretHint": "Exibido uma única vez ao criar o token de serviço.",
+        "showSecret": "Mostrar segredo",
+        "hideSecret": "Ocultar segredo"
+      },
+      "accessBlocked": "Token do Cloudflare Access ausente ou incorreto"
     }
   },
   "providers": {

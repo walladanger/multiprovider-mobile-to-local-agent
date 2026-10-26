@@ -13,7 +13,7 @@ import { getServerHostname } from '@/lib/opencode/client/url';
 import { useConnection } from '@/providers/opencode-contexts';
 import { LoopbackWarning } from '@/components/ui/connection-error-text';
 import { isLoopbackServerUrl } from '@/lib/opencode/connection-hints';
-import { saveCloudflareAccessCredentials } from '@/lib/cloudflare-access-secrets';
+import { getCloudflareAccessCredentials, saveCloudflareAccessCredentials } from '@/lib/cloudflare-access-secrets';
 
 export type ConnectionProfileFormValues = {
   name: string;
@@ -50,6 +50,8 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [accessClientId, setAccessClientId] = useState('');
   const [accessClientSecret, setAccessClientSecret] = useState('');
+  const [showAccessSecret, setShowAccessSecret] = useState(false);
+  const accessTouched = useRef(false);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState<'probe' | 'save'>();
   const working = useRef(false);
@@ -57,6 +59,20 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
   const controller = useRef<AbortController | undefined>(undefined);
   useEffect(() => () => { request.current += 1; controller.current?.abort(); }, []);
   useEffect(() => { onBusyChange?.(Boolean(busy)); }, [busy, onBusyChange]);
+  // Prefill saved Access values (read from secure storage; never logged).
+  useEffect(() => {
+    let active = true;
+    void getCloudflareAccessCredentials().then((stored) => {
+      if (!active || accessTouched.current || (!stored.clientId && !stored.clientSecret)) return;
+      setAccessClientId(stored.clientId);
+      setAccessClientSecret(stored.clientSecret);
+      setShowAdvanced(true);
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  function editAccess(update: (value: string) => void) {
+    return (value: string) => { accessTouched.current = true; update(value); setProbe(undefined); setError(undefined); };
+  }
   const locked = busy === 'save';
   const v1 = probe?.status === 'detected' && probe.contract === 'v1';
   const v2 = probe?.status === 'detected' && probe.contract === 'v2';
@@ -85,14 +101,16 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
     controller.current = new AbortController();
     try {
       const values = { name: name.trim(), serverUrl: serverUrl.trim(), username: username.trim(), password };
+      // Saved before probing so the health check already carries the Access
+      // headers. Values are kept only in secure storage and never logged.
+      if (accessTouched.current) await saveCloudflareAccessCredentials({ clientId: accessClientId, clientSecret: accessClientSecret });
       const result = await connectionProfiles.probe(values, controller.current.signal);
       if (current !== request.current) return;
       setProbe(result);
+      if (result.status === 'access-blocked') { setShowAdvanced(true); throw new Error(t('settings:connection.setup.accessBlocked')); }
       if (result.status === 'unreachable') throw new Error(t('settings:connection.setup.unreachable'));
       if (operation === 'probe') { setStep('details'); return; }
       if (result.status === 'authentication-required') throw new Error(t('settings:connection.setup.credentialsRejected'));
-      // Values are kept only in secure storage and never logged.
-      if (accessClientId.trim() || accessClientSecret) await saveCloudflareAccessCredentials({ clientId: accessClientId, clientSecret: accessClientSecret });
       await onSubmit(values);
     } catch (reason) {
       if (current !== request.current) return;
@@ -122,12 +140,13 @@ export function ConnectionProfileDialog({ title, submitLabel, showName = true, i
             <Button testID="connection-profile-advanced-toggle" style={styles.left} icon={showAdvanced ? 'chevron-up' : 'chevron-down'} disabled={Boolean(busy)}
               accessibilityState={{ expanded: showAdvanced }} onPress={() => setShowAdvanced((value) => !value)}>{t('settings:connection.setup.cfAccess.title')}</Button>
             {showAdvanced ? <View testID="connection-profile-advanced" style={styles.advanced}>
-              <Text style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.hint')}</Text>
+              <Text testID="connection-profile-cf-hint" style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.hint')}</Text>
               <TextInput mode="outlined" label={t('settings:connection.setup.cfAccess.clientId')} testID="connection-profile-cf-client-id-input" value={accessClientId}
-                onChangeText={setAccessClientId} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false} placeholder="0123abcd….access" />
+                onChangeText={editAccess(setAccessClientId)} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false} placeholder="0123abcd….access" />
               <Text style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.clientIdHint')}</Text>
               <TextInput mode="outlined" label={t('settings:connection.setup.cfAccess.clientSecret')} testID="connection-profile-cf-client-secret-input" value={accessClientSecret}
-                onChangeText={setAccessClientSecret} secureTextEntry disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false} />
+                onChangeText={editAccess(setAccessClientSecret)} secureTextEntry={!showAccessSecret} disabled={Boolean(busy)} autoCapitalize="none" autoCorrect={false}
+                right={<PaperInput.Icon testID="connection-profile-cf-secret-toggle" icon={showAccessSecret ? 'eye-off' : 'eye'} onPress={() => setShowAccessSecret((value) => !value)} accessibilityLabel={t(showAccessSecret ? 'settings:connection.setup.cfAccess.hideSecret' : 'settings:connection.setup.cfAccess.showSecret')} />} />
               <Text style={{ color: palette.muted }}>{t('settings:connection.setup.cfAccess.clientSecretHint')}</Text>
             </View> : null}
           </> : <>

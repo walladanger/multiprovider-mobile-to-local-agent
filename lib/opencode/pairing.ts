@@ -1,11 +1,12 @@
 import { decode as decodeBase64 } from 'base-64';
 
+import { AccessBlockedError } from './client/access';
 import { fetchConnection } from './client/fetch';
 import { probeConnection } from './client/probe';
 import { joinUrlPath, normalizeServerUrl } from './client/url';
 
 export type LocalPairing = { urls: string[] } & ({ code: string } | { password: string });
-export type PairingFailure = 'invalid' | 'expired' | 'unreachable' | 'loopback';
+export type PairingFailure = 'invalid' | 'expired' | 'unreachable' | 'loopback' | 'access';
 export class LocalPairingError extends Error {
   constructor(public reason: PairingFailure) { super(reason); }
 }
@@ -70,12 +71,14 @@ export async function resolveLocalPairing(value: string, signal?: AbortSignal) {
   const urls = pairing.urls.filter((url) => !isDeviceLocal(url));
   if (!urls.length) throw new LocalPairingError('loopback');
   let expired = false;
+  let accessBlocked = false;
   for (const serverUrl of urls) {
     if (signal?.aborted) throw new Error('Aborted');
     if ('password' in pairing) {
       const settings = { serverUrl, username: '', password: pairing.password, directory: '' };
       const result = await probeConnection(settings, signal);
       if (result.status === 'detected' && result.contract === 'v2') return settings;
+      if (result.status === 'access-blocked') accessBlocked = true;
       continue;
     }
     const controller = new AbortController();
@@ -86,14 +89,18 @@ export async function resolveLocalPairing(value: string, signal?: AbortSignal) {
     try {
       const base = normalizeServerUrl(serverUrl);
       const path = joinUrlPath(base.pathPrefix.replace(/\/api$/, ''), `/auth/connect/${pairing.code}`);
-      const response = await fetchConnection(`${base.origin}${path}`, { headers: { Accept: 'application/json' }, signal: controller.signal, redirect: 'error' });
+      const response = await fetchConnection(`${base.origin}${path}`, { headers: { Accept: 'application/json' }, signal: controller.signal, redirect: 'manual' });
       if (response.status === 401) { expired = true; continue; }
+      if (response.status >= 300 && response.status < 400) continue;
       if (!response.ok) continue;
       const body: unknown = await response.json();
       if (!body || typeof body !== 'object' || !('token' in body) || typeof body.token !== 'string' || !body.token || body.token.length > 4096) continue;
       return { serverUrl, username: '', password: body.token, directory: '' };
-    } catch { /* Try the next address without exposing a pairing code in an error. */ }
+    } catch (error) {
+      // Try the next address without exposing a pairing code in an error.
+      if (error instanceof AccessBlockedError) accessBlocked = true;
+    }
     finally { clearTimeout(timer); signal?.removeEventListener('abort', abort); }
   }
-  throw new LocalPairingError(expired ? 'expired' : 'unreachable');
+  throw new LocalPairingError(expired ? 'expired' : accessBlocked ? 'access' : 'unreachable');
 }

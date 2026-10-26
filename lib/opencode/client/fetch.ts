@@ -5,6 +5,7 @@ import { recordBytes, recordRequest } from '../data-usage';
 import { joinUrlPath } from './url';
 import type { OpencodeConnectionSettings } from './types';
 import { fetchWithReadDeadline } from './read-deadline';
+import { AccessBlockedError, getAccessHeaders, isAccessBlockedResponse, withAccessHeaders } from './access';
 
 export function createAuthHeader(settings: OpencodeConnectionSettings) {
   const password = settings.password;
@@ -19,25 +20,33 @@ export function createAuthHeader(settings: OpencodeConnectionSettings) {
 
 export function getRequestHeaders(settings: OpencodeConnectionSettings) {
   const authHeader = createAuthHeader(settings);
-  return authHeader
-    ? {
-        Authorization: authHeader,
-      }
-    : undefined;
+  const headers: Record<string, string> = { ...(authHeader ? { Authorization: authHeader } : {}), ...getAccessHeaders() };
+  return Object.keys(headers).length ? headers : undefined;
 }
 
 export async function fetchConnection(input: RequestInfo | URL, init?: RequestInit, settings?: OpencodeConnectionSettings) {
   // RN's XHR ignores redirect rejection. Use Expo for one-use local pairing
   // requests; other connections retain their transport.
-  const transport = init?.redirect === 'error'
-    ? (input: RequestInfo | URL, init?: RequestInit) => expoFetch(input, { ...init, redirect: 'error' })
+  // `manual` (health checks) also needs Expo so an Access 302 stays visible.
+  const redirect = init?.redirect;
+  const transport = redirect === 'error' || redirect === 'manual'
+    ? (input: RequestInfo | URL, init?: RequestInit) => expoFetch(input as string, { ...init, redirect } as never) as unknown as Promise<Response>
     : fetch;
+  // Every OpenCode request (SDK calls, SSE, probes, pairing) passes through
+  // here, so this is the one place the Cloudflare Access headers are added.
+  const inputHeaders = typeof input === 'object' && !(input instanceof URL) ? input.headers : undefined;
+  init = { ...init, headers: withAccessHeaders(init?.headers ?? inputHeaders) };
   const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
   const method = init?.method ?? (typeof input === 'object' && 'method' in input ? input.method : 'GET');
   const finiteRead = /^(GET|HEAD)$/i.test(method) && !/\/event\/?(?:\?|$)/.test(url);
   const response = finiteRead ? await fetchWithReadDeadline(transport, input, init) : await transport(input, init);
   recordRequest();
   measureResponseBytes(response);
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/event-stream') && (response.status === 403 || (response.status >= 300 && response.status < 400) || response.redirected || contentType.includes('text/html'))
+    && await isAccessBlockedResponse(response)) {
+    throw new AccessBlockedError(response.status);
+  }
   return response;
 }
 

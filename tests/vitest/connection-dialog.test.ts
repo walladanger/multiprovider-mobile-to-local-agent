@@ -28,7 +28,7 @@ async function form(onSubmit = vi.fn()) {
     '@/lib/opencode/client/url': { getServerHostname: () => '192.168.1.10' },
     '@/components/ui/connection-error-text': { LoopbackWarning: (props: { serverUrl: string; isLoopback: (url: string) => boolean; testID: string }) => (props.isLoopback(props.serverUrl) ? { type: 'Warning', props: { testID: props.testID } } : null) },
     '@/lib/opencode/connection-hints': hints,
-    '@/lib/cloudflare-access-secrets': { saveCloudflareAccessCredentials: saveAccess },
+    '@/lib/cloudflare-access-secrets': { saveCloudflareAccessCredentials: saveAccess, getCloudflareAccessCredentials: async () => ({ clientId: '', clientSecret: '' }) },
     '@/providers/opencode-contexts': { useConnection: () => ({ connectionProfiles: { probe } }) },
   }, { Error });
   const onDismiss = vi.fn();
