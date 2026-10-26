@@ -96,6 +96,8 @@
     "tlsHint": "टनल का सर्टिफ़िकेट जाँचें, या LAN का http पता आज़माएँ।",
     "showDetails": "विवरण दिखाएँ",
     "hideDetails": "विवरण छिपाएँ",
-    "loopback": "यह पता फ़ोन को ही दर्शाता है। अपना टनल URL, अपने PC का LAN IP, या Android एमुलेटर पर 10.0.2.2 इस्तेमाल करें।"
+    "loopback": "यह पता फ़ोन को ही दर्शाता है। अपना टनल URL, अपने PC का LAN IP, या Android एमुलेटर पर 10.0.2.2 इस्तेमाल करें।",
+    "access": "Cloudflare Access टोकन गायब है या गलत है",
+    "accessHint": "सेटिंग्स › कनेक्शन में Access Client ID और Secret जोड़ें या ठीक करें।"
   }
 }

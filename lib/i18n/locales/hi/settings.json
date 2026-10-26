@@ -73,19 +73,23 @@
         "invalid": "यह OpenCode पेयरिंग कोड नहीं है। opencode pair चलाएँ और दोबारा स्कैन करें।",
         "expired": "यह कोड समाप्त हो गया है या पहले इस्तेमाल हो चुका है। opencode pair फिर चलाएँ।",
         "unreachable": "सर्वर तक नहीं पहुँच सके। दोनों डिवाइस एक ही नेटवर्क पर हैं यह जाँचें, या पता खुद दर्ज करें।",
-        "loopback": "इस कोड में केवल localhost का पता है। कंप्यूटर पर opencode service set hostname 0.0.0.0 चलाएँ, फिर opencode service start और opencode pair चलाएँ।"
+        "loopback": "इस कोड में केवल localhost का पता है। कंप्यूटर पर opencode service set hostname 0.0.0.0 चलाएँ, फिर opencode service start और opencode pair चलाएँ।",
+        "access": "Cloudflare Access टोकन गायब है या गलत है."
       },
       "serverUrlFieldHint": "आपके Cloudflare टनल का पता (जैसे https://opencode.example.com) या लोकल नेटवर्क पर आपके कंप्यूटर का पता (जैसे http://192.168.1.10:4096)।",
       "usernameHint": "आमतौर पर opencode, जब तक आपने सर्वर सेटअप में इसे बदला न हो।",
       "passwordPlaceholder": "सर्वर पासवर्ड",
       "cfAccess": {
         "title": "उन्नत: Cloudflare Access",
-        "hint": "केवल तब ज़रूरी जब आपका टनल सर्विस टोकन के साथ Cloudflare Access से सुरक्षित हो। इस डिवाइस पर सुरक्षित रूप से सहेजा जाता है; सर्वर को भेजना जल्द आ रहा है।",
+        "hint": "केवल तब ज़रूरी जब आपका सर्वर Cloudflare Access के पीछे हो।",
         "clientId": "Access Client ID",
         "clientIdHint": "Cloudflare Zero Trust › Access › Service credentials से। अंत में .access होता है।",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "सर्विस टोकन बनाते समय केवल एक बार दिखाया जाता है।"
-      }
+        "clientSecretHint": "सर्विस टोकन बनाते समय केवल एक बार दिखाया जाता है।",
+        "showSecret": "सीक्रेट दिखाएँ",
+        "hideSecret": "सीक्रेट छिपाएँ"
+      },
+      "accessBlocked": "Cloudflare Access टोकन गायब है या गलत है"
     }
   },
   "providers": {

@@ -129,6 +129,7 @@ describe('background notification monitor', () => {
       [/from '@\/lib\/opencode\/client'/g, `from "${clientStubUri}"`],
       [/from '@\/lib\/notification-pending'/g, `from "${notificationPendingUri}"`],
       [/from '@\/lib\/storage-keys'/g, `from "${storageKeysUri}"`],
+      [/from '@\/lib\/cloudflare-access-secrets'/g, `from "data:text/javascript,export async function loadCloudflareAccessCredentials() { return { clientId: '', clientSecret: '' }; }"`],
     ]);
 
     const { trackPendingTaskFinishedNotification, clearPendingTaskFinishedNotification, listPendingTaskFinishedNotifications } = await import(notificationsUri);

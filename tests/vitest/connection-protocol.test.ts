@@ -5,6 +5,7 @@ import { detectServerContract, probeConnection } from '@/lib/opencode/client/pro
 import { getServerHostname } from '@/lib/opencode/client/url';
 import { parseLocalPairing, resolveLocalPairing } from '@/lib/opencode/pairing';
 import * as readDeadline from '@/lib/opencode/client/read-deadline';
+import * as access from '@/lib/opencode/client/access';
 import { loadTs } from '../helpers/runtime.mjs';
 
 vi.mock('@/lib/opencode/client/types', () => ({ defaultConnectionSettings: { serverUrl: 'http://127.0.0.1:4096' } }));
@@ -58,7 +59,7 @@ describe('local pairing', () => {
   it('passes error responses through to the SDK for manual connections', async () => {
     const transport = await loadTs('lib/opencode/client/fetch.ts', {
       './read-deadline': readDeadline, 'base-64': {}, 'expo/fetch': { fetch: async () => response },
-      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} }, './url': {},
+      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} }, './url': {}, './access': access,
     }, { fetch: async () => response });
     const response = new Response('<html>Cloudflare Error 1033</html>', { status: 530, headers: { 'content-type': 'text/html' } });
     expect(await (await transport.fetchConnection('http://manual.test', {}, settings)).text()).toContain('1033');
@@ -68,7 +69,7 @@ describe('local pairing', () => {
     const nativeFetch = vi.fn(async () => json({}));
     const transport = await loadTs('lib/opencode/client/fetch.ts', {
       './read-deadline': readDeadline, 'base-64': {}, 'expo/fetch': { fetch: nativeFetch },
-      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} }, './url': {},
+      '../data-usage': { recordBytes: () => {}, recordRequest: () => {} }, './url': {}, './access': access,
     }, { fetch: manualFetch });
     await transport.fetchConnection('http://example.test/api/info');
     await transport.fetchConnection('http://example.test/auth/connect/code', { redirect: 'error' });
@@ -106,7 +107,7 @@ describe('local pairing', () => {
     const result = await resolveLocalPairing(JSON.stringify({ code: 'one-use-code', urls: ['http://127.0.0.1', 'http://unreachable.test', 'http://example.test', 'http://example.test'] }));
     expect(result).toEqual({ ...settings, password: 'session-token' });
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual(['http://unreachable.test/auth/connect/one-use-code', 'http://example.test/auth/connect/one-use-code']);
-    expect(fetchMock.mock.calls[1][1]).toMatchObject({ headers: { Accept: 'application/json' }, redirect: 'error' });
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({ headers: { Accept: 'application/json' }, redirect: 'manual' });
   });
   it('bounds each address attempt to five seconds', async () => {
     vi.useFakeTimers();

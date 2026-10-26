@@ -96,6 +96,8 @@
     "tlsHint": "Vérifiez le certificat du tunnel ou essayez l'adresse http du réseau local.",
     "showDetails": "Afficher les détails",
     "hideDetails": "Masquer les détails",
-    "loopback": "Cette adresse désigne le téléphone lui-même. Utilisez l'URL de votre tunnel, l'IP locale de votre PC ou 10.0.2.2 sur l'émulateur Android."
+    "loopback": "Cette adresse désigne le téléphone lui-même. Utilisez l'URL de votre tunnel, l'IP locale de votre PC ou 10.0.2.2 sur l'émulateur Android.",
+    "access": "Jeton Cloudflare Access manquant ou incorrect",
+    "accessHint": "Ajoutez ou corrigez l'Access Client ID et le Secret dans Réglages › Connexion."
   }
 }

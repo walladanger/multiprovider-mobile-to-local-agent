@@ -73,19 +73,23 @@
         "invalid": "Ce code n’est pas un code d’appairage OpenCode. Exécutez opencode pair et scannez à nouveau.",
         "expired": "Ce code a expiré ou a déjà été utilisé. Exécutez à nouveau opencode pair.",
         "unreachable": "Serveur inaccessible. Vérifiez que les appareils sont sur le même réseau ou saisissez l’adresse manuellement.",
-        "loopback": "Ce code contient uniquement une adresse localhost. Exécutez opencode service set hostname 0.0.0.0, puis opencode service start et opencode pair sur votre ordinateur."
+        "loopback": "Ce code contient uniquement une adresse localhost. Exécutez opencode service set hostname 0.0.0.0, puis opencode service start et opencode pair sur votre ordinateur.",
+        "access": "Jeton Cloudflare Access manquant ou incorrect."
       },
       "serverUrlFieldHint": "L'adresse de votre tunnel Cloudflare (par exemple https://opencode.example.com) ou de votre ordinateur sur le réseau local (par exemple http://192.168.1.10:4096).",
       "usernameHint": "Généralement opencode, sauf si vous l'avez modifié dans la configuration du serveur.",
       "passwordPlaceholder": "Mot de passe du serveur",
       "cfAccess": {
         "title": "Avancé : Cloudflare Access",
-        "hint": "Nécessaire uniquement si votre tunnel est protégé par Cloudflare Access avec un jeton de service. Enregistré de façon sécurisée sur cet appareil ; l'envoi au serveur arrive bientôt.",
+        "hint": "Nécessaire uniquement si votre serveur est derrière Cloudflare Access.",
         "clientId": "Access Client ID",
         "clientIdHint": "Dans Cloudflare Zero Trust › Access › Identifiants de service. Se termine par .access.",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "Affiché une seule fois lors de la création du jeton de service."
-      }
+        "clientSecretHint": "Affiché une seule fois lors de la création du jeton de service.",
+        "showSecret": "Afficher le secret",
+        "hideSecret": "Masquer le secret"
+      },
+      "accessBlocked": "Jeton Cloudflare Access manquant ou incorrect"
     }
   },
   "providers": {

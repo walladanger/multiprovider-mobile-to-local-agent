@@ -73,19 +73,23 @@
         "invalid": "This is not an OpenCode pairing code. Run opencode pair and scan again.",
         "expired": "This pairing code expired or was already used. Run opencode pair again.",
         "unreachable": "Could not reach the server. Check that both devices are on the same network, or enter the address manually.",
-        "loopback": "This code only contains a localhost address. Run opencode service set hostname 0.0.0.0, then opencode service start and opencode pair on your computer."
+        "loopback": "This code only contains a localhost address. Run opencode service set hostname 0.0.0.0, then opencode service start and opencode pair on your computer.",
+        "access": "Cloudflare Access token missing or wrong."
       },
       "serverUrlFieldHint": "The address of your Cloudflare tunnel (for example https://opencode.example.com) or of your computer on the local network (for example http://192.168.1.10:4096).",
       "usernameHint": "Usually opencode, unless you changed it in your server setup.",
       "passwordPlaceholder": "Server password",
       "cfAccess": {
         "title": "Advanced: Cloudflare Access",
-        "hint": "Only needed if your tunnel is protected by Cloudflare Access with a service token. Saved securely on this device; sending them to the server is coming soon.",
+        "hint": "Only needed if your server is behind Cloudflare Access.",
         "clientId": "Access Client ID",
         "clientIdHint": "From Cloudflare Zero Trust › Access › Service credentials. Ends in .access.",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "Shown once when you create the service token."
-      }
+        "clientSecretHint": "Shown once when you create the service token.",
+        "showSecret": "Show secret",
+        "hideSecret": "Hide secret"
+      },
+      "accessBlocked": "Cloudflare Access token missing or wrong"
     }
   },
   "providers": {

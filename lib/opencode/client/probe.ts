@@ -1,11 +1,12 @@
 import { fetchConnection, getRequestHeaders } from './fetch';
+import { AccessBlockedError } from './access';
 import { joinUrlPath, normalizeServerUrl } from './url';
 import type { OpencodeConnectionSettings, ServerContract } from './types';
 
 export type ContractProbeResult = { contract: ServerContract; version?: string };
 export type ConnectionProbeResult =
   | ({ status: 'detected' } & ContractProbeResult)
-  | { status: 'authentication-required' | 'unreachable' | 'unknown' };
+  | { status: 'authentication-required' | 'access-blocked' | 'unreachable' | 'unknown' };
 
 async function probeJson(origin: string, pathPrefix: string, path: string, settings: OpencodeConnectionSettings, signal?: AbortSignal) {
   const url = `${origin}${joinUrlPath(pathPrefix, path)}`;
@@ -15,8 +16,9 @@ async function probeJson(origin: string, pathPrefix: string, path: string, setti
   signal?.addEventListener('abort', abort, { once: true });
   if (signal?.aborted) abort();
   try {
-    const response = await fetchConnection(url, { headers: getRequestHeaders(settings), signal: controller.signal }, settings);
+    const response = await fetchConnection(url, { headers: getRequestHeaders(settings), signal: controller.signal, redirect: 'manual' }, settings);
     if (!response.ok) {
+      // Any other redirect left unfollowed by `manual` is not an OpenCode answer.
       return { status: response.status };
     }
     const contentType = response.headers.get('content-type') || '';
@@ -25,7 +27,8 @@ async function probeJson(origin: string, pathPrefix: string, path: string, setti
     }
     const body: unknown = await response.json().catch(() => undefined);
     return { status: response.status, body: body && typeof body === 'object' && !Array.isArray(body) ? body as Record<string, unknown> : undefined };
-  } catch {
+  } catch (error) {
+    if (error instanceof AccessBlockedError) return { status: error.status, accessBlocked: true };
     return undefined;
   } finally {
     clearTimeout(timeout);
@@ -74,6 +77,7 @@ export async function probeConnection(settings: OpencodeConnectionSettings, sign
     return { status: 'detected', contract: 'v1', version: health.version };
   }
 
+  if (responses.some((response) => response && 'accessBlocked' in response)) return { status: 'access-blocked' };
   if (responses.some((response) => response?.status === 401 || response?.status === 403)) return { status: 'authentication-required' };
   return { status: responses.every((response) => !response) ? 'unreachable' : 'unknown' };
 }

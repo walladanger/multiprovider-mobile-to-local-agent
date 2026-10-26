@@ -73,19 +73,23 @@
         "invalid": "这不是 OpenCode 配对码。请运行 opencode pair 并重新扫描。",
         "expired": "此配对码已过期或已使用。请重新运行 opencode pair。",
         "unreachable": "无法连接服务器。请确认两台设备连接到同一网络，或手动输入地址。",
-        "loopback": "此配对码仅包含 localhost 地址。请在电脑上运行 opencode service set hostname 0.0.0.0，然后运行 opencode service start 和 opencode pair。"
+        "loopback": "此配对码仅包含 localhost 地址。请在电脑上运行 opencode service set hostname 0.0.0.0，然后运行 opencode service start 和 opencode pair。",
+        "access": "Cloudflare Access 令牌缺失或错误."
       },
       "serverUrlFieldHint": "你的 Cloudflare 隧道地址（例如 https://opencode.example.com），或你电脑在局域网中的地址（例如 http://192.168.1.10:4096）。",
       "usernameHint": "通常是 opencode，除非你在服务器设置中修改过。",
       "passwordPlaceholder": "服务器密码",
       "cfAccess": {
         "title": "高级：Cloudflare Access",
-        "hint": "仅当你的隧道受带服务令牌的 Cloudflare Access 保护时才需要。安全保存在此设备上；发送到服务器的功能即将推出。",
+        "hint": "仅当你的服务器位于 Cloudflare Access 之后时才需要。",
         "clientId": "Access Client ID",
         "clientIdHint": "在 Cloudflare Zero Trust › Access › Service credentials 中获取，以 .access 结尾。",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "仅在创建服务令牌时显示一次。"
-      }
+        "clientSecretHint": "仅在创建服务令牌时显示一次。",
+        "showSecret": "显示密钥",
+        "hideSecret": "隐藏密钥"
+      },
+      "accessBlocked": "Cloudflare Access 令牌缺失或错误"
     }
   },
   "providers": {

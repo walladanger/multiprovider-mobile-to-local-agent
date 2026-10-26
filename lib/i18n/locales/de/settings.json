@@ -73,19 +73,23 @@
         "invalid": "Dies ist kein OpenCode-Kopplungscode. Führe opencode pair aus und scanne erneut.",
         "expired": "Dieser Code ist abgelaufen oder wurde bereits verwendet. Führe opencode pair erneut aus.",
         "unreachable": "Server nicht erreichbar. Prüfe, ob beide Geräte im selben Netzwerk sind, oder gib die Adresse manuell ein.",
-        "loopback": "Dieser Code enthält nur eine localhost-Adresse. Führe opencode service set hostname 0.0.0.0, dann opencode service start und opencode pair auf deinem Computer aus."
+        "loopback": "Dieser Code enthält nur eine localhost-Adresse. Führe opencode service set hostname 0.0.0.0, dann opencode service start und opencode pair auf deinem Computer aus.",
+        "access": "Cloudflare-Access-Token fehlt oder ist falsch."
       },
       "serverUrlFieldHint": "Die Adresse deines Cloudflare-Tunnels (z. B. https://opencode.example.com) oder deines Computers im lokalen Netzwerk (z. B. http://192.168.1.10:4096).",
       "usernameHint": "Meist opencode, außer du hast ihn in der Server-Einrichtung geändert.",
       "passwordPlaceholder": "Server-Passwort",
       "cfAccess": {
         "title": "Erweitert: Cloudflare Access",
-        "hint": "Nur nötig, wenn dein Tunnel durch Cloudflare Access mit einem Service-Token geschützt ist. Wird sicher auf diesem Gerät gespeichert; das Senden an den Server folgt bald.",
+        "hint": "Nur nötig, wenn dein Server hinter Cloudflare Access liegt.",
         "clientId": "Access Client ID",
         "clientIdHint": "Aus Cloudflare Zero Trust › Access › Service-Anmeldedaten. Endet auf .access.",
         "clientSecret": "Access Client Secret",
-        "clientSecretHint": "Wird beim Erstellen des Service-Tokens einmalig angezeigt."
-      }
+        "clientSecretHint": "Wird beim Erstellen des Service-Tokens einmalig angezeigt.",
+        "showSecret": "Secret anzeigen",
+        "hideSecret": "Secret verbergen"
+      },
+      "accessBlocked": "Cloudflare-Access-Token fehlt oder ist falsch"
     }
   },
   "providers": {

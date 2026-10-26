@@ -96,6 +96,8 @@
     "tlsHint": "トンネルの証明書を確認するか、LAN の http アドレスを試してください。",
     "showDetails": "詳細を表示",
     "hideDetails": "詳細を隠す",
-    "loopback": "このアドレスはスマホ自身を指しています。トンネルの URL、PC の LAN IP、または Android エミュレーターでは 10.0.2.2 を使ってください。"
+    "loopback": "このアドレスはスマホ自身を指しています。トンネルの URL、PC の LAN IP、または Android エミュレーターでは 10.0.2.2 を使ってください。",
+    "access": "Cloudflare Access トークンがないか、間違っています",
+    "accessHint": "設定 › 接続 で Access Client ID と Secret を追加または修正してください。"
   }
 }

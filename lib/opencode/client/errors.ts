@@ -1,9 +1,11 @@
 import { normalizeServerUrl } from './url';
+import { ACCESS_BLOCKED_MESSAGE } from './access';
 
 export type ConnectionFailureKind =
   | 'timeout'
   | 'offline'
   | 'auth'
+  | 'access-blocked'
   | 'tunnel-startup'
   | 'server-incompatible'
   | 'unknown';
@@ -24,6 +26,7 @@ function describeError(error: unknown) {
   return { status, message: descriptions.join(' ') };
 }
 
+const ACCESS_PATTERN = /cloudflare access token missing or wrong|AccessBlockedError|cloudflareaccess\.com/i;
 const TUNNEL_STARTUP_PATTERN = /\b1033\b|cloudflare error 1033/i;
 const AUTH_PATTERN = /credentials were rejected|credentials expired|credentials are missing|authentication required|unauthorized/i;
 const INSECURE_PATTERN = /certificate|(?:^|[^a-z])(?:TLS|SSL|CERT)(?:[^a-z]|$)|NSURLErrorDomain.*-120[0-6]\b|invalid.*url|unsafe.*url/i;
@@ -35,6 +38,7 @@ const TIMEOUT_PATTERN = /\b(?:ENOTFOUND|EAI_AGAIN|ETIMEDOUT|ESOCKETTIMEDOUT|ECON
 // stop automatic retries, everything else stays bounded and retryable.
 export function classifyConnectionFailure(error: unknown): ConnectionFailureKind {
   const { status, message } = describeError(error);
+  if (ACCESS_PATTERN.test(message)) return 'access-blocked';
   if (TUNNEL_STARTUP_PATTERN.test(message)) return 'tunnel-startup';
   const explicitStatus = status ?? (/\b401\b/.test(message) ? 401 : /\b403\b/.test(message) ? 403 : undefined);
   if (explicitStatus === 401 || explicitStatus === 403) return 'auth';
@@ -48,11 +52,11 @@ export function classifyConnectionFailure(error: unknown): ConnectionFailureKind
 }
 
 export function isRetryableConnectionFailure(kind: ConnectionFailureKind) {
-  return kind !== 'auth' && kind !== 'server-incompatible';
+  return kind !== 'auth' && kind !== 'access-blocked' && kind !== 'server-incompatible';
 }
 
 export function isAuthConnectionFailure(kind: ConnectionFailureKind) {
-  return kind === 'auth';
+  return kind === 'auth' || kind === 'access-blocked';
 }
 
 export function getConnectionErrorMessage(error: unknown, serverUrl: string) {
@@ -76,6 +80,10 @@ export function getConnectionErrorMessage(error: unknown, serverUrl: string) {
   const versionHint = alreadyApiBase
     ? ' This app supports OpenCode 1.x and 2.x servers; verify the API base URL is correct.'
     : '';
+
+  if (ACCESS_PATTERN.test(message) || error.name === 'AccessBlockedError') {
+    return ACCESS_BLOCKED_MESSAGE;
+  }
 
   if (/\b1033\b/.test(message)) {
     return 'The Cloudflare tunnel is still starting (Error 1033). Retry shortly.';

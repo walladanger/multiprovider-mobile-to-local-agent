@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
 
 import type { OpencodeConnectionSettings } from '@/lib/opencode/client';
 import { getConnectionPassword, saveConnectionPassword, withoutConnectionPassword } from '@/lib/connection-password';
+import { loadCloudflareAccessCredentials } from '@/lib/cloudflare-access-secrets';
 import { isValidServerUrl } from '@/lib/opencode/client/url';
 import {
   ACTIVE_PROJECT_STORAGE_KEY,
@@ -94,6 +95,8 @@ export function useOpencodePersistence({
           writeChanged.preserveUnread(SETTINGS_STORAGE_KEY);
           console.warn('Could not hydrate connection credentials.', reason);
         }
+        // Access headers must be cached before the first connection attempt.
+        await loadCloudflareAccessCredentials();
         setSettings({ ...defaultSettings, ...persistedSettings, password });
 
         await load(CHAT_PREFERENCES_STORAGE_KEY, parseChatPreferences, (parsed) => {
