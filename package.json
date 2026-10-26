@@ -92,6 +92,7 @@
     "@types/react": "~19.2.4",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~57.0.2",
+    "qrcode": "^1.5.4",
     "serve": "^14.2.4",
     "typescript": "~6.0.3",
     "vitest": "^5.0.3",
@@ -113,7 +114,9 @@
   "expo": {
     "autolinking": {
       "android": {
-        "buildFromSource": ["expo-sharing"]
+        "buildFromSource": [
+          "expo-sharing"
+        ]
       }
     }
   }
