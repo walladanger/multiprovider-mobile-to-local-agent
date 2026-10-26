@@ -33,27 +33,36 @@ The app uses a simple structural pattern where Expo Router provides navigation, 
 
 ## Quick start
 
+```bash
+opencode serve --port 4096
+```
+
+Expose the server through authenticated HTTPS, a VPN or a secure tunnel (for
+example `cloudflared tunnel --url localhost:4096`), then enter its URL in the
+app. Do not expose an unauthenticated port to the internet.
+
 Requires Node `^22.12.0 || ^24.0.0 || >=26.0.0` (see `.nvmrc`).
 
 ```bash
-# Install dependencies
 npm ci
-
-# Start the Expo development server
-npm start
-
-# Build and run on Android
-npm run android
-
-# Build and run on iOS
-npm run ios
-
-# Run in the browser
-npm run web
-
-# Run vitest suite
-npm run test:vitest
+npm start              # Expo dev server
+npm run android        # build and run on Android
+npm run ios            # build and run on iOS
+npm run web            # run in the browser
 ```
+
+Checks:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test:vitest
+npm run test:ci:static
+```
+
+Release builds: `npm run build:android`, `npm run build:foss:android`,
+`npm run build:ios:local`. See [docs/development.md](docs/development.md) for
+details.
 
 ## Configuration
 
