@@ -6,7 +6,8 @@ import { useReducedMotion } from 'react-native-reanimated';
 
 import { SKIA_BACKGROUNDS, type SkiaKind } from '@/components/background/skia-backgrounds';
 import { MOTION_BACKGROUND_SOURCE } from '@/constants/motion-background';
-import { BACKGROUND_DEFAULTS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
+import { invertHex } from '@/lib/backgrounds/color-math';
+import { BACKGROUND_DEFAULTS, BACKGROUND_KINDS, type BackgroundKind, type BackgroundSettings } from '@/lib/backgrounds/settings';
 import { useBackground } from '@/providers/background-context';
 import { tokens } from '@/theme/tokens';
 
@@ -14,9 +15,10 @@ type LayerProps = { settings: BackgroundSettings; width?: number; height?: numbe
 
 function GradientFallback({ settings }: { settings?: BackgroundSettings }) {
   const colors = settings && settings.kind === 'gradient'
-    ? [settings.colorBack, settings.colorB, settings.colorA] as const
-    : [...tokens.overlay.gradient] as const;
-  return <LinearGradient colors={[colors[0], colors[1], colors[2]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />;
+    ? [settings.colorBack, settings.colorB, settings.colorA].map((c) => invertHex(c, settings.invert))
+    : [...tokens.overlay.gradient];
+  const opacity = settings && settings.kind === 'gradient' ? settings.opacity : 1;
+  return <LinearGradient colors={[colors[0], colors[1], colors[2]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { opacity }]} />;
 }
 
 function LoopingVideo({ source, paused }: { source: number; paused: boolean }) {
@@ -37,17 +39,8 @@ function LoopingVideo({ source, paused }: { source: number; paused: boolean }) {
  */
 export const BACKGROUND_REGISTRY: Record<BackgroundKind, (props: LayerProps) => React.ReactNode> = {
   gradient: ({ settings }) => <GradientFallback settings={settings} />,
-  video: ({ paused }) => (MOTION_BACKGROUND_SOURCE != null ? <LoopingVideo source={MOTION_BACKGROUND_SOURCE} paused={paused} /> : null),
-  paths: (props) => renderSkia('paths', props),
-  liquid: (props) => renderSkia('liquid', props),
-  swirl: (props) => renderSkia('swirl', props),
-  cyber: (props) => renderSkia('cyber', props),
-  mesh: (props) => renderSkia('mesh', props),
-  prism: (props) => renderSkia('prism', props),
-  aurora: (props) => renderSkia('aurora', props),
-  halftone: (props) => renderSkia('halftone', props),
-  papermesh: (props) => renderSkia('papermesh', props),
-  hive: (props) => renderSkia('hive', props),
+  video: ({ paused, settings }) => (MOTION_BACKGROUND_SOURCE != null ? <View style={[StyleSheet.absoluteFill, { opacity: settings.opacity }]}><LoopingVideo source={MOTION_BACKGROUND_SOURCE} paused={paused} /></View> : null),
+  ...(Object.fromEntries(BACKGROUND_KINDS.filter((k): k is SkiaKind => k !== 'gradient' && k !== 'video').map((k) => [k, (props: LayerProps) => renderSkia(k, props)])) as Record<SkiaKind, (props: LayerProps) => React.ReactNode>),
 };
 
 function renderSkia(kind: SkiaKind, { settings, width, height, paused }: LayerProps) {

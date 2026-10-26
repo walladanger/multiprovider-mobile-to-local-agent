@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import { OnboardingStep } from '@/components/onboarding/onboarding-step';
+import { OnboardingHelp } from '@/components/onboarding/onboarding-help';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SetupSummary } from '@/components/onboarding/setup-summary';
@@ -53,6 +54,7 @@ export default function OnboardingReadyScreen() {
           {onboardingActive ? t('onboarding:ready.done') : t('onboarding:ready.start')}
         </Button>
       }>
+      <OnboardingHelp testID="onboarding-ready-help" summary={t('onboarding:help.ready.summary')} details={t('onboarding:help.ready.details', { returnObjects: true }) as string[]} />
       <SetupSummary />
       <View style={styles.footerNote}>
         <MaterialCommunityIcons name="check-circle" size={18} color={palette.success} />

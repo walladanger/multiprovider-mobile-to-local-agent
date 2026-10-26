@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getOnboardingSteps, onboardingRoute } from '@/components/onboarding/navigation';
+import { getOnboardingSteps, getStepperModel, ONBOARDING_STEP_ICONS, ONBOARDING_STEPS, onboardingRoute } from '@/components/onboarding/navigation';
 import { getVisibleModels, type ModelOption } from '@/providers/opencode-model-selection';
 
 const models = [
@@ -11,17 +11,25 @@ const models = [
 
 describe('onboarding navigation and model choices', () => {
   it('inserts AI after connection and General before review', () => {
-    expect(getOnboardingSteps(true)).toEqual(['index', 'permissions', 'connect', 'ai', 'project', 'general', 'ready']);
+    expect(getOnboardingSteps(true)).toEqual(['index', 'permissions', 'connect', 'ai', 'project', 'transcript', 'look', 'background', 'general', 'ready']);
     expect(getOnboardingSteps(true).map(onboardingRoute)).toEqual([
       '/onboarding', '/onboarding/permissions', '/onboarding/connect', '/onboarding/ai',
-      '/onboarding/project', '/onboarding/general', '/onboarding/ready',
+      '/onboarding/project', '/onboarding/transcript', '/onboarding/look', '/onboarding/background',
+      '/onboarding/general', '/onboarding/ready',
     ]);
   });
 
   it('skips server-dependent steps in both directions without a connection', () => {
     const steps = getOnboardingSteps(false);
-    expect(steps).toEqual(['index', 'permissions', 'connect', 'general', 'ready']);
-    expect(steps[steps.indexOf('general') - 1]).toBe('connect');
+    expect(steps).toEqual(['index', 'permissions', 'connect', 'transcript', 'look', 'background', 'ready']);
+    expect(steps[steps.indexOf('transcript') - 1]).toBe('connect');
+  });
+
+  it('marks completed, current, and upcoming stepper dots', () => {
+    const model = getStepperModel(getOnboardingSteps(false), 'connect');
+    expect(model.map((dot) => dot.state)).toEqual(['done', 'done', 'current', 'upcoming', 'upcoming', 'upcoming', 'upcoming']);
+    expect(model[2]).toEqual({ name: 'connect', number: 3, state: 'current' });
+    expect(Object.keys(ONBOARDING_STEP_ICONS)).toEqual([...ONBOARDING_STEPS]);
   });
 
   it('uses the same configured, enabled models in Chat, General, and Review', () => {

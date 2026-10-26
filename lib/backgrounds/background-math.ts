@@ -34,14 +34,15 @@ type PathSink = { moveTo: (x: number, y: number) => unknown; lineTo: (x: number,
 /**
  * One CyberBackground animation step, in place. `s` holds [x, y, size, life, maxLife]
  * per particle; each particle is drawn into the bucket for its fade-in/out opacity.
+ * `chaos` (0..1) adds random turbulence to the flow angle (0 = the original field).
  */
-export function stepParticles(s: number[], steps: number, t: number, w: number, h: number, noiseIntensity: number, buckets: PathSink[]) {
+export function stepParticles(s: number[], steps: number, t: number, w: number, h: number, noiseIntensity: number, buckets: PathSink[], chaos = 0) {
   'worklet';
   const n = buckets.length;
   for (let i = 0; i < s.length; i += 5) {
     s[i + 3] += steps;
     if (s[i + 3] > s[i + 4]) { s[i + 3] = 0; s[i] = Math.random() * w; s[i + 1] = Math.random() * h; }
-    const angle = perlin3(s[i] * noiseIntensity, s[i + 1] * noiseIntensity, t, P512) * Math.PI * 4;
+    const angle = perlin3(s[i] * noiseIntensity, s[i + 1] * noiseIntensity, t, P512) * Math.PI * 4 + (chaos > 0 ? (Math.random() - 0.5) * chaos * 3 : 0);
     const vx = Math.cos(angle) * 2 * steps;
     const vy = Math.sin(angle) * 2 * steps;
     const px = s[i];

@@ -5,6 +5,7 @@ import { ActivityIndicator, Button, Text } from 'react-native-paper';
 
 import { useOnboardingNavigation } from '@/components/onboarding/use-onboarding-navigation';
 import { OnboardingStep } from '@/components/onboarding/onboarding-step';
+import { OnboardingHelp } from '@/components/onboarding/onboarding-help';
 import { ProjectOptions } from '@/components/onboarding/project-options';
 import { TextInput } from '@/components/ui/text-input';
 import { Colors } from '@/constants/theme';
@@ -88,6 +89,7 @@ export default function OnboardingProjectScreen() {
           ) : null}
         </>
       }>
+      <OnboardingHelp testID="onboarding-project-help" summary={t('onboarding:help.project.summary')} details={t('onboarding:help.project.details', { returnObjects: true }) as string[]} />
       {isRefreshingProjectCatalog && projects.length === 0 ? (
         <View style={styles.loading}>
           <ActivityIndicator />

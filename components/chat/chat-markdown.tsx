@@ -1,6 +1,12 @@
 import { memo, useMemo } from 'react';
-import { Linking } from 'react-native';
+import { Linking, View } from 'react-native';
 import { EnrichedMarkdownText, type MarkdownStyle } from 'react-native-enriched-markdown';
+
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { FONT_FAMILIES } from '@/lib/backgrounds/fonts';
+import { DEFAULT_TEXT_EFFECTS, resolveTextEffects } from '@/lib/backgrounds/text-effects';
+import { useOptionalBackground } from '@/providers/background-context';
 
 const allowedLinkProtocols = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 
@@ -16,18 +22,27 @@ function openMarkdownLink(url: string) {
   void Linking.openURL(url).catch(() => undefined);
 }
 
-function MarkdownTextImpl({ text, color, fontSize, mutedColor }: { text: string; color: string; fontSize: number; mutedColor: string }) {
+function MarkdownTextImpl({ text, color: baseColor, fontSize, mutedColor }: { text: string; color: string; fontSize: number; mutedColor: string }) {
   const scale = fontSize / 16;
+  // Settings > Appearance > Text & fonts: font, color and effects apply to the real transcript too.
+  const bg = useOptionalBackground();
+  const palette = Colors[useColorScheme() ?? 'light'];
+  const textFx = bg?.appearance.text ?? DEFAULT_TEXT_EFFECTS;
+  const uiFont = bg && bg.appearance.uiFont !== 'system' && bg.fontsLoaded ? FONT_FAMILIES[bg.appearance.uiFont].regular : undefined;
+  const fx = useMemo(() => resolveTextEffects(textFx, { text: baseColor, surface: palette.surfaceSolid, accent: palette.tint }), [textFx, baseColor, palette.surfaceSolid, palette.tint]);
+  const color = fx.color;
+  const heading = fx.headingColor;
   const markdownStyle = useMemo<MarkdownStyle>(() => ({
-    paragraph: { fontSize, color, lineHeight: 26 * scale },
-    h1: { fontSize: 24 * scale, fontWeight: '700', color },
-    h2: { fontSize: 18 * scale, fontWeight: '700', color },
-    h3: { fontSize: 16 * scale, fontWeight: '700', color },
-    h4: { fontSize: 15 * scale, fontWeight: '700', color },
-    h5: { fontSize: 14 * scale, fontWeight: '700', color },
-    h6: { fontSize: 13 * scale, fontWeight: '700', color },
-    list: { fontSize, color, lineHeight: 26 * scale, bulletColor: color, markerColor: color, gapWidth: 10 },
-    link: { color, underline: true },
+    paragraph: { fontSize, color, lineHeight: 26 * scale, ...(uiFont ? { fontFamily: uiFont } : {}) },
+    h1: { fontSize: 24 * scale, fontWeight: '700', color: heading },
+    h2: { fontSize: 18 * scale, fontWeight: '700', color: heading },
+    h3: { fontSize: 16 * scale, fontWeight: '700', color: heading },
+    h4: { fontSize: 15 * scale, fontWeight: '700', color: heading },
+    h5: { fontSize: 14 * scale, fontWeight: '700', color: heading },
+    h6: { fontSize: 13 * scale, fontWeight: '700', color: heading },
+    list: { fontSize, color, lineHeight: 26 * scale, bulletColor: color, markerColor: color, gapWidth: 10, ...(uiFont ? { fontFamily: uiFont } : {}) },
+    strong: { color: fx.strongColor },
+    link: { color: fx.strongColor, underline: true },
     code: { fontSize: 15 * scale, color, backgroundColor: 'rgba(0,0,0,0.08)' },
     codeBlock: { fontSize: 15 * scale, lineHeight: 18 * scale, color, backgroundColor: 'rgba(0,0,0,0.08)', padding: 14, borderRadius: 14 },
     blockquote: { color, fontSize: 15 * scale, borderColor: mutedColor, borderWidth: 3 },
@@ -45,9 +60,9 @@ function MarkdownTextImpl({ text, color, fontSize, mutedColor }: { text: string;
       cellPaddingVertical: 6,
     },
     thematicBreak: { color: mutedColor },
-  }), [color, fontSize, mutedColor, scale]);
+  }), [color, heading, fx.strongColor, uiFont, fontSize, mutedColor, scale]);
 
-  return (
+  const content = (
     <EnrichedMarkdownText
       markdown={text}
       flavor="github"
@@ -57,6 +72,8 @@ function MarkdownTextImpl({ text, color, fontSize, mutedColor }: { text: string;
       onLinkPress={({ url }) => openMarkdownLink(url)}
     />
   );
+  // Shadow / outline / glow / emboss are drop-shadow filters on a transparent wrapper (Android 12+).
+  return fx.filter.length ? <View style={{ alignSelf: 'stretch', minWidth: 0, filter: fx.filter }}>{content}</View> : content;
 }
 
 // Keep the transcript boundary memoized; only the active streaming message

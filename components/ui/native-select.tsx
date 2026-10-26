@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useUpdateBlocker } from '@/hooks/use-update-blocker';
 import { Colors, Fonts } from '@/constants/theme';
@@ -43,6 +44,19 @@ type NativeSelectProps<T extends string> = {
   title?: string;
 };
 
+/**
+ * Bottom spacing for the select sheet so its last option always clears the
+ * system navigation bar / home indicator (and never sits under a screen footer).
+ */
+export function sheetBottomInset(insets: { bottom: number }, keyboardHeight: number) {
+  return keyboardHeight > 0 ? 0 : Math.max(insets.bottom, 12);
+}
+
+/** Top gap so a tall sheet never runs under the status bar. */
+export function sheetTopInset(insets: { top: number }) {
+  return insets.top + 24;
+}
+
 export function NativeSelect<T extends string>({
   disabled = false,
   onValueChange,
@@ -59,6 +73,7 @@ export function NativeSelect<T extends string>({
   const [query, setQuery] = useState('');
   useUpdateBlocker(visible);
   const keyboardHeight = useKeyboardHeight(visible && searchable);
+  const insets = useSafeAreaInsets();
 
   const selectedOption = useMemo(
     () => options.find((option) => option.value === selectedValue),
@@ -125,12 +140,12 @@ export function NativeSelect<T extends string>({
         selectedOption,
       })}
       {Platform.OS === 'ios' && !searchable ? null : (
-        <Modal animationType="fade" transparent visible={visible} onRequestClose={close}>
-          <GestureHandlerRootView style={[styles.overlay, { paddingBottom: keyboardHeight }]}>
+        <Modal animationType="fade" transparent statusBarTranslucent navigationBarTranslucent visible={visible} onRequestClose={close}>
+          <GestureHandlerRootView style={[styles.overlay, { paddingBottom: keyboardHeight, paddingTop: sheetTopInset(insets) }]}>
             <Pressable style={StyleSheet.absoluteFill} onPress={close}>
-              <Animated.View style={[styles.backdrop, backdropStyle]} />
+              <Animated.View style={[styles.backdrop, { backgroundColor: palette.scrim }, backdropStyle]} />
             </Pressable>
-            <Animated.View onLayout={handleSheetLayout} style={[styles.sheet, { backgroundColor: palette.surface, borderColor: palette.border }, sheetStyle]}>
+            <Animated.View onLayout={handleSheetLayout} testID="native-select-sheet" style={[styles.sheet, { backgroundColor: palette.sheet, borderColor: palette.border, paddingBottom: sheetBottomInset(insets, keyboardHeight) }, sheetStyle]}>
               <GestureDetector gesture={pan}>
                 <View style={[styles.sheetHeader, { borderBottomColor: palette.border }]}>
                   <Text numberOfLines={1} style={[styles.sheetTitle, { color: palette.text }]}>
@@ -213,7 +228,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     borderWidth: 1,
     flexShrink: 1,
-    maxHeight: '72%',
+    maxHeight: '85%',
     overflow: 'hidden',
   },
   sheetHeader: {

@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
-import { List } from 'react-native-paper';
+import { List, Text } from 'react-native-paper';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -15,6 +15,8 @@ export function ConnectionMethodChooser({ onScan, onManual }: { onScan: () => vo
   const scanAvailable = (Platform.OS === 'ios' || Platform.OS === 'android') && !Constants.expoConfig?.extra?.foss;
   return <View testID="connection-method-chooser" style={{ gap: 12 }}>
     <List.Item accessibilityRole="button" style={choiceStyle} titleStyle={titleStyle} descriptionStyle={descriptionStyle} testID="connection-method-scan" title={t('settings:connect.scanLocal')} description={t('settings:connect.scanLocalHint')} left={(props) => <List.Icon {...props} icon="qrcode-scan" color={palette.tint} />} right={(props) => <List.Icon {...props} icon="chevron-right" color={palette.muted} />} onPress={onScan} disabled={!scanAvailable} accessibilityState={{ disabled: !scanAvailable }} />
+    <Text testID="connection-method-scan-where" variant="bodySmall" style={{ color: palette.muted, paddingHorizontal: 8 }}>{t('settings:connect.scanWhere')}</Text>
     <List.Item accessibilityRole="button" style={choiceStyle} titleStyle={titleStyle} descriptionStyle={descriptionStyle} testID="connection-method-manual" title={t('settings:connect.manual')} description={t('settings:connect.manualHint')} left={(props) => <List.Icon {...props} icon="server" color={palette.tint} />} right={(props) => <List.Icon {...props} icon="chevron-right" color={palette.muted} />} onPress={onManual} />
+    <Text testID="connection-method-manual-where" variant="bodySmall" style={{ color: palette.muted, paddingHorizontal: 8 }}>{t('settings:connect.manualWhere')}</Text>
   </View>;
 }

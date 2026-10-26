@@ -55,7 +55,9 @@ Text, Dialog, GlassPanel) rather than from a kit package. To swap kits:
 | Swirl | Original SkSL after Ali Imam's 21st.dev Swirl look (Bayer dither) | original |
 | Liquid glow | Original approximation | original |
 | Prismatic lattice, Halftone clouds | Original | original |
-| Aurora flow | Original, inspired by Ruixen UI (no code copied) | original |
+| Aurora flow | Original, inspired by Ruixen UI (no code copied); now two colliding light balls | original |
+| 3-ball gradient, Bouncing balls, Gravity orbit, Repel & shockwave | Original SkSL + `lib/backgrounds/ball-physics.ts` | original |
+| Silk waves, Star field, Plasma | Original | original |
 | Hive | Original, inspired by Xor's Hive shader (no code copied; license not clear) | original |
 | Paper mesh | Port of `MeshGradient` from `@paper-design/shaders` 0.0.81 | Apache-2.0, Copyright 2026 Paper (see `NOTICE`) |
 | Mesh gradient / Soft Mesh | Original, presets are data in `lib/backgrounds/mesh-presets.ts` | original |
@@ -74,9 +76,34 @@ Every ported or reference-inspired background keeps its faithful look as a `REFE
 | --- | --- | --- |
 | See `BACKGROUND_NUDGES` | 10–25° per kind | speed / density / intensity / scale multipliers plus per-kind extras (counts, offsets) |
 | Mesh presets (Indigo Aurora, Deep Ocean, Soft Mesh) | +14° | stop x ±0.05, drift ×1.15, blur +6 |
-| Aurora Flow (Deep Blue) | −14° | — |
+| Aurora Flow (Deep Blue) | −14° | slower, larger balls, more glow, blur 4 |
 | Gradient, Video | none | our own (theme / user video), not references |
 
 The exact per-kind numbers sit in code next to each preset. In the UI, sliders show an offset from the
 default (−100..+100, 0 = our default); **Reset** returns to 0. Saved presets store absolute values plus
-`schema` (`PRESET_SCHEMA = 2`), so changing defaults later does not move saved presets.
+`schema` (`PRESET_SCHEMA = 3`), so changing defaults later does not move saved presets.
+
+Every default sits strictly inside its slider range, so each slider moves both ways
+(`tests/vitest/slider-ranges.test.ts`). That is why defaults use opacity 0.9 and a light blur
+(1.5px, 0.6px on the dither styles) while references keep opacity 1 / blur 0.
+
+## Unified parameters (schema 3)
+
+Every style exposes the same sliders (`UNIFIED_PARAMS` in `lib/backgrounds/params.ts`): speed, intensity,
+scale, blur, opacity, particle density, chaos, edge & impact glow and invert (-1..1: positive inverts
+brightness, negative flips hues around grey). `PARAM_SUPPORT` lists which ones a style uses; the UI labels the
+rest "no effect on this style". Each style also has one color per light ball / particle layer / band
+(`layerColors`, count in `LAYER_COUNTS`); `colorA`/`colorB` mirror the first two layers.
+
+Schema-2 presets (and stored active settings without the new fields) migrate with chaos = glow = invert = 0,
+which renders exactly the old look, and layer colors derived from the preset's own colors
+(`migratePreset`, `tests/vitest/preset-migration.test.ts`). All SkSL compiles in CI via CanvasKit
+(`tests/vitest/shader-compile.test.ts`).
+
+## Text & fonts
+
+`AppearanceSettings.text` (`lib/backgrounds/text-effects.ts`) holds text color, shadow (amount; black or a
+darker shade of the surface), outline (color, 0-3px), glow, gradient text and soft emboss. Shadow, outline,
+glow and emboss are RN `filter` drop shadows (Android 12+) on a transparent wrapper around the chat markdown;
+gradient text is a true per-word gradient in the settings preview and a body -> heading/emphasis color sweep
+in the native markdown renderer (it cannot clip a gradient to glyphs).

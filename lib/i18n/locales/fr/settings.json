@@ -50,13 +50,13 @@
       "step": "Étape {{step}} sur 2",
       "addressTitle": "Adresse du serveur",
       "detailsTitle": "Détails de connexion",
-      "addressHint": "Connectez-vous à votre serveur OpenCode.",
+      "addressHint": "Saisissez l'adresse de votre serveur OpenCode.",
       "continue": "Continuer",
       "change": "Modifier",
       "detected": "OpenCode {{version}} détecté",
       "identify": "Saisissez les identifiants pour identifier le serveur.",
       "customUsername": "Nom d’utilisateur personnalisé",
-      "passwordHint": "Saisissez le mot de passe du serveur.",
+      "passwordHint": "Le mot de passe défini pour votre serveur OpenCode.",
       "optionalName": "Nom (facultatif)",
       "nameHint": "Laissez vide pour utiliser l’IP ou le domaine du serveur.",
       "showPassword": "Afficher le mot de passe",
@@ -74,6 +74,17 @@
         "expired": "Ce code a expiré ou a déjà été utilisé. Exécutez à nouveau opencode pair.",
         "unreachable": "Serveur inaccessible. Vérifiez que les appareils sont sur le même réseau ou saisissez l’adresse manuellement.",
         "loopback": "Ce code contient uniquement une adresse localhost. Exécutez opencode service set hostname 0.0.0.0, puis opencode service start et opencode pair sur votre ordinateur."
+      },
+      "serverUrlFieldHint": "L'adresse de votre tunnel Cloudflare (par exemple https://opencode.example.com) ou de votre ordinateur sur le réseau local (par exemple http://192.168.1.10:4096).",
+      "usernameHint": "Généralement opencode, sauf si vous l'avez modifié dans la configuration du serveur.",
+      "passwordPlaceholder": "Mot de passe du serveur",
+      "cfAccess": {
+        "title": "Avancé : Cloudflare Access",
+        "hint": "Nécessaire uniquement si votre tunnel est protégé par Cloudflare Access avec un jeton de service. Enregistré de façon sécurisée sur cet appareil ; l'envoi au serveur arrive bientôt.",
+        "clientId": "Access Client ID",
+        "clientIdHint": "Dans Cloudflare Zero Trust › Access › Identifiants de service. Se termine par .access.",
+        "clientSecret": "Access Client Secret",
+        "clientSecretHint": "Affiché une seule fois lors de la création du jeton de service."
       }
     }
   },
@@ -343,6 +354,69 @@
         "label": "Détaillé",
         "description": "Afficher aussi les appels d’outils sous forme de lignes repliées."
       }
+    },
+    "info": "About {{value}}",
+    "footer": "Everything here applies instantly and is saved on this device.",
+    "background": {
+      "title": "Background",
+      "info": "The animated layer behind the whole app: pick a preset or build your own look."
+    },
+    "presets": {
+      "info": "Ready-made looks.",
+      "hint": "A preset sets the style, all colors and all sliders together. Adjust anything afterwards."
+    },
+    "style": {
+      "info": "The kind of animation. Switching style loads that style's defaults with your theme's colors."
+    },
+    "colors": {
+      "title": "Colors",
+      "info": "The base color plus one color per light ball, particle layer or band.",
+      "none": "Video backgrounds use the video's own colors."
+    },
+    "sliders": {
+      "title": "Sliders",
+      "info": "Every style has the same sliders; 0 is the style's default, Reset returns there.",
+      "noEffect": "no effect on this style"
+    },
+    "saved": {
+      "info": "Save the current background and appearance under a name, and load it later."
+    },
+    "icons": {
+      "info": "The icon set used across the app."
+    },
+    "layers": {
+      "ball": "Ball {{value}}",
+      "blob": "Blob {{value}}",
+      "layer": "Layer {{value}}",
+      "band": "Band {{value}}",
+      "fan": "Fan {{value}}",
+      "arm": "Arm {{value}}",
+      "ribbon": "Ribbon {{value}}",
+      "stop": "Color {{value}}"
+    },
+    "color": {
+      "edit": "Edit {{value}}",
+      "more": "More colors",
+      "close": "Close color picker",
+      "hex": "Hex",
+      "eyedropper": "Eyedropper",
+      "eyedropperHint": "Tap the live background to pick a color from it.",
+      "done": "Done"
+    },
+    "text": {
+      "title": "Text & fonts",
+      "info": "Font, size, color and effects for app and chat text, with a live chat preview.",
+      "color": "Text color",
+      "shadow": "Shadow",
+      "shadowBlack": "Black shadow",
+      "shadowSurface": "Darker surface shade",
+      "outlineColor": "Outline color",
+      "outline": "Outline thickness",
+      "glow": "Glow",
+      "gradient": "Gradient text",
+      "emboss": "Soft emboss",
+      "effectsHint": "Shadow, outline, glow and emboss need Android 12 or later.",
+      "previewQuestion": "Can you check the settings sheet?"
     }
   },
   "connect": {
@@ -354,9 +428,11 @@
     },
     "scanHint": "Scannez le code QR de votre ordinateur pour vous connecter.",
     "scanLocal": "Scanner le code QR",
-    "scanLocalHint": "Se connecter à un ordinateur sur le même réseau.",
+    "scanLocalHint": "Utilisez ceci si votre ordinateur affiche un QR code d'appairage.",
     "manual": "Manuel",
-    "manualHint": "Saisissez l’URL de votre serveur et vos identifiants."
+    "manualHint": "Utilisez ceci pour saisir l'URL du serveur, le nom d'utilisateur et le mot de passe.",
+    "scanWhere": "Où le trouver ? Le code est affiché sur votre ordinateur par le script d'appairage (opencode pair) ou l'assistant de bureau.",
+    "manualWhere": "Où le trouver ? L'URL, le nom d'utilisateur et le mot de passe proviennent de la configuration de votre serveur OpenCode."
   },
   "editor": {
     "title": "Éditeur"
@@ -411,7 +487,14 @@
       "aurora": "Aurora flow",
       "halftone": "Halftone clouds",
       "papermesh": "Paper mesh",
-      "hive": "Hive"
+      "hive": "Hive",
+      "gradient3": "3-ball gradient",
+      "bounce": "Bouncing balls",
+      "orbit": "Gravity orbit",
+      "repel": "Repel & shockwave",
+      "waves": "Silk waves",
+      "starfield": "Star field",
+      "plasma": "Plasma"
     },
     "descriptions": {
       "gradient": "A static indigo gradient. Lightest on battery.",
@@ -422,10 +505,17 @@
       "cyber": "A flowing field of tiny particles driven by Perlin noise.",
       "mesh": "Slowly drifting, blurred color blobs.",
       "prism": "A kaleidoscopic lattice of rounded, slowly morphing cells with iridescent edges.",
-      "aurora": "A flat color field with one soft drifting glow.",
+      "aurora": "Deux boules de lumière douces dérivent, se percutent et mélangent leurs couleurs là où elles se chevauchent.",
       "halftone": "Flowing noise clouds drawn as a monochrome pixel halftone.",
       "papermesh": "Mesh gradient from Paper Shaders with blended color blobs and grain.",
-      "hive": "A dark field with a glowing shape and rainbow edges."
+      "hive": "A dark field with a glowing shape and rainbow edges.",
+      "gradient3": "Three large light balls wander slowly and blend into one smooth gradient.",
+      "bounce": "Glowing balls bounce elastically off the edges and each other, flashing on impact.",
+      "orbit": "Balls pulled by gravity orbit a center well and merge on close passes.",
+      "repel": "Balls push each other away; hard near-misses send out a shockwave ring.",
+      "waves": "Layered glowing sine ribbons that flare where they cross.",
+      "starfield": "Stars rushing toward you in three depth layers.",
+      "plasma": "Classic flowing sine plasma through a three-color palette."
     },
     "controls": {
       "colorA": "Couleur principale",
@@ -448,7 +538,10 @@
       "distortion": "Distortion",
       "swirl": "Swirl",
       "reset": "Réinitialiser",
-      "resetAll": "Tout réinitialiser"
+      "resetAll": "Tout réinitialiser",
+      "chaos": "Chaos",
+      "glow": "Edge & impact glow",
+      "invert": "Invert"
     },
     "presets": {
       "title": "Préréglages enregistrés",

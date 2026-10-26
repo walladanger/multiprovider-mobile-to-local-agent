@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ConnectionErrorText } from '@/components/ui/connection-error-text';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -111,7 +112,7 @@ export function ChangesOverlay({
           {connection.status === 'error' ? (
             <View style={styles.changesNotice}>
               <Text variant="titleMedium" style={{ color: palette.text }}>{t('chat:content.connectionIssue')}</Text>
-              <Text variant="bodyMedium" style={{ color: palette.muted }}>{connection.message}</Text>
+              <ConnectionErrorText message={connection.message} />
             </View>
           ) : null}
           {currentDiffs.length === 0 && !(showDiffDetails && changedFiles.length > 0) ? (

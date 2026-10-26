@@ -10,6 +10,7 @@ import {
   deletePreset as deleteFromList,
   normalizePresets,
   normalizeSettings,
+  patchSettings,
   renamePreset as renameInList,
   savePreset as saveToList,
   type BackgroundKind,
@@ -86,12 +87,12 @@ export function BackgroundProvider({ children }: { children: React.ReactNode }) 
       appearance,
       presets,
       fontsLoaded,
-      update: (patch) => setActive(normalizeSettings({ ...settings, ...patch })),
+      update: (patch) => setActive(patchSettings(settings, patch)),
       applySettings: (next) => setActive(normalizeSettings(next)),
-      selectKind: (kind) => setActive(normalizeSettings({ ...BACKGROUND_DEFAULTS[kind], ...suggestBackgroundColors(COLOR_THEMES[appearance.themeId], kind) })),
+      selectKind: (kind) => setActive(patchSettings(BACKGROUND_DEFAULTS[kind], suggestBackgroundColors(COLOR_THEMES[appearance.themeId], kind))),
       selectTheme: (id) => {
         setLook({ ...appearance, themeId: id });
-        setActive(normalizeSettings({ ...settings, ...suggestBackgroundColors(COLOR_THEMES[id], settings.kind) }));
+        setActive(patchSettings(settings, suggestBackgroundColors(COLOR_THEMES[id], settings.kind)));
       },
       updateAppearance: (patch) => setLook(normalizeAppearance({ ...appearance, ...patch })),
       savePreset: (name) => setList(saveToList(presets, name, settings, undefined, appearance)),
@@ -113,4 +114,9 @@ export function useBackground(): BackgroundContextValue {
   const ctx = React.useContext(BackgroundContext);
   if (!ctx) throw new Error('useBackground must be used inside BackgroundProvider');
   return ctx;
+}
+
+/** Like useBackground, but null outside the provider (for leaf components such as chat text). */
+export function useOptionalBackground(): BackgroundContextValue | null {
+  return React.useContext(BackgroundContext);
 }
