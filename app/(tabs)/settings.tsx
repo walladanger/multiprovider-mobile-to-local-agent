@@ -1,5 +1,7 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Icon } from '@/components/ui/icon';
+import { tokens } from '@/theme/tokens';
+import type { IconName } from '@/lib/backgrounds/icon-map';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -27,6 +29,8 @@ import {
   VoiceSection,
 } from '@/components/settings/settings-sections';
 import { useNotificationSetup } from '@/components/settings/use-notification-setup';
+import { BackgroundSection } from '@/components/settings/sections/background-section';
+import { useBackground } from '@/providers/background-context';
 import { AiSettingsPanel } from '@/components/settings/ai-settings-panel';
 import { useVoiceSetup } from '@/components/settings/use-voice-setup';
 import {
@@ -44,7 +48,7 @@ import { useApprovals, useCapabilities, useConnection, useDiagnostics, useMcp, u
 // from this array, so there is a single place to edit.
 type SettingsSection = {
   id: string;
-  icon: ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: IconName;
   title: string;
   summary: string;
   onPress: () => void;
@@ -71,6 +75,7 @@ function SettingsContent() {
   const { approvals } = useApprovals();
   const { startOnboardingReview } = useOnboarding();
   const updates = useUpdates();
+  const background = useBackground();
   const router = useRouter();
   const notifications = useNotificationSetup();
   const voiceSetup = useVoiceSetup({
@@ -125,7 +130,7 @@ function SettingsContent() {
   const sections: SettingsSection[] = [
     {
       id: 'connection',
-      icon: 'server-network',
+      icon: 'server',
       title: t('settings:screen.categories.connection'),
       summary: connection.status === 'connected' ? t('common:labels.connected') : connection.message,
       onPress: () => setOpenSection('connection'),
@@ -133,7 +138,7 @@ function SettingsContent() {
     },
     {
       id: 'ai',
-      icon: 'creation',
+      icon: 'ai',
       title: t('settings:screen.categories.ai'),
       summary: t('settings:screen.summaries.configuredCount', { value: configuredProviders.length }),
       onPress: () => setOpenSection('ai'),
@@ -141,7 +146,7 @@ function SettingsContent() {
     },
     {
       id: 'notifications',
-      icon: 'bell-outline',
+      icon: 'bell',
       title: t('settings:screen.categories.notifications'),
       summary: notifications.status?.permissionGranted ? t('common:labels.enabled') : t('common:labels.off'),
       onPress: () => setOpenSection('notifications'),
@@ -149,14 +154,22 @@ function SettingsContent() {
     },
     {
       id: 'voice',
-      icon: 'waveform',
+      icon: 'voice',
       title: t('settings:screen.categories.voice'),
       summary: chatPreferences.autoPlayAssistantReplies ? t('settings:screen.summaries.replyPlaybackOn') : t('settings:screen.summaries.replyPlaybackOff'),
       onPress: () => setOpenSection('voice'),
       render: () => <VoiceSection availableSpeechVoices={availableSpeechVoices} chatPreferences={chatPreferences} isRefreshingSpeechVoices={isRefreshingSpeechVoices} isRefreshingVoiceCapabilities={voiceSetup.isRefreshing} isTestingVoice={voiceSetup.isTesting} onEnableVoiceInput={() => void voiceSetup.enable()} onOpenVoiceSettings={() => void voiceSetup.openAppSettings()} onRefreshVoiceCapabilities={() => void voiceSetup.refreshStatus()} onTestVoicePlayback={() => void voiceSetup.testPlayback()} palette={palette} selectedResponseScope={selectedResponseScope} selectedSpeechVoiceLabel={selectedSpeechVoiceLabel} selectedWorkingSound={selectedWorkingSound} updateChatPreferences={updateChatPreferences} voiceCapabilities={voiceSetup.capabilities} />,
     },
     {
-      id: 'general', icon: 'cog-outline', title: t('common:servers.appSettings'), summary: t('common:servers.appSettingsSummary'),
+      id: 'appearance',
+      icon: 'palette',
+      title: t('settings:screen.categories.appearance'),
+      summary: t('settings:backgrounds.summary', { value: t(`settings:backgrounds.kinds.${background.settings.kind}`) }),
+      onPress: () => setOpenSection('appearance'),
+      render: () => <BackgroundSection palette={palette} />,
+    },
+    {
+      id: 'general', icon: 'settings', title: t('common:servers.appSettings'), summary: t('common:servers.appSettingsSummary'),
       onPress: () => setOpenSection('general'), render: () => <>
           <EditorSection chatPreferences={chatPreferences} contract={serverCapabilities.contract} palette={palette} updateChatPreferences={updateChatPreferences} />
           <GeneralSection chatPreferences={chatPreferences} palette={palette} updateChatPreferences={updateChatPreferences} onResetOnboarding={() => {
@@ -186,7 +199,7 @@ function SettingsContent() {
     },
     ...(serverCapabilities.savedPermissions ? [{
       id: 'permissions',
-      icon: 'shield-key-outline' as const,
+      icon: 'shield' as const,
       title: t('settings:screen.categories.permissions'),
       summary: t('settings:screen.summaries.permissions', { value: approvals.savedPermissions.length }),
       onPress: () => {
@@ -214,14 +227,14 @@ function SettingsContent() {
       </Appbar.Header>
       <ScrollView style={[styles.screen, { backgroundColor: palette.background }]} contentContainerStyle={styles.content}>
         {[{ label: t('common:servers.serverSettings'), ids: ['ai', 'advanced', 'permissions'], server: true },
-          { label: t('common:servers.appSettings'), ids: ['connection', 'general', 'notifications', 'voice'], server: false }].map((group) => <View key={group.label} style={{ gap: 12, marginBottom: 20 }}>
+          { label: t('common:servers.appSettings'), ids: ['connection', 'appearance', 'general', 'notifications', 'voice'], server: false }].map((group) => <View key={group.label} style={{ gap: tokens.spacing.md, marginBottom: tokens.spacing.xl - 4 }}>
           <Text variant="titleMedium">{group.label}</Text>
           {group.server ? <ServerContextPicker /> : null}
-          <View style={[styles.categoryGroup, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <View style={[styles.categoryGroup, { backgroundColor: palette.surface, borderColor: palette.border, borderRadius: tokens.radius.lg }]}>
           {sections.filter((section) => group.ids.includes(section.id)).map((section, index) => <Pressable key={section.id} accessibilityRole="button" accessibilityLabel={`${section.title}. ${section.summary}`} onPress={section.onPress} style={[styles.category, index > 0 && { borderTopColor: palette.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
-            <MaterialCommunityIcons name={section.icon} size={22} color={palette.tint} />
+            <Icon name={section.icon} size={22} color={palette.tint} />
             <View style={styles.categoryText}><Text variant="titleMedium" style={{ color: palette.text }}>{section.title}</Text><Text variant="bodyMedium" numberOfLines={1} style={{ color: palette.muted }}>{section.summary}</Text></View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={palette.muted} />
+            <Icon name="chevron-right" size={20} color={palette.muted} />
           </Pressable>)}
           </View>
         </View>)}
@@ -255,7 +268,7 @@ const styles = StyleSheet.create({
   headerMain: { alignSelf: 'stretch', flex: 1, justifyContent: 'center', minWidth: 0 },
   headerActions: { alignItems: 'center', flexDirection: 'row', flexShrink: 0 },
   headerTitle: { fontFamily: Fonts.display, fontWeight: '700' },
-  categoryGroup: { borderRadius: 18, borderWidth: 1, overflow: 'hidden' },
+  categoryGroup: { borderWidth: 1, overflow: 'hidden' },
   category: { minHeight: 76, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 16 },
   categoryText: { flex: 1, gap: 2 },
 });

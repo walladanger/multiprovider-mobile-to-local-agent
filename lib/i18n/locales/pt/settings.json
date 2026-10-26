@@ -395,5 +395,110 @@
     "removeTitle": "Remover permissão salva",
     "removeMessage": "Parar de permitir automaticamente {{resource}}?",
     "refresh": "Atualizar"
+  },
+  "backgrounds": {
+    "preview": "Pré-visualização",
+    "style": "Estilo do fundo",
+    "kinds": {
+      "gradient": "Gradiente",
+      "video": "Vídeo",
+      "paths": "Linhas fluidas",
+      "liquid": "Brilho líquido",
+      "swirl": "Redemoinho de pixels",
+      "cyber": "Cyber particles",
+      "mesh": "Mesh gradient",
+      "prism": "Prismatic lattice",
+      "aurora": "Aurora flow",
+      "halftone": "Halftone clouds",
+      "papermesh": "Paper mesh",
+      "hive": "Hive"
+    },
+    "descriptions": {
+      "gradient": "A static indigo gradient. Lightest on battery.",
+      "video": "Your own looping video from assets/backgrounds/motion.mp4. Falls back to the gradient if none is set.",
+      "paths": "Thin animated lines flowing across the screen (Kokonut UI Background Paths).",
+      "liquid": "Soft glowing liquid blobs in blue and violet.",
+      "swirl": "A dithered pixel swirl, cyan on dark plum.",
+      "cyber": "A flowing field of tiny particles driven by Perlin noise.",
+      "mesh": "Slowly drifting, blurred color blobs.",
+      "prism": "A kaleidoscopic lattice of rounded, slowly morphing cells with iridescent edges.",
+      "aurora": "A flat color field with one soft drifting glow.",
+      "halftone": "Flowing noise clouds drawn as a monochrome pixel halftone.",
+      "papermesh": "Mesh gradient from Paper Shaders with blended color blobs and grain.",
+      "hive": "A dark field with a glowing shape and rainbow edges."
+    },
+    "controls": {
+      "colorA": "Cor principal",
+      "colorB": "Cor secundária",
+      "colorBack": "Cor base",
+      "speed": "Velocidade",
+      "density": "Densidade",
+      "intensity": "Intensidade",
+      "blur": "Desfoque",
+      "opacity": "Opacidade",
+      "particleCount": "Particle count",
+      "noiseIntensity": "Noise frequency",
+      "particleSizeMin": "Smallest particle",
+      "particleSizeMax": "Largest particle",
+      "positionBoth": "Both sides",
+      "positionRight": "Right",
+      "positionLeft": "Left",
+      "stop": "Color {{value}}",
+      "scale": "Scale",
+      "distortion": "Distortion",
+      "swirl": "Swirl",
+      "reset": "Redefinir",
+      "resetAll": "Redefinir tudo"
+    },
+    "presets": {
+      "title": "Predefinições salvas",
+      "name": "Nome",
+      "newName": "Novo nome",
+      "save": "Salvar",
+      "load": "Carregar",
+      "rename": "Renomear",
+      "delete": "Excluir",
+      "empty": "Nenhuma predefinição salva."
+    },
+    "summary": "Fundo: {{value}}",
+    "theme": {
+      "title": "Tema de cores",
+      "hint": "Aplica-se na hora e sugere cores de fundo combinando, que você pode alterar abaixo.",
+      "names": {
+        "deepIndigo": "Deep Indigo",
+        "midnightViolet": "Midnight Violet",
+        "royalPurple": "Royal Purple",
+        "abyssBlue": "Abyss Blue",
+        "nebulaMagenta": "Nebula Magenta",
+        "cosmicTeal": "Cosmic Teal",
+        "emberNight": "Ember Night"
+      }
+    },
+    "skin": {
+      "title": "Estilo",
+      "names": {
+        "glass": "Vidro",
+        "solid": "Sólido",
+        "crisp": "Nítido",
+        "compact": "Compacto"
+      }
+    },
+    "fonts": {
+      "ui": "Fonte da interface",
+      "code": "Fonte do código",
+      "system": "Sistema",
+      "textSize": "Tamanho do texto",
+      "textSizeHint": "Soma-se ao tamanho de fonte do sistema."
+    },
+    "icons": {
+      "title": "Ícones",
+      "packs": {
+        "material": "Material",
+        "lucide": "Lucide",
+        "phosphor": "Phosphor",
+        "tabler": "Tabler"
+      }
+    },
+    "builtin": "Presets"
   }
 }

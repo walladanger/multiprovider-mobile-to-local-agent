@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react';
 import { useColorScheme as useRNColorScheme } from 'react-native';
 
+import { getThemeTokensVersion, subscribeThemeTokens } from '@/theme/tokens';
+
 const subscribe = () => () => undefined;
 
 /**
@@ -9,6 +11,8 @@ const subscribe = () => () => undefined;
  * without a state-setting effect.
  */
 export function useColorScheme(): 'light' | 'dark' {
+  // Re-render consumers when a color theme is applied at runtime.
+  useSyncExternalStore(subscribeThemeTokens, getThemeTokensVersion, getThemeTokensVersion);
   const colorScheme = useRNColorScheme();
   const hasHydrated = useSyncExternalStore(subscribe, () => true, () => false);
 

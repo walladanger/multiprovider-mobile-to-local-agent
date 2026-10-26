@@ -5,6 +5,22 @@ import {
 } from 'react-native-paper';
 
 import { Colors } from '@/constants/theme';
+import { typography } from '@/theme/tokens';
+
+// Applies the Appearance font family and app text scale (stacks with the OS scale).
+function themedFonts(base: MD3Theme['fonts']): MD3Theme['fonts'] {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(base)) {
+    if (value && typeof value === 'object' && 'fontSize' in value) {
+      const bold = Number(value.fontWeight) >= 600;
+      const family = (bold ? typography.sansBold : typography.sans) ?? value.fontFamily;
+      out[key] = { ...value, fontFamily: family, fontSize: Math.round(value.fontSize * typography.scale * 10) / 10, lineHeight: Math.round(value.lineHeight * typography.scale * 10) / 10 };
+    } else {
+      out[key] = value;
+    }
+  }
+  return out as MD3Theme['fonts'];
+}
 
 export function getPaperTheme(colorScheme: 'light' | 'dark'): MD3Theme {
   const palette = Colors[colorScheme];
@@ -12,6 +28,7 @@ export function getPaperTheme(colorScheme: 'light' | 'dark'): MD3Theme {
 
   return {
     ...base,
+    fonts: themedFonts(base.fonts),
     roundness: 3,
     colors: {
       ...base.colors,

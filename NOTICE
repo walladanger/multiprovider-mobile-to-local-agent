@@ -1,0 +1,7 @@
+This product includes third-party material:
+
+Paper Shaders (MeshGradient fragment shader, ported to SkSL in lib/backgrounds/shader-sources.ts)
+Copyright 2026 Paper
+Licensed under the Apache License, Version 2.0
+https://github.com/paper-design/shaders
+Powered by Paper Shaders: https://shaders.paper.design
