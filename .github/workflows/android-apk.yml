@@ -37,6 +37,16 @@ on:
         required: false
         default: ''
         type: string
+      channel:
+        description: 'Numbered test channel: empty = no numbering/pre-release; "test" or "main"'
+        required: false
+        default: ''
+        type: string
+      release_label:
+        description: 'Pre-release tag label, e.g. "combined" -> test-combined-<N>. Defaults to the channel'
+        required: false
+        default: ''
+        type: string
   push:
     tags:
       - 'v*'
@@ -60,6 +70,10 @@ jobs:
       EXPO_ANDROID_PACKAGE: ${{ inputs.package_id || vars.EXPO_ANDROID_PACKAGE }}
       EXPO_APP_NAME: ${{ inputs.app_name }}
       ABIS: arm64-v8a,armeabi-v7a,x86_64
+      # Numbering: N = github.run_number (monotonic per workflow, so it increases for every channel).
+      CHANNEL: ${{ inputs.channel }}
+      RELEASE_LABEL: ${{ inputs.release_label || inputs.channel }}
+      BUILD_NUMBER: ${{ github.run_number }}
 
     steps:
       - name: Checkout repository
@@ -145,6 +159,12 @@ jobs:
         run: |
           set -eo pipefail
           npx expo prebuild --platform android --clean
+          if [ -n "$CHANNEL" ]; then
+            # Override versionCode/versionName in the generated project only (no committed edits).
+            VERSION_NAME="$(node -p "require('./package.json').version")-${CHANNEL}.${BUILD_NUMBER}"
+            sed -i -E "s/versionCode [0-9]+/versionCode ${BUILD_NUMBER}/; s/versionName \"[^\"]*\"/versionName \"${VERSION_NAME}\"/" android/app/build.gradle
+            grep -E 'versionCode|versionName' android/app/build.gradle
+          fi
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures="$ABIS"
 
@@ -158,6 +178,7 @@ jobs:
           if [ "${{ steps.signing.outputs.mode }}" = debug ]; then SUFFIX="-debug-signed"; fi
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then LABEL="${GITHUB_REF_NAME}"; else LABEL="$(git rev-parse --short HEAD)"; fi
           NAME="opencode-mobile-${VARIANT}-${LABEL}${SUFFIX}.apk"
+          if [ -n "$CHANNEL" ]; then NAME="agentlink-${CHANNEL}-${BUILD_NUMBER}.apk"; fi
           mkdir -p out && cp "$SRC" "out/$NAME"
           APKSIGNER=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name apksigner -type f | sort -V | tail -1)
           "$APKSIGNER" verify --verbose --print-certs "out/$NAME"
@@ -178,3 +199,17 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: ${{ steps.apk.outputs.path }}
+
+      - name: Publish numbered test pre-release
+        if: github.event_name == 'workflow_dispatch' && env.CHANNEL != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eo pipefail
+          TAG="test-${RELEASE_LABEL}-${BUILD_NUMBER}"
+          SHA="$(git rev-parse HEAD)"
+          gh release create "$TAG" "${{ steps.apk.outputs.path }}" --prerelease --target "$SHA" \
+            --title "Agent Link test #${BUILD_NUMBER} (${RELEASE_LABEL})" \
+            --notes "Test build ${BUILD_NUMBER} of ${{ inputs.ref || github.ref_name }} @ ${SHA::7}. Package ${EXPO_ANDROID_PACKAGE:-default}, name ${EXPO_APP_NAME:-default}. Debug-signed unless release secrets are configured. Not a release."
+          echo "::notice::https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/agentlink-${CHANNEL}-${BUILD_NUMBER}.apk"
